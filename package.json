@@ -1,0 +1,40 @@
+{
+  "name": "aotoo-koa-server",
+  "version": "1.0.0",
+  "description": "web service, based on koa2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "aotoo",
+    "koa",
+    "koa2",
+    "fkp",
+    "react",
+    "node"
+  ],
+  "author": "webkixi",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/webkixi/aotoo-koa-server.git"
+  },
+  "dependencies": {
+    "aotoo-common": "^1.0.1",
+    "blueimp-md5": "^2.7.0",
+    "debug": "^2.6.8",
+    "diskdb": "^0.1.17",
+    "koa": "^2.3.0",
+    "koa-router": "^7.2.1",
+    "koa-static-cache": "^5.1.1",
+    "koa-views": "^6.0.2",
+    "lru-cache": "^4.1.1",
+    "request": "^2.81.0",
+    "socket.io": "^2.0.3"
+  },
+  "bugs": {
+    "url": "https://github.com/webkixi/aotoo-koa-server/issues"
+  },
+  "homepage": "https://github.com/webkixi/aotoo-koa-server#readme"
+}
