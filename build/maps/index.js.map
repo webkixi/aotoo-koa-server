@@ -1,0 +1,1 @@
+{"version":3,"sources":["index.js"],"names":["atServer","require","module","exports","opts"],"mappings":";;AAAA,IAAIA,WAAWC,QAAQ,UAAR,CAAf;AACAC,OAAOC,OAAP,GAAiB,UAASC,IAAT,EAAc;AAC7B,SAAOJ,SAASI,IAAT,CAAP;AACD,CAFD","file":"../index.js","sourcesContent":["var atServer = require('./server')\nmodule.exports = function(opts){\n  return atServer(opts)\n}"]}

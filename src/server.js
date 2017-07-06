@@ -2,6 +2,7 @@ import Koa from 'koa'
 import aotoo from 'aotoo-common'   // global.Aotoo
 import views from 'koa-views'
 import statics from 'koa-static-cache'
+import bodyparser from 'koa-bodyparser'
 
 global.debug = require('debug')
 const fkp = require('./fkpcore').default
@@ -17,6 +18,10 @@ class aotooServer {
       apis: opts.apis||{},
       mapper: opts.mapper||{},
       pluginsFolder: opts.pluginsFolder
+    }
+    this.state = {
+      views: false,
+      bodyparser: false
     }
   }
 
@@ -43,6 +48,13 @@ class aotooServer {
     }
   }
 
+  async bodyparser(obj={}) {
+    if (typeof obj == 'object') {
+      this.state.bodyparser = true
+      app.use( bodyparser(obj) )
+    }
+  }
+
   async views(dist, opts){
     let dft = {
       map: {
@@ -55,11 +67,23 @@ class aotooServer {
     if (opts&&opts.options) {
       dft.options = opts.options
     }
+    this.state.views = true
     app.use( views(dist, dft) )
   }
 
   async init(){
-    return await _init.call(this)
+    try {
+      if (!this.state.views) {
+        throw '必须指定模板引擎的views目录'
+      }
+      if (!this.state.bodyparser) {
+        app.use( bodyparser() )
+      }
+      return await _init.call(this)
+      
+    } catch (e) {
+      console.error(e);
+    }
   }
 }
 
