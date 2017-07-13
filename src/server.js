@@ -3,9 +3,9 @@ import aotoo from 'aotoo-common'   // global.Aotoo
 import views from 'koa-views'
 import statics from 'koa-static-cache'
 import bodyparser from 'koa-bodyparser'
-
+import core, {fkp} from './fkpcore'
 global.debug = require('debug')
-const fkp = require('./fkpcore').default
+
 const app = new Koa()
 
 class aotooServer {
@@ -27,6 +27,14 @@ class aotooServer {
 
   async use(midw){
     app.use(midw)
+  }
+
+  plugins(name, fn){
+    fkp.plugins(name, fn)
+  }
+
+  utile(name, fn) {
+    fkp.utileHand(name, fn)
   }
 
   async statics(dist, opts, files){
@@ -90,7 +98,7 @@ class aotooServer {
 
 async function _init() {
   app.keys = this.configs.keys
-  const server = await fkp(app, this.configs)
+  const server = await core(app, this.configs)
 	app.on('error', async (err, ctx) => {
 		logger.error('server error', err, ctx)
 	})

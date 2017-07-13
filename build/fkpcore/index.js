@@ -6,6 +6,8 @@ Object.defineProperty(exports, "__esModule", {
 
 var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
 
+exports.fkp = fkp;
+
 var _fs = require('fs');
 
 var _fs2 = _interopRequireDefault(_fs);
@@ -27,67 +29,105 @@ var cache = require('./modules/cache');global.Cache = cache;
 var _fetch = require('./modules/fetch');
 var router = require('./router');
 
+// 实例, fkp中间件
+function _fkp(ctx, opts) {
+  this.ctx = ctx;
+  this.opts = opts;
+
+  this.isAjax = function () {
+    return header('X-Requested-With') === 'XMLHttpRequest';
+  };
+
+  function header(name, value) {
+    if (value != undefined) {
+      ctx.request.set(name, value);
+    } else {
+      return ctx.request.get(name);
+    }
+  }
+}
+
+// 静态, fkp()返回实例
+function fkp(ctx, opts) {
+  var fkpInstanc = new _fkp(ctx, opts);
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = Object.entries(fkp)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var property = _step.value;
+
+      var _property = _slicedToArray(property, 2),
+          _name = _property[0],
+          _value = _property[1];
+
+      fkpInstanc[_name] = _value;
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
+  return fkpInstanc;
+}
+
+// manual set static property or fun or some resource
+fkp.env = process.env.NODE_ENV == 'development' ? 'dev' : 'pro';
+// fkp.staticMapper = dfts.mapper
+// fkp.router = router
+// fkp.apilist = dfts.apis
+// fkp.index = dfts.index
+
+// Register utile function
+fkp.utileHand = function (name, fn) {
+  if (typeof fn == 'function') {
+    fkp[name] = function () {
+      if (fn && typeof fn == 'function') {
+        return fn.apply(null, [fkp].concat(Array.prototype.slice.call(arguments)));
+      }
+    };
+  }
+};
+
+// Register plugins function
+fkp.plugins = function (name, fn) {
+  if (typeof fn == 'function') {
+    _fkp.prototype[name] = function () {
+      if (fn && typeof fn == 'function') {
+        return fn.apply(this, [this.ctx].concat(Array.prototype.slice.call(arguments)));
+      }
+    };
+  }
+};
+
+// as plugins, it look nice
+fkp.use = function (name, fn) {
+  _fkp.prototype[name] = function () {
+    if (fn && typeof fn == 'function') return fn.apply(this, [this.ctx].concat(Array.prototype.slice.call(arguments)));
+  };
+};
+
 exports.default = function () {
   var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(app, options) {
     var _this = this;
 
-    var dfts, server, fetch, innerData, _fkp, fkp, baseRoot, _utilesFiles, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, utileFile, utileFun, pluginRoot, _pluginFiles, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, pluginFile, plugin;
+    var dfts, server, fetch, innerData, baseRoot, _utilesFiles, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, utileFile, utileFun, pluginRoot, _pluginFiles, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, pluginFile, plugin;
 
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            fkp = function fkp(ctx, opts) {
-              var fkpInstanc = new _fkp(ctx, opts);
-              var _iteratorNormalCompletion = true;
-              var _didIteratorError = false;
-              var _iteratorError = undefined;
-
-              try {
-                for (var _iterator = Object.entries(fkp)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                  var property = _step.value;
-
-                  var _property = _slicedToArray(property, 2),
-                      _name = _property[0],
-                      _value = _property[1];
-
-                  fkpInstanc[_name] = _value;
-                }
-              } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-              } finally {
-                try {
-                  if (!_iteratorNormalCompletion && _iterator.return) {
-                    _iterator.return();
-                  }
-                } finally {
-                  if (_didIteratorError) {
-                    throw _iteratorError;
-                  }
-                }
-              }
-
-              return fkpInstanc;
-            };
-
-            _fkp = function _fkp(ctx, opts) {
-              this.ctx = ctx;
-              this.opts = opts;
-
-              this.isAjax = function () {
-                return header('X-Requested-With') === 'XMLHttpRequest';
-              };
-
-              function header(name, value) {
-                if (value != undefined) {
-                  ctx.request.set(name, value);
-                } else {
-                  return ctx.request.get(name);
-                }
-              }
-            };
-
             dfts = {
               apis: options.apis || { list: {} },
               pages: options.pages,
@@ -114,46 +154,67 @@ exports.default = function () {
                 prefix: []
               }
 
-              // 实例, fkp中间件
+              // // 实例, fkp中间件
+              // function _fkp(ctx, opts){
+              //   this.ctx = ctx
+              //   this.opts = opts
+
+              //   this.isAjax = function() {
+              //     return header('X-Requested-With') === 'XMLHttpRequest';
+              //   }
+
+              //   function header(name, value) {
+              //     if (value != undefined) {
+              //       ctx.request.set(name, value);
+              //     } else {
+              //       return ctx.request.get(name);
+              //     }
+              //   }
+              // }
+
+              // // 静态, fkp()返回实例
+              // function fkp(ctx, opts){
+              //   let fkpInstanc = new _fkp(ctx, opts)
+              //   for (let property of Object.entries(fkp)) {
+              //     let [_name, _value] = property
+              //     fkpInstanc[_name] = _value
+              //   }
+              //   return fkpInstanc
+              // }
+
+              // // manual set static property or fun or some resource
+              // fkp.env = process.env.NODE_ENV == 'development' ? 'dev' : 'pro'
             };
-
-            // 静态, fkp()返回实例
-
-            // manual set static property or fun or some resource
-            fkp.env = process.env.NODE_ENV == 'development' ? 'dev' : 'pro';
             fkp.staticMapper = dfts.mapper;
             fkp.router = router;
             fkp.apilist = dfts.apis;
             fkp.index = dfts.index;
 
-            // Register utile function
-            fkp.utileHand = function (name, fn) {
-              if (typeof fn == 'function') {
-                fkp[name] = function () {
-                  if (fn && typeof fn == 'function') {
-                    return fn.apply(null, [fkp].concat(Array.prototype.slice.call(arguments)));
-                  }
-                };
-              }
-            };
+            // // Register utile function
+            // fkp.utileHand = function(name, fn){
+            //   if (typeof fn == 'function') {
+            //     fkp[name] = function() {
+            //       if (fn && typeof fn=='function') { return fn.apply(null, [fkp, ...arguments]) }
+            //     }
+            //   }
+            // }
 
-            // Register plugins function
-            fkp.plugins = function (name, fn) {
-              if (typeof fn == 'function') {
-                _fkp.prototype[name] = function () {
-                  if (fn && typeof fn == 'function') {
-                    return fn.apply(this, [this.ctx].concat(Array.prototype.slice.call(arguments)));
-                  }
-                };
-              }
-            };
+            // // Register plugins function
+            // fkp.plugins = function(name, fn){
+            //   if (typeof fn == 'function') {
+            //     _fkp.prototype[name] = function() {
+            //       if (fn && typeof fn=='function') { return fn.apply(this, [this.ctx, ...arguments]) }
+            //     }
+            //   }
+            // }
 
-            // as plugins, it look nice
-            fkp.use = function (name, fn) {
-              _fkp.prototype[name] = function () {
-                if (fn && typeof fn == 'function') return fn.apply(this, [this.ctx].concat(Array.prototype.slice.call(arguments)));
-              };
-            };
+            // // as plugins, it look nice
+            // fkp.use = function(name, fn){
+            //   _fkp.prototype[name] = function() {
+            //     if (fn && typeof fn=='function') return fn.apply(this, [this.ctx, ...arguments])
+            //   }
+            // }
+
 
             /**
              * 预动态设置路由, 在plugins方法中使用
@@ -216,21 +277,21 @@ exports.default = function () {
             2、插件方法为new fkp后的对象方法，带有this的上下文，第一个参数ctx，为koa环境对象，插件方法挂载在fkp上，调用方法同样为fkp.xxx
             =================================================*/
 
-            _context3.prev = 17;
+            _context3.prev = 11;
 
             // register utile
             baseRoot = './base';
             _utilesFiles = _fs2.default.readdirSync(_path2.default.resolve(__dirname, baseRoot));
 
             if (!(_utilesFiles && _utilesFiles.length)) {
-              _context3.next = 40;
+              _context3.next = 34;
               break;
             }
 
             _iteratorNormalCompletion2 = true;
             _didIteratorError2 = false;
             _iteratorError2 = undefined;
-            _context3.prev = 24;
+            _context3.prev = 18;
 
             for (_iterator2 = _utilesFiles[Symbol.iterator](); !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
               utileFile = _step2.value;
@@ -241,61 +302,61 @@ exports.default = function () {
                 fkp.utileHand(_path2.default.parse(utileFile).name, utileFun);
               }
             }
-            _context3.next = 32;
+            _context3.next = 26;
             break;
 
-          case 28:
-            _context3.prev = 28;
-            _context3.t0 = _context3['catch'](24);
+          case 22:
+            _context3.prev = 22;
+            _context3.t0 = _context3['catch'](18);
             _didIteratorError2 = true;
             _iteratorError2 = _context3.t0;
 
-          case 32:
-            _context3.prev = 32;
-            _context3.prev = 33;
+          case 26:
+            _context3.prev = 26;
+            _context3.prev = 27;
 
             if (!_iteratorNormalCompletion2 && _iterator2.return) {
               _iterator2.return();
             }
 
-          case 35:
-            _context3.prev = 35;
+          case 29:
+            _context3.prev = 29;
 
             if (!_didIteratorError2) {
-              _context3.next = 38;
+              _context3.next = 32;
               break;
             }
 
             throw _iteratorError2;
 
-          case 38:
-            return _context3.finish(35);
+          case 32:
+            return _context3.finish(29);
 
-          case 39:
-            return _context3.finish(32);
+          case 33:
+            return _context3.finish(26);
 
-          case 40:
+          case 34:
 
             // register plugins
             pluginRoot = dfts.pluginsFolder;
             // if ( fs.existsSync(Path.resolve(__dirname, pluginRoot)) ) {
 
             if (!(pluginRoot && _fs2.default.existsSync(pluginRoot))) {
-              _context3.next = 63;
+              _context3.next = 57;
               break;
             }
 
             _pluginFiles = _fs2.default.readdirSync(pluginRoot);
 
             if (!(_pluginFiles && _pluginFiles.length)) {
-              _context3.next = 63;
+              _context3.next = 57;
               break;
             }
 
             _iteratorNormalCompletion3 = true;
             _didIteratorError3 = false;
             _iteratorError3 = undefined;
-            _context3.prev = 47;
+            _context3.prev = 41;
 
             for (_iterator3 = _pluginFiles[Symbol.iterator](); !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
               pluginFile = _step3.value;
@@ -306,50 +367,50 @@ exports.default = function () {
                 fkp.plugins(_path2.default.parse(pluginFile).name, plugin);
               }
             }
-            _context3.next = 55;
+            _context3.next = 49;
             break;
 
-          case 51:
-            _context3.prev = 51;
-            _context3.t1 = _context3['catch'](47);
+          case 45:
+            _context3.prev = 45;
+            _context3.t1 = _context3['catch'](41);
             _didIteratorError3 = true;
             _iteratorError3 = _context3.t1;
 
-          case 55:
-            _context3.prev = 55;
-            _context3.prev = 56;
+          case 49:
+            _context3.prev = 49;
+            _context3.prev = 50;
 
             if (!_iteratorNormalCompletion3 && _iterator3.return) {
               _iterator3.return();
             }
 
-          case 58:
-            _context3.prev = 58;
+          case 52:
+            _context3.prev = 52;
 
             if (!_didIteratorError3) {
-              _context3.next = 61;
+              _context3.next = 55;
               break;
             }
 
             throw _iteratorError3;
 
-          case 61:
-            return _context3.finish(58);
+          case 55:
+            return _context3.finish(52);
 
-          case 62:
-            return _context3.finish(55);
+          case 56:
+            return _context3.finish(49);
 
-          case 63:
-            _context3.next = 68;
+          case 57:
+            _context3.next = 62;
             break;
 
-          case 65:
-            _context3.prev = 65;
-            _context3.t2 = _context3['catch'](17);
+          case 59:
+            _context3.prev = 59;
+            _context3.t2 = _context3['catch'](11);
 
             console.log(_context3.t2);
 
-          case 68:
+          case 62:
 
             // =========== 注册fkp中间件 =============
             app.fkp = fkp;
@@ -397,12 +458,12 @@ exports.default = function () {
             socketio.run();
             return _context3.abrupt('return', server);
 
-          case 72:
+          case 66:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[17, 65], [24, 28, 32, 40], [33,, 35, 39], [47, 51, 55, 63], [56,, 58, 62]]);
+    }, _callee3, this, [[11, 59], [18, 22, 26, 34], [27,, 29, 33], [41, 45, 49, 57], [50,, 52, 56]]);
   }));
 
   return function (_x, _x2) {

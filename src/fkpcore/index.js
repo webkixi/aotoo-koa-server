@@ -7,6 +7,67 @@ let cache = require('./modules/cache');      global.Cache = cache
 let _fetch = require('./modules/fetch');
 let router = require('./router')
 
+
+// 实例, fkp中间件
+function _fkp(ctx, opts){
+  this.ctx = ctx
+  this.opts = opts
+
+  this.isAjax = function() {
+    return header('X-Requested-With') === 'XMLHttpRequest';
+  }
+
+  function header(name, value) {
+    if (value != undefined) {
+      ctx.request.set(name, value);
+    } else {
+      return ctx.request.get(name);
+    }
+  }
+}
+
+// 静态, fkp()返回实例
+export function fkp(ctx, opts){
+  let fkpInstanc = new _fkp(ctx, opts)
+  for (let property of Object.entries(fkp)) {
+    let [_name, _value] = property
+    fkpInstanc[_name] = _value
+  }
+  return fkpInstanc
+}
+
+// manual set static property or fun or some resource
+fkp.env = process.env.NODE_ENV == 'development' ? 'dev' : 'pro'
+// fkp.staticMapper = dfts.mapper
+// fkp.router = router
+// fkp.apilist = dfts.apis
+// fkp.index = dfts.index
+
+// Register utile function
+fkp.utileHand = function(name, fn){
+  if (typeof fn == 'function') {
+    fkp[name] = function() {
+      if (fn && typeof fn=='function') { return fn.apply(null, [fkp, ...arguments]) }
+    }
+  }
+}
+
+// Register plugins function
+fkp.plugins = function(name, fn){
+  if (typeof fn == 'function') {
+    _fkp.prototype[name] = function() {
+      if (fn && typeof fn=='function') { return fn.apply(this, [this.ctx, ...arguments]) }
+    }
+  }
+}
+
+// as plugins, it look nice
+fkp.use = function(name, fn){
+  _fkp.prototype[name] = function() {
+    if (fn && typeof fn=='function') return fn.apply(this, [this.ctx, ...arguments])
+  }
+}
+
 export default async function(app, options) {
   let dfts = {
     apis: options.apis||{list: {}},
@@ -33,65 +94,65 @@ export default async function(app, options) {
     }
   }
 
-  // 实例, fkp中间件
-  function _fkp(ctx, opts){
-    this.ctx = ctx
-    this.opts = opts
+  // // 实例, fkp中间件
+  // function _fkp(ctx, opts){
+  //   this.ctx = ctx
+  //   this.opts = opts
 
-    this.isAjax = function() {
-      return header('X-Requested-With') === 'XMLHttpRequest';
-    }
+  //   this.isAjax = function() {
+  //     return header('X-Requested-With') === 'XMLHttpRequest';
+  //   }
 
-    function header(name, value) {
-      if (value != undefined) {
-        ctx.request.set(name, value);
-      } else {
-        return ctx.request.get(name);
-      }
-    }
-  }
+  //   function header(name, value) {
+  //     if (value != undefined) {
+  //       ctx.request.set(name, value);
+  //     } else {
+  //       return ctx.request.get(name);
+  //     }
+  //   }
+  // }
 
-  // 静态, fkp()返回实例
-  function fkp(ctx, opts){
-    let fkpInstanc = new _fkp(ctx, opts)
-    for (let property of Object.entries(fkp)) {
-      let [_name, _value] = property
-      fkpInstanc[_name] = _value
-    }
-    return fkpInstanc
-  }
+  // // 静态, fkp()返回实例
+  // function fkp(ctx, opts){
+  //   let fkpInstanc = new _fkp(ctx, opts)
+  //   for (let property of Object.entries(fkp)) {
+  //     let [_name, _value] = property
+  //     fkpInstanc[_name] = _value
+  //   }
+  //   return fkpInstanc
+  // }
 
-  // manual set static property or fun or some resource
-  fkp.env = process.env.NODE_ENV == 'development' ? 'dev' : 'pro'
+  // // manual set static property or fun or some resource
+  // fkp.env = process.env.NODE_ENV == 'development' ? 'dev' : 'pro'
   fkp.staticMapper = dfts.mapper
   fkp.router = router
   fkp.apilist = dfts.apis
   fkp.index = dfts.index
 
-  // Register utile function
-  fkp.utileHand = function(name, fn){
-    if (typeof fn == 'function') {
-      fkp[name] = function() {
-        if (fn && typeof fn=='function') { return fn.apply(null, [fkp, ...arguments]) }
-      }
-    }
-  }
+  // // Register utile function
+  // fkp.utileHand = function(name, fn){
+  //   if (typeof fn == 'function') {
+  //     fkp[name] = function() {
+  //       if (fn && typeof fn=='function') { return fn.apply(null, [fkp, ...arguments]) }
+  //     }
+  //   }
+  // }
 
-  // Register plugins function
-  fkp.plugins = function(name, fn){
-    if (typeof fn == 'function') {
-      _fkp.prototype[name] = function() {
-        if (fn && typeof fn=='function') { return fn.apply(this, [this.ctx, ...arguments]) }
-      }
-    }
-  }
+  // // Register plugins function
+  // fkp.plugins = function(name, fn){
+  //   if (typeof fn == 'function') {
+  //     _fkp.prototype[name] = function() {
+  //       if (fn && typeof fn=='function') { return fn.apply(this, [this.ctx, ...arguments]) }
+  //     }
+  //   }
+  // }
 
-  // as plugins, it look nice
-  fkp.use = function(name, fn){
-    _fkp.prototype[name] = function() {
-      if (fn && typeof fn=='function') return fn.apply(this, [this.ctx, ...arguments])
-    }
-  }
+  // // as plugins, it look nice
+  // fkp.use = function(name, fn){
+  //   _fkp.prototype[name] = function() {
+  //     if (fn && typeof fn=='function') return fn.apply(this, [this.ctx, ...arguments])
+  //   }
+  // }
 
 
   /**

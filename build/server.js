@@ -16,7 +16,7 @@ var _init = function () {
           case 0:
             app.keys = this.configs.keys;
             _context8.next = 3;
-            return fkp(app, this.configs);
+            return (0, _fkpcore2.default)(app, this.configs);
 
           case 3:
             server = _context8.sent;
@@ -77,6 +77,10 @@ var _koaBodyparser = require('koa-bodyparser');
 
 var _koaBodyparser2 = _interopRequireDefault(_koaBodyparser);
 
+var _fkpcore = require('./fkpcore');
+
+var _fkpcore2 = _interopRequireDefault(_fkpcore);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
@@ -84,7 +88,7 @@ function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, a
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 global.debug = require('debug');
-var fkp = require('./fkpcore').default;
+
 var app = new _koa2.default();
 
 var aotooServer = function () {
@@ -130,6 +134,16 @@ var aotooServer = function () {
 
       return use;
     }()
+  }, {
+    key: 'plugins',
+    value: function plugins(name, fn) {
+      _fkpcore.fkp.plugins(name, fn);
+    }
+  }, {
+    key: 'utile',
+    value: function utile(name, fn) {
+      _fkpcore.fkp.utileHand(name, fn);
+    }
   }, {
     key: 'statics',
     value: function () {
