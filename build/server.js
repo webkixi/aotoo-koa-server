@@ -16,7 +16,7 @@ var _init = function () {
           case 0:
             app.keys = this.configs.keys;
             _context8.next = 3;
-            return (0, _fkpcore2.default)(app, this.configs);
+            return _fkpcore2.default.call(this, app, this.configs);
 
           case 3:
             server = _context8.sent;

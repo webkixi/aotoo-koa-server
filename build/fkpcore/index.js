@@ -122,12 +122,13 @@ exports.default = function () {
   var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(app, options) {
     var _this = this;
 
-    var dfts, server, fetch, innerData, baseRoot, _utilesFiles, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, utileFile, utileFun, pluginRoot, _pluginFiles, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, pluginFile, plugin;
+    var instance, dfts, server, fetch, innerData, baseRoot, _utilesFiles, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, utileFile, utileFun, pluginRoot, _pluginFiles, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, pluginFile, plugin;
 
     return regeneratorRuntime.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
+            instance = this;
             dfts = {
               apis: options.apis || { list: {} },
               pages: options.pages,
@@ -189,6 +190,7 @@ exports.default = function () {
             fkp.router = router;
             fkp.apilist = dfts.apis;
             fkp.index = dfts.index;
+            fkp.statics = instance.statics.bind(instance);
 
             // // Register utile function
             // fkp.utileHand = function(name, fn){
@@ -277,21 +279,21 @@ exports.default = function () {
             2、插件方法为new fkp后的对象方法，带有this的上下文，第一个参数ctx，为koa环境对象，插件方法挂载在fkp上，调用方法同样为fkp.xxx
             =================================================*/
 
-            _context3.prev = 11;
+            _context3.prev = 13;
 
             // register utile
             baseRoot = './base';
             _utilesFiles = _fs2.default.readdirSync(_path2.default.resolve(__dirname, baseRoot));
 
             if (!(_utilesFiles && _utilesFiles.length)) {
-              _context3.next = 34;
+              _context3.next = 36;
               break;
             }
 
             _iteratorNormalCompletion2 = true;
             _didIteratorError2 = false;
             _iteratorError2 = undefined;
-            _context3.prev = 18;
+            _context3.prev = 20;
 
             for (_iterator2 = _utilesFiles[Symbol.iterator](); !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
               utileFile = _step2.value;
@@ -302,61 +304,61 @@ exports.default = function () {
                 fkp.utileHand(_path2.default.parse(utileFile).name, utileFun);
               }
             }
-            _context3.next = 26;
+            _context3.next = 28;
             break;
 
-          case 22:
-            _context3.prev = 22;
-            _context3.t0 = _context3['catch'](18);
+          case 24:
+            _context3.prev = 24;
+            _context3.t0 = _context3['catch'](20);
             _didIteratorError2 = true;
             _iteratorError2 = _context3.t0;
 
-          case 26:
-            _context3.prev = 26;
-            _context3.prev = 27;
+          case 28:
+            _context3.prev = 28;
+            _context3.prev = 29;
 
             if (!_iteratorNormalCompletion2 && _iterator2.return) {
               _iterator2.return();
             }
 
-          case 29:
-            _context3.prev = 29;
+          case 31:
+            _context3.prev = 31;
 
             if (!_didIteratorError2) {
-              _context3.next = 32;
+              _context3.next = 34;
               break;
             }
 
             throw _iteratorError2;
 
-          case 32:
-            return _context3.finish(29);
-
-          case 33:
-            return _context3.finish(26);
-
           case 34:
+            return _context3.finish(31);
+
+          case 35:
+            return _context3.finish(28);
+
+          case 36:
 
             // register plugins
             pluginRoot = dfts.pluginsFolder;
             // if ( fs.existsSync(Path.resolve(__dirname, pluginRoot)) ) {
 
             if (!(pluginRoot && _fs2.default.existsSync(pluginRoot))) {
-              _context3.next = 57;
+              _context3.next = 59;
               break;
             }
 
             _pluginFiles = _fs2.default.readdirSync(pluginRoot);
 
             if (!(_pluginFiles && _pluginFiles.length)) {
-              _context3.next = 57;
+              _context3.next = 59;
               break;
             }
 
             _iteratorNormalCompletion3 = true;
             _didIteratorError3 = false;
             _iteratorError3 = undefined;
-            _context3.prev = 41;
+            _context3.prev = 43;
 
             for (_iterator3 = _pluginFiles[Symbol.iterator](); !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
               pluginFile = _step3.value;
@@ -367,50 +369,50 @@ exports.default = function () {
                 fkp.plugins(_path2.default.parse(pluginFile).name, plugin);
               }
             }
-            _context3.next = 49;
+            _context3.next = 51;
             break;
 
-          case 45:
-            _context3.prev = 45;
-            _context3.t1 = _context3['catch'](41);
+          case 47:
+            _context3.prev = 47;
+            _context3.t1 = _context3['catch'](43);
             _didIteratorError3 = true;
             _iteratorError3 = _context3.t1;
 
-          case 49:
-            _context3.prev = 49;
-            _context3.prev = 50;
+          case 51:
+            _context3.prev = 51;
+            _context3.prev = 52;
 
             if (!_iteratorNormalCompletion3 && _iterator3.return) {
               _iterator3.return();
             }
 
-          case 52:
-            _context3.prev = 52;
+          case 54:
+            _context3.prev = 54;
 
             if (!_didIteratorError3) {
-              _context3.next = 55;
+              _context3.next = 57;
               break;
             }
 
             throw _iteratorError3;
 
-          case 55:
-            return _context3.finish(52);
-
-          case 56:
-            return _context3.finish(49);
-
           case 57:
-            _context3.next = 62;
-            break;
+            return _context3.finish(54);
+
+          case 58:
+            return _context3.finish(51);
 
           case 59:
-            _context3.prev = 59;
-            _context3.t2 = _context3['catch'](11);
+            _context3.next = 64;
+            break;
+
+          case 61:
+            _context3.prev = 61;
+            _context3.t2 = _context3['catch'](13);
 
             console.log(_context3.t2);
 
-          case 62:
+          case 64:
 
             // =========== 注册fkp中间件 =============
             app.fkp = fkp;
@@ -458,12 +460,12 @@ exports.default = function () {
             socketio.run();
             return _context3.abrupt('return', server);
 
-          case 66:
+          case 68:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[11, 59], [18, 22, 26, 34], [27,, 29, 33], [41, 45, 49, 57], [50,, 52, 56]]);
+    }, _callee3, this, [[13, 61], [20, 24, 28, 36], [29,, 31, 35], [43, 47, 51, 59], [52,, 54, 58]]);
   }));
 
   return function (_x, _x2) {

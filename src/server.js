@@ -98,7 +98,7 @@ class aotooServer {
 
 async function _init() {
   app.keys = this.configs.keys
-  const server = await core(app, this.configs)
+  const server = await core.call(this, app, this.configs)
 	app.on('error', async (err, ctx) => {
 		logger.error('server error', err, ctx)
 	})

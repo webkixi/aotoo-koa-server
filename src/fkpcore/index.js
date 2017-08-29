@@ -69,6 +69,7 @@ fkp.use = function(name, fn){
 }
 
 export default async function(app, options) {
+  const instance = this
   let dfts = {
     apis: options.apis||{list: {}},
     pages: options.pages,      
@@ -128,6 +129,7 @@ export default async function(app, options) {
   fkp.router = router
   fkp.apilist = dfts.apis
   fkp.index = dfts.index
+  fkp.statics = instance.statics.bind(instance)
 
   // // Register utile function
   // fkp.utileHand = function(name, fn){
