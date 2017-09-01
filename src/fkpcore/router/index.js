@@ -304,7 +304,8 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance){
           xData = {nomatch: true}
         }
       }
-      if (passAccess) pageData = xData
+      const isAjax = ctx.fkp.isAjax()
+      if (passAccess || isAjax) pageData = xData
     }
     return [pageData, route]
   } catch (e) {

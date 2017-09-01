@@ -329,7 +329,7 @@ var getctrlData = function () {
 
 var controler = function () {
   var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(ctx, route, pageData, ctrlPages, routerInstance) {
-    var routerPrefix, ctrl, passAccess, xData, controlFile, prefixIndexFile, prefixCatFile, paramsCatFile, xRoute, apilist;
+    var routerPrefix, ctrl, passAccess, xData, controlFile, prefixIndexFile, prefixCatFile, paramsCatFile, xRoute, apilist, isAjax;
     return regeneratorRuntime.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
@@ -354,7 +354,7 @@ var controler = function () {
             pageData = _context6.sent;
 
             route = ctrl.store.route || route;
-            _context6.next = 46;
+            _context6.next = 47;
             break;
 
           case 12:
@@ -433,23 +433,25 @@ var controler = function () {
             xData = { nomatch: true };
 
           case 45:
-            if (passAccess) pageData = xData;
+            isAjax = ctx.fkp.isAjax();
 
-          case 46:
+            if (passAccess || isAjax) pageData = xData;
+
+          case 47:
             return _context6.abrupt('return', [pageData, route]);
 
-          case 49:
-            _context6.prev = 49;
+          case 50:
+            _context6.prev = 50;
             _context6.t0 = _context6['catch'](2);
 
             console.log(_context6.t0.stack);
 
-          case 52:
+          case 53:
           case 'end':
             return _context6.stop();
         }
       }
-    }, _callee6, this, [[2, 49]]);
+    }, _callee6, this, [[2, 50]]);
   }));
 
   return function controler(_x17, _x18, _x19, _x20, _x21) {
