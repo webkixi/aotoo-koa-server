@@ -606,6 +606,8 @@ function controlPages() {
 function makeRoute(ctx, prefix) {
   var params = ctx.params;
   var _url = ctx.url;
+  var fkp = ctx.fkp;
+  var indexRoot = fkp.index;
   ctx.local = Url.parse(ctx.url, true);
 
   var _ext = Path.extname(ctx.url);
@@ -629,9 +631,9 @@ function makeRoute(ctx, prefix) {
     route = gtpy(title) === 'number' ? cat : cat + '/' + title;
   } else if (cat) {
     cat = cat.replace(rjson.ext, '');
-    route = gtpy(cat) === 'number' ? CONFIG.root || 'index' : cat;
+    route = gtpy(cat) === 'number' ? indexRoot || 'index' : cat;
   } else {
-    route = CONFIG.root || 'index';
+    route = indexRoot || 'index';
   }
   if (ctxurl && route !== ctxurl) route = ctxurl;
   if (prefix) route = prefix.indexOf('/') == 0 ? prefix.substring(1) : prefix;

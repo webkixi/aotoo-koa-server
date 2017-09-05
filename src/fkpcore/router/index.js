@@ -70,6 +70,8 @@ function controlPages() {
 function makeRoute(ctx, prefix){
   let params = ctx.params
   let _url = ctx.url
+  const fkp = ctx.fkp
+  const indexRoot = fkp.index
   ctx.local = Url.parse(ctx.url, true)
 
 
@@ -100,11 +102,11 @@ function makeRoute(ctx, prefix){
 
   else if(cat){
     cat = cat.replace(rjson.ext,'');
-    route = gtpy(cat)==='number' ? CONFIG.root||'index' : cat
+    route = gtpy(cat)==='number' ? indexRoot||'index' : cat
   }
 
   else{
-    route = CONFIG.root||'index'
+    route = indexRoot||'index'
   }
   if (ctxurl && route !== ctxurl) route = ctxurl
   if (prefix) route = prefix.indexOf('/')==0 ? prefix.substring(1) : prefix

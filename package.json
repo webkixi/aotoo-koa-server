@@ -1,6 +1,6 @@
 {
   "name": "aotoo-koa-server",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "description": "web service, based on koa2",
   "main": "./build/index.js",
   "scripts": {
@@ -21,7 +21,7 @@
     "url": "git+https://github.com/webkixi/aotoo-koa-server.git"
   },
   "dependencies": {
-    "aotoo-common": "^1.0.1",
+    "aotoo-common": "^1.0.5",
     "blueimp-md5": "^2.7.0",
     "debug": "^2.6.8",
     "diskdb": "^0.1.17",
