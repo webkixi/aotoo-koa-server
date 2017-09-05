@@ -118,6 +118,13 @@ fkp.use = function (name, fn) {
   };
 };
 
+function valideFile(_file) {
+  var firstChar = _file && _file.charAt(0);
+  var invalideChars = ['_', '.'];
+  if (invalideChars.indexOf(firstChar) > -1) return false;
+  return true;
+}
+
 exports.default = function () {
   var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(app, options) {
     var _this = this;
@@ -298,7 +305,8 @@ exports.default = function () {
             for (_iterator2 = _utilesFiles[Symbol.iterator](); !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
               utileFile = _step2.value;
 
-              if (utileFile.indexOf('_') != 0) {
+              // if (utileFile.indexOf('_')!=0) {
+              if (valideFile(utileFile)) {
                 utileFun = require('./base/' + utileFile).default();
 
                 fkp.utileHand(_path2.default.parse(utileFile).name, utileFun);
@@ -363,7 +371,8 @@ exports.default = function () {
             for (_iterator3 = _pluginFiles[Symbol.iterator](); !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
               pluginFile = _step3.value;
 
-              if (pluginFile.indexOf('_') != 0) {
+              // if (pluginFile.indexOf('_')!=0) {
+              if (valideFile(pluginFile)) {
                 plugin = require(_path2.default.join(pluginRoot, pluginFile)).default(fkp);
 
                 fkp.plugins(_path2.default.parse(pluginFile).name, plugin);

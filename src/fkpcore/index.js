@@ -68,6 +68,13 @@ fkp.use = function(name, fn){
   }
 }
 
+function valideFile(_file){
+  const firstChar = _file && _file.charAt(0)
+  const invalideChars = ['_', '.']
+  if (invalideChars.indexOf(firstChar)>-1) return false
+  return true
+}
+
 export default async function(app, options) {
   const instance = this
   let dfts = {
@@ -184,7 +191,8 @@ export default async function(app, options) {
     let _utilesFiles = fs.readdirSync(Path.resolve(__dirname, baseRoot))
     if (_utilesFiles && _utilesFiles.length) {
       for (let utileFile of _utilesFiles) {
-        if (utileFile.indexOf('_')!=0) {
+        // if (utileFile.indexOf('_')!=0) {
+        if (valideFile(utileFile)) {
           let utileFun = require( './base/'+utileFile ).default()
           fkp.utileHand(Path.parse(utileFile).name, utileFun)
         }
@@ -198,7 +206,8 @@ export default async function(app, options) {
       let _pluginFiles = fs.readdirSync(pluginRoot)
       if (_pluginFiles && _pluginFiles.length) {
         for (let pluginFile of _pluginFiles) {
-          if (pluginFile.indexOf('_')!=0) {
+          // if (pluginFile.indexOf('_')!=0) {
+          if (valideFile(pluginFile)) {
             let plugin = require( Path.join(pluginRoot, pluginFile) ).default(fkp)
             fkp.plugins(Path.parse(pluginFile).name, plugin)
           }
