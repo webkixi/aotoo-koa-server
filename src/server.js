@@ -100,7 +100,7 @@ async function _init() {
   app.keys = this.configs.keys
   const server = await core.call(this, app, this.configs)
 	app.on('error', async (err, ctx) => {
-		logger.error('server error', err, ctx)
+		console.error('server error', err, ctx)
 	})
 
   return server

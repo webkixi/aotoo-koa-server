@@ -27,7 +27,7 @@ var _init = function () {
                   while (1) {
                     switch (_context7.prev = _context7.next) {
                       case 0:
-                        logger.error('server error', err, ctx);
+                        console.error('server error', err, ctx);
 
                       case 1:
                       case 'end':
