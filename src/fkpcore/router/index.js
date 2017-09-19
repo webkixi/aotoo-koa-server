@@ -268,7 +268,7 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance){
   if (_.isString(routerPrefix) && routerPrefix.indexOf('/')==0) routerPrefix = routerPrefix.replace('/','')
 
   try {
-    let ctrl = control(route, ctx, pageData)
+    let ctrl = control(route, ctx, pageData, routerInstance)
     let passAccess = false
     if (ctrl.initStat){
       pageData = await ctrl.run(ctx)

@@ -339,7 +339,7 @@ var controler = function () {
             if (_.isString(routerPrefix) && routerPrefix.indexOf('/') == 0) routerPrefix = routerPrefix.replace('/', '');
 
             _context6.prev = 2;
-            ctrl = control(route, ctx, pageData);
+            ctrl = control(route, ctx, pageData, routerInstance);
             passAccess = false;
 
             if (!ctrl.initStat) {
