@@ -1,7 +1,7 @@
 {
   "name": "aotoo-koa-server",
   "version": "1.1.5",
-  "description": "web service, based on koa2",
+  "description": "based on koa2",
   "main": "./build/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
