@@ -21,7 +21,7 @@
     "url": "git+https://github.com/webkixi/aotoo-koa-server.git"
   },
   "dependencies": {
-    "aotoo-common": "^1.0.5",
+    "aotoo-common": "^1.0.6",
     "art-template": "^4.12.1",
     "babel-core": "^6.26.0",
     "babel-plugin-add-module-exports": "^0.2.1",
