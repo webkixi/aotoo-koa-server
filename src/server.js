@@ -1,6 +1,6 @@
 import Koa from 'koa'
 import aotoo from 'aotoo-common'   // global.Aotoo
-import views from 'koa-views'
+import render from 'koa-art-template'
 import statics from 'koa-static-cache'
 import bodyparser from 'koa-bodyparser'
 import core, {fkp} from './fkpcore'
@@ -64,19 +64,29 @@ class aotooServer {
   }
 
   async views(dist, opts){
+    // import views from 'koa-views'   // 放到顶部
+    // let dft = {
+    //   map: {
+    //     html: (opts&&opts.html||'ejs')
+    //   }
+    // }
+    // if (opts&&opts.extension) {
+    //   dft.extension = opts.extension
+    // }
+    // if (opts&&opts.options) {
+    //   dft.options = opts.options
+    // }
+    // this.state.views = true
+    // app.use( views(dist, dft) )
+
     let dft = {
-      map: {
-        html: (opts&&opts.html||'ejs')
-      }
+      root: dist,
+      extname: '.html',
+      debug: process.env.NODE_ENV !== 'production'
     }
-    if (opts&&opts.extension) {
-      dft.extension = opts.extension
-    }
-    if (opts&&opts.options) {
-      dft.options = opts.options
-    }
+    dft = _.merge({}, dft, opts)
     this.state.views = true
-    app.use( views(dist, dft) )
+    render(app, dft)
   }
 
   async init(){

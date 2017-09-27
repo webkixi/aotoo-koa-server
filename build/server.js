@@ -65,9 +65,9 @@ var _aotooCommon = require('aotoo-common');
 
 var _aotooCommon2 = _interopRequireDefault(_aotooCommon);
 
-var _koaViews = require('koa-views');
+var _koaArtTemplate = require('koa-art-template');
 
-var _koaViews2 = _interopRequireDefault(_koaViews);
+var _koaArtTemplate2 = _interopRequireDefault(_koaArtTemplate);
 
 var _koaStaticCache = require('koa-static-cache');
 
@@ -243,22 +243,32 @@ var aotooServer = function () {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
+                // import views from 'koa-views'   // 放到顶部
+                // let dft = {
+                //   map: {
+                //     html: (opts&&opts.html||'ejs')
+                //   }
+                // }
+                // if (opts&&opts.extension) {
+                //   dft.extension = opts.extension
+                // }
+                // if (opts&&opts.options) {
+                //   dft.options = opts.options
+                // }
+                // this.state.views = true
+                // app.use( views(dist, dft) )
+
                 dft = {
-                  map: {
-                    html: opts && opts.html || 'ejs'
-                  }
+                  root: dist,
+                  extname: '.html',
+                  debug: process.env.NODE_ENV !== 'production'
                 };
 
-                if (opts && opts.extension) {
-                  dft.extension = opts.extension;
-                }
-                if (opts && opts.options) {
-                  dft.options = opts.options;
-                }
+                dft = _.merge({}, dft, opts);
                 this.state.views = true;
-                app.use((0, _koaViews2.default)(dist, dft));
+                (0, _koaArtTemplate2.default)(app, dft);
 
-              case 5:
+              case 4:
               case 'end':
                 return _context5.stop();
             }
