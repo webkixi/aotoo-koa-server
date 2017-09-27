@@ -3,6 +3,61 @@ web service, based on koa2, with router and plugins
 easier to build koa web service
 aotoo-koa-server基于koa2完成，支持基础路由、镜像路由，静态资源，插件plugins机制等
 
+## USAGE
+#### server.js
+```js
+const path = require('path')
+const as = require('aotoo-koa-server')
+const logger = require('koa-logger')
+
+const app = as({
+  index: 'index',
+  root: path.join(__dirname, './html'),   // index.html
+  pages: path.join(__dirname, './pages')  // pages/index.js
+})
+
+app.use(logger())  
+app.listen(3000)
+```
+
+#### pages/index.js
+```js
+function index(oridata) {
+  return {
+    get: async function(ctx){
+      const fkp = ctx.fkp
+      oridata.fkp = 'Aotoo-koa-server'
+      const test = <div>hello test</div>
+      oridata.react = Aotoo.html(test)
+      return oridata;
+    },
+
+    post: async function(ctx){
+      return {pdata: '我是post数据'}
+    }
+  }
+}
+export { index as getData }
+```
+
+#### html/index.html
+支持handbars语法，使用art-template模板引擎
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  <h1>Hello <%=fkp%></h1>
+  <%-react%>
+</body>
+</html>
+```
+
 ## FEATHER
 1. 标准MVC结构
 2. 动态路由
