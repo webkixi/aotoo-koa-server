@@ -21,54 +21,54 @@ var _createClass2 = require('babel-runtime/helpers/createClass');
 var _createClass3 = _interopRequireDefault(_createClass2);
 
 var _init = function () {
-  var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8() {
+  var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9() {
     var _this = this;
 
     var server;
-    return _regenerator2.default.wrap(function _callee8$(_context8) {
+    return _regenerator2.default.wrap(function _callee9$(_context9) {
       while (1) {
-        switch (_context8.prev = _context8.next) {
+        switch (_context9.prev = _context9.next) {
           case 0:
             app.keys = this.configs.keys;
-            _context8.next = 3;
+            _context9.next = 3;
             return _fkpcore2.default.call(this, app, this.configs);
 
           case 3:
-            server = _context8.sent;
+            server = _context9.sent;
 
             app.on('error', function () {
-              var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(err, ctx) {
-                return _regenerator2.default.wrap(function _callee7$(_context7) {
+              var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8(err, ctx) {
+                return _regenerator2.default.wrap(function _callee8$(_context8) {
                   while (1) {
-                    switch (_context7.prev = _context7.next) {
+                    switch (_context8.prev = _context8.next) {
                       case 0:
                         console.error('server error', err, ctx);
 
                       case 1:
                       case 'end':
-                        return _context7.stop();
+                        return _context8.stop();
                     }
                   }
-                }, _callee7, _this);
+                }, _callee8, _this);
               }));
 
-              return function (_x9, _x10) {
-                return _ref8.apply(this, arguments);
+              return function (_x12, _x13) {
+                return _ref9.apply(this, arguments);
               };
             }());
 
-            return _context8.abrupt('return', server);
+            return _context9.abrupt('return', server);
 
           case 6:
           case 'end':
-            return _context8.stop();
+            return _context9.stop();
         }
       }
-    }, _callee8, this);
+    }, _callee9, this);
   }));
 
   return function _init() {
-    return _ref7.apply(this, arguments);
+    return _ref8.apply(this, arguments);
   };
 }();
 
@@ -389,6 +389,37 @@ var aotooServer = function () {
       }
 
       return init;
+    }()
+  }, {
+    key: 'listen',
+    value: function () {
+      var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(port, dom, cb) {
+        var server;
+        return _regenerator2.default.wrap(function _callee7$(_context7) {
+          while (1) {
+            switch (_context7.prev = _context7.next) {
+              case 0:
+                _context7.next = 2;
+                return this.init();
+
+              case 2:
+                server = _context7.sent;
+
+                server.listen(port, dom, cb);
+
+              case 4:
+              case 'end':
+                return _context7.stop();
+            }
+          }
+        }, _callee7, this);
+      }));
+
+      function listen(_x9, _x10, _x11) {
+        return _ref7.apply(this, arguments);
+      }
+
+      return listen;
     }()
   }]);
   return aotooServer;

@@ -129,6 +129,11 @@ class aotooServer {
       console.error(e);
     }
   }
+
+  async listen(port, dom, cb){
+    const server = await this.init()
+    server.listen(port, dom, cb)
+  }
 }
 
 
