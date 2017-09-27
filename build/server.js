@@ -1,16 +1,31 @@
 'use strict';
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+var _typeof2 = require('babel-runtime/helpers/typeof');
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); // global.Aotoo
+var _typeof3 = _interopRequireDefault(_typeof2);
 
+var _regenerator = require('babel-runtime/regenerator');
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
+
+var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
+var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+
+var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
+
+var _createClass2 = require('babel-runtime/helpers/createClass');
+
+var _createClass3 = _interopRequireDefault(_createClass2);
 
 var _init = function () {
-  var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee8() {
+  var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8() {
     var _this = this;
 
     var server;
-    return regeneratorRuntime.wrap(function _callee8$(_context8) {
+    return _regenerator2.default.wrap(function _callee8$(_context8) {
       while (1) {
         switch (_context8.prev = _context8.next) {
           case 0:
@@ -22,8 +37,8 @@ var _init = function () {
             server = _context8.sent;
 
             app.on('error', function () {
-              var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(err, ctx) {
-                return regeneratorRuntime.wrap(function _callee7$(_context7) {
+              var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(err, ctx) {
+                return _regenerator2.default.wrap(function _callee7$(_context7) {
                   while (1) {
                     switch (_context7.prev = _context7.next) {
                       case 0:
@@ -83,38 +98,42 @@ var _fkpcore2 = _interopRequireDefault(_fkpcore);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
+// global.Aotoo
 global.debug = require('debug');
 
 var app = new _koa2.default();
 
 var aotooServer = function () {
   function aotooServer(opts) {
-    _classCallCheck(this, aotooServer);
+    (0, _classCallCheck3.default)(this, aotooServer);
 
     this.middlewares = [];
     this.configs = {
-      keys: opts.keys || ['agzgz gogogo'],
-      index: opts.index || 'index',
-      pages: opts.pages,
-      apis: opts.apis || {},
-      mapper: opts.mapper || {},
-      pluginsFolder: opts.pluginsFolder
+      keys: opts.keys || ['aotoo koa'], // cookie session关键字
+      index: opts.index || 'index', // 默认首页
+
+      apis: opts.apis || { list: {} }, // api接口集合
+      mapper: opts.mapper || { js: {}, css: {} }, // 静态资源映射文件
+
+      root: opts.root, // 渲染默认目录
+      pages: opts.pages, // control层文件夹，必须
+      pluginsFolder: opts.pluginsFolder // 插件文件夹
     };
+
     this.state = {
       views: false,
       bodyparser: false
     };
   }
 
-  _createClass(aotooServer, [{
+  // 注册KOA2的中间间，与KOA2语法保持一致
+
+
+  (0, _createClass3.default)(aotooServer, [{
     key: 'use',
     value: function () {
-      var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee(midw) {
-        return regeneratorRuntime.wrap(function _callee$(_context) {
+      var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(midw) {
+        return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
@@ -134,22 +153,36 @@ var aotooServer = function () {
 
       return use;
     }()
+
+    // 注册一个Aotoo插件方法
+
   }, {
     key: 'plugins',
     value: function plugins(name, fn) {
       _fkpcore.fkp.plugins(name, fn);
     }
+
+    // 注册一个Aotoo助手方法
+
   }, {
     key: 'utile',
     value: function utile(name, fn) {
       _fkpcore.fkp.utileHand(name, fn);
     }
   }, {
+    key: 'callback',
+    value: function callback() {
+      return app.callback(arguments);
+    }
+
+    // 指定站点静态路径，如 /images, /uploader, /user
+
+  }, {
     key: 'statics',
     value: function () {
-      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(dist, opts, files) {
+      var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(dist, opts, files) {
         var dft;
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        return _regenerator2.default.wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
@@ -179,16 +212,19 @@ var aotooServer = function () {
 
       return statics;
     }()
+
+    // 注册api接口集，用于做接口层的数据访问
+
   }, {
     key: 'apis',
     value: function () {
-      var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3() {
+      var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
         var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        return regeneratorRuntime.wrap(function _callee3$(_context3) {
+        return _regenerator2.default.wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) == 'object') {
+                if ((typeof obj === 'undefined' ? 'undefined' : (0, _typeof3.default)(obj)) == 'object') {
                   this.configs.apis = obj;
                 }
 
@@ -206,16 +242,19 @@ var aotooServer = function () {
 
       return apis;
     }()
+
+    // 注册POST中间件，可以通过 ctx.bodys来访问post数据
+
   }, {
     key: 'bodyparser',
     value: function () {
-      var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4() {
+      var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4() {
         var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-        return regeneratorRuntime.wrap(function _callee4$(_context4) {
+        return _regenerator2.default.wrap(function _callee4$(_context4) {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                if ((typeof obj === 'undefined' ? 'undefined' : _typeof(obj)) == 'object') {
+                if ((typeof obj === 'undefined' ? 'undefined' : (0, _typeof3.default)(obj)) == 'object') {
                   this.state.bodyparser = true;
                   app.use((0, _koaBodyparser2.default)(obj));
                 }
@@ -234,12 +273,15 @@ var aotooServer = function () {
 
       return bodyparser;
     }()
+
+    // 注册渲染方法
+
   }, {
     key: 'views',
     value: function () {
-      var _ref5 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(dist, opts) {
+      var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(dist, opts) {
         var dft;
-        return regeneratorRuntime.wrap(function _callee5$(_context5) {
+        return _regenerator2.default.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
               case 0:
@@ -282,45 +324,64 @@ var aotooServer = function () {
 
       return views;
     }()
+
+    // 初始化
+
   }, {
     key: 'init',
     value: function () {
-      var _ref6 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6() {
-        return regeneratorRuntime.wrap(function _callee6$(_context6) {
+      var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6() {
+        return _regenerator2.default.wrap(function _callee6$(_context6) {
           while (1) {
             switch (_context6.prev = _context6.next) {
               case 0:
                 _context6.prev = 0;
 
-                if (this.state.views) {
+                if (this.configs.pages) {
                   _context6.next = 3;
+                  break;
+                }
+
+                throw '必须指定control目录';
+
+              case 3:
+                if (this.state.views) {
+                  _context6.next = 9;
+                  break;
+                }
+
+                if (this.configs.root) {
+                  _context6.next = 8;
                   break;
                 }
 
                 throw '必须指定模板引擎的views目录';
 
-              case 3:
+              case 8:
+                this.views(this.configs.root);
+
+              case 9:
                 if (!this.state.bodyparser) {
                   app.use((0, _koaBodyparser2.default)());
                 }
-                _context6.next = 6;
+                _context6.next = 12;
                 return _init.call(this);
 
-              case 6:
+              case 12:
                 return _context6.abrupt('return', _context6.sent);
 
-              case 9:
-                _context6.prev = 9;
+              case 15:
+                _context6.prev = 15;
                 _context6.t0 = _context6['catch'](0);
 
                 console.error(_context6.t0);
 
-              case 12:
+              case 18:
               case 'end':
                 return _context6.stop();
             }
           }
-        }, _callee6, this, [[0, 9]]);
+        }, _callee6, this, [[0, 15]]);
       }));
 
       function init() {
@@ -330,7 +391,6 @@ var aotooServer = function () {
       return init;
     }()
   }]);
-
   return aotooServer;
 }();
 

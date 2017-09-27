@@ -1,6 +1,24 @@
 'use strict';
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+var _getIterator2 = require('babel-runtime/core-js/get-iterator');
+
+var _getIterator3 = _interopRequireDefault(_getIterator2);
+
+var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
+
+var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
+
+var _regenerator = require('babel-runtime/regenerator');
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
+
+var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
+var _promise = require('babel-runtime/core-js/promise');
+
+var _promise2 = _interopRequireDefault(_promise);
 
 /**
  * 路由分配
@@ -9,13 +27,11 @@ var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = [
  * return rende pages
 **/
 var init = function () {
-  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(app) {
-    var prefix = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : '';
-
+  var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(app, prefix, options) {
     var forBetter = function () {
-      var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee(ctx, next) {
+      var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(ctx, next) {
         var ignoreStacic;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
+        return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
@@ -50,16 +66,14 @@ var init = function () {
         }, _callee, this, [[0, 9]]);
       }));
 
-      return function forBetter(_x3, _x4) {
+      return function forBetter(_x4, _x5) {
         return _ref2.apply(this, arguments);
       };
     }();
 
-    var options = arguments[2];
-
     var _controlPages, router, routeParam, customControl;
 
-    return regeneratorRuntime.wrap(function _callee2$(_context2) {
+    return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
@@ -81,22 +95,25 @@ var init = function () {
                 if (_.includes(['get', 'post', 'put', 'del'], key)) {
                   if (typeof item == 'string') item = [item];
                   if (!Array.isArray(item)) return;
-                  item.map(function (rt) {
-                    if (key != 'get' && rt.indexOf('p1') == -1) {
-                      router[key](rt, (customControl || forBetter).bind(router));
+                  item.forEach(function (rt) {
+                    // if (key!='get' && rt.indexOf('p1')==-1) {
+                    if (key != 'get') {
+                      if (rt != '/') {
+                        router[key](rt, (customControl || forBetter).bind(router));
+                      }
                     } else {
                       router[key](rt, (customControl || forBetter).bind(router));
                     }
                   });
                 } else {
-                  routeParam.map(function (_path) {
+                  routeParam.forEach(function (_path) {
                     router.get(_path, (customControl || forBetter).bind(router));
                     router.post(_path, (customControl || forBetter).bind(router));
                   });
                 }
               });
             } else {
-              routeParam.map(function (item) {
+              routeParam.forEach(function (item) {
                 router.get(item, forBetter.bind(router));
                 if (item != '/') {
                   router.post(item, forBetter.bind(router));
@@ -115,7 +132,7 @@ var init = function () {
     }, _callee2, this);
   }));
 
-  return function init(_x) {
+  return function init(_x, _x2, _x3) {
     return _ref.apply(this, arguments);
   };
 }();
@@ -129,9 +146,9 @@ var init = function () {
 
 
 var dealwithRoute = function () {
-  var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(ctx, _mapper, ctrlPages) {
+  var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(ctx, _mapper, ctrlPages) {
     var isRender, route, routerPrefix, pageData;
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+    return _regenerator2.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
@@ -139,7 +156,7 @@ var dealwithRoute = function () {
             isRender = filterRendeFile(ctx.params, ctx.url);
             route = isRender ? makeRoute(ctx) : false;
 
-            if (!(!isRender || !route)) {
+            if (route) {
               _context3.next = 5;
               break;
             }
@@ -148,35 +165,36 @@ var dealwithRoute = function () {
 
           case 5:
             ctx.fkproute = route;
+            ctx.routerPrefix = this.opts.prefix;
             routerPrefix = this.opts.prefix;
             pageData = staticMapper(ctx, _mapper, route, routerPrefix);
 
-            if (!(!_mapper || !pageData)) {
-              _context3.next = 10;
+            if (pageData) {
+              _context3.next = 11;
               break;
             }
 
             throw 'mapper数据不正确';
 
-          case 10:
+          case 11:
             return _context3.abrupt('return', distribute.call(ctx, route, pageData, ctrlPages, this));
 
-          case 13:
-            _context3.prev = 13;
+          case 14:
+            _context3.prev = 14;
             _context3.t0 = _context3['catch'](0);
 
             console.log(_context3.t0);
             // return ctx.redirect('404')
 
-          case 16:
+          case 17:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[0, 13]]);
+    }, _callee3, this, [[0, 14]]);
   }));
 
-  return function dealwithRoute(_x5, _x6, _x7) {
+  return function dealwithRoute(_x6, _x7, _x8) {
     return _ref3.apply(this, arguments);
   };
 }();
@@ -185,10 +203,10 @@ var dealwithRoute = function () {
 
 
 var distribute = function () {
-  var _ref4 = _asyncToGenerator(regeneratorRuntime.mark(function _callee4(route, pageData, ctrlPages, routerInstance) {
+  var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(route, pageData, ctrlPages, routerInstance) {
     var _ref5, _ref6, pdata, rt;
 
-    return regeneratorRuntime.wrap(function _callee4$(_context4) {
+    return _regenerator2.default.wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
@@ -197,7 +215,7 @@ var distribute = function () {
 
           case 2:
             _ref5 = _context4.sent;
-            _ref6 = _slicedToArray(_ref5, 2);
+            _ref6 = (0, _slicedToArray3.default)(_ref5, 2);
             pdata = _ref6[0];
             rt = _ref6[1];
             _context4.next = 8;
@@ -214,7 +232,7 @@ var distribute = function () {
     }, _callee4, this);
   }));
 
-  return function distribute(_x8, _x9, _x10, _x11) {
+  return function distribute(_x9, _x10, _x11, _x12) {
     return _ref4.apply(this, arguments);
   };
 }();
@@ -223,10 +241,10 @@ var distribute = function () {
 
 
 var getctrlData = function () {
-  var _ref7 = _asyncToGenerator(regeneratorRuntime.mark(function _callee5(_path, route, ctx, _pageData, ctrl) {
+  var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(_path, route, ctx, _pageData, ctrl) {
     var _names, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _filename, _stat, controlConfig;
 
-    return regeneratorRuntime.wrap(function _callee5$(_context5) {
+    return _regenerator2.default.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
@@ -245,7 +263,7 @@ var getctrlData = function () {
             _iteratorError = undefined;
             _context5.prev = 7;
 
-            for (_iterator = _path[Symbol.iterator](); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            for (_iterator = (0, _getIterator3.default)(_path); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
               _filename = _step.value;
 
               _filename = Path.resolve(__dirname, _filename + '.js');
@@ -322,15 +340,15 @@ var getctrlData = function () {
     }, _callee5, this, [[0, 34], [7, 11, 15, 23], [16,, 18, 22]]);
   }));
 
-  return function getctrlData(_x12, _x13, _x14, _x15, _x16) {
+  return function getctrlData(_x13, _x14, _x15, _x16, _x17) {
     return _ref7.apply(this, arguments);
   };
 }();
 
 var controler = function () {
-  var _ref8 = _asyncToGenerator(regeneratorRuntime.mark(function _callee6(ctx, route, pageData, ctrlPages, routerInstance) {
+  var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(ctx, route, pageData, ctrlPages, routerInstance) {
     var routerPrefix, ctrl, passAccess, xData, controlFile, prefixIndexFile, prefixCatFile, paramsCatFile, xRoute, apilist, isAjax;
-    return regeneratorRuntime.wrap(function _callee6$(_context6) {
+    return _regenerator2.default.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
           case 0:
@@ -454,7 +472,7 @@ var controler = function () {
     }, _callee6, this, [[2, 50]]);
   }));
 
-  return function controler(_x17, _x18, _x19, _x20, _x21) {
+  return function controler(_x18, _x19, _x20, _x21, _x22) {
     return _ref8.apply(this, arguments);
   };
 }();
@@ -463,9 +481,9 @@ var controler = function () {
 
 
 var renderPage = function () {
-  var _ref9 = _asyncToGenerator(regeneratorRuntime.mark(function _callee7(ctx, route, data, isAjax) {
+  var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(ctx, route, data, isAjax) {
     var getStat;
-    return regeneratorRuntime.wrap(function _callee7$(_context7) {
+    return _regenerator2.default.wrap(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
@@ -527,12 +545,12 @@ var renderPage = function () {
     }, _callee7, this, [[0, 15]]);
   }));
 
-  return function renderPage(_x22, _x23, _x24, _x25) {
+  return function renderPage(_x23, _x24, _x25, _x26) {
     return _ref9.apply(this, arguments);
   };
 }();
 
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 /**
  * Module dependencies.
@@ -584,7 +602,7 @@ function controlPages() {
   var _id = controlPagePath;
   var ctrlFiles = [];
   return Cache.ifid(_id, function () {
-    return new Promise(function (res, rej) {
+    return new _promise2.default(function (res, rej) {
       return function getCtrlFiles(dir) {
         fs.readdir(dir, function (err, data) {
           if (err) throw err;
@@ -593,7 +611,8 @@ function controlPages() {
             var stat = fs.statSync(_path);
             if (stat && stat.isDirectory()) return getCtrlFiles(_path);
             var okPath = _path.replace(controlPagePath, '');
-            ctrlFiles.push(Path.join(okPath));
+            ctrlFiles.push(okPath);
+            // ctrlFiles.push(Path.join(okPath))
           }); // end map
           Cache.set(_id, ctrlFiles);
           res(ctrlFiles);

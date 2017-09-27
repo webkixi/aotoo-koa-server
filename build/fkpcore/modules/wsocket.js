@@ -1,5 +1,11 @@
 'use strict';
 
+var _keys2 = require('babel-runtime/core-js/object/keys');
+
+var _keys3 = _interopRequireDefault(_keys2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 var http = require('http'),
     socket_config = {},
     io,
@@ -53,7 +59,7 @@ function run() {
 
   function mkon(skt) {
     var scfg = socket_config;
-    var _keys = Object.keys(scfg);
+    var _keys = (0, _keys3.default)(scfg);
     _keys.map(function (item, i) {
       var _cb = mkmkon(scfg[item], skt);
       skt.on(item, _cb);

@@ -4,7 +4,25 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+var _regenerator = require('babel-runtime/regenerator');
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
+
+var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
+var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
+
+var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
+
+var _entries = require('babel-runtime/core-js/object/entries');
+
+var _entries2 = _interopRequireDefault(_entries);
+
+var _getIterator2 = require('babel-runtime/core-js/get-iterator');
+
+var _getIterator3 = _interopRequireDefault(_getIterator2);
 
 exports.fkp = fkp;
 
@@ -21,8 +39,6 @@ var _request = require('request');
 var _request2 = _interopRequireDefault(_request);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
 
 var socketio = require('./modules/wsocket');global.Sio = socketio.sio;
 var cache = require('./modules/cache');global.Cache = cache;
@@ -55,10 +71,10 @@ function fkp(ctx, opts) {
   var _iteratorError = undefined;
 
   try {
-    for (var _iterator = Object.entries(fkp)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+    for (var _iterator = (0, _getIterator3.default)((0, _entries2.default)(fkp)), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
       var property = _step.value;
 
-      var _property = _slicedToArray(property, 2),
+      var _property = (0, _slicedToArray3.default)(property, 2),
           _name = _property[0],
           _value = _property[1];
 
@@ -84,10 +100,6 @@ function fkp(ctx, opts) {
 
 // manual set static property or fun or some resource
 fkp.env = process.env.NODE_ENV == 'development' ? 'dev' : 'pro';
-// fkp.staticMapper = dfts.mapper
-// fkp.router = router
-// fkp.apilist = dfts.apis
-// fkp.index = dfts.index
 
 // Register utile function
 fkp.utileHand = function (name, fn) {
@@ -126,20 +138,20 @@ function valideFile(_file) {
 }
 
 exports.default = function () {
-  var _ref = _asyncToGenerator(regeneratorRuntime.mark(function _callee3(app, options) {
+  var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(app, options) {
     var _this = this;
 
     var instance, dfts, server, fetch, innerData, baseRoot, _utilesFiles, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, utileFile, utileFun, pluginRoot, _pluginFiles, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, pluginFile, plugin;
 
-    return regeneratorRuntime.wrap(function _callee3$(_context3) {
+    return _regenerator2.default.wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
             instance = this;
             dfts = {
-              apis: options.apis || { list: {} },
+              apis: options.apis,
               pages: options.pages,
-              index: options.index || 'index',
+              index: options.index,
               mapper: options.mapper,
               pluginsFolder: options.pluginsFolder
 
@@ -161,69 +173,14 @@ exports.default = function () {
               route: {
                 prefix: []
               }
-
-              // // 实例, fkp中间件
-              // function _fkp(ctx, opts){
-              //   this.ctx = ctx
-              //   this.opts = opts
-
-              //   this.isAjax = function() {
-              //     return header('X-Requested-With') === 'XMLHttpRequest';
-              //   }
-
-              //   function header(name, value) {
-              //     if (value != undefined) {
-              //       ctx.request.set(name, value);
-              //     } else {
-              //       return ctx.request.get(name);
-              //     }
-              //   }
-              // }
-
-              // // 静态, fkp()返回实例
-              // function fkp(ctx, opts){
-              //   let fkpInstanc = new _fkp(ctx, opts)
-              //   for (let property of Object.entries(fkp)) {
-              //     let [_name, _value] = property
-              //     fkpInstanc[_name] = _value
-              //   }
-              //   return fkpInstanc
-              // }
-
-              // // manual set static property or fun or some resource
-              // fkp.env = process.env.NODE_ENV == 'development' ? 'dev' : 'pro'
             };
+
+
             fkp.staticMapper = dfts.mapper;
             fkp.router = router;
             fkp.apilist = dfts.apis;
             fkp.index = dfts.index;
             fkp.statics = instance.statics.bind(instance);
-
-            // // Register utile function
-            // fkp.utileHand = function(name, fn){
-            //   if (typeof fn == 'function') {
-            //     fkp[name] = function() {
-            //       if (fn && typeof fn=='function') { return fn.apply(null, [fkp, ...arguments]) }
-            //     }
-            //   }
-            // }
-
-            // // Register plugins function
-            // fkp.plugins = function(name, fn){
-            //   if (typeof fn == 'function') {
-            //     _fkp.prototype[name] = function() {
-            //       if (fn && typeof fn=='function') { return fn.apply(this, [this.ctx, ...arguments]) }
-            //     }
-            //   }
-            // }
-
-            // // as plugins, it look nice
-            // fkp.use = function(name, fn){
-            //   _fkp.prototype[name] = function() {
-            //     if (fn && typeof fn=='function') return fn.apply(this, [this.ctx, ...arguments])
-            //   }
-            // }
-
 
             /**
              * 预动态设置路由, 在plugins方法中使用
@@ -231,9 +188,9 @@ exports.default = function () {
              * @param  {JSON}  routerOptions   koa-router's route
             */
             fkp.routepreset = function () {
-              var _ref2 = _asyncToGenerator(regeneratorRuntime.mark(function _callee(prefix, routerOptions) {
+              var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(prefix, routerOptions) {
                 var prefixs;
-                return regeneratorRuntime.wrap(function _callee$(_context) {
+                return _regenerator2.default.wrap(function _callee$(_context) {
                   while (1) {
                     switch (_context.prev = _context.next) {
                       case 0:
@@ -302,7 +259,7 @@ exports.default = function () {
             _iteratorError2 = undefined;
             _context3.prev = 20;
 
-            for (_iterator2 = _utilesFiles[Symbol.iterator](); !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            for (_iterator2 = (0, _getIterator3.default)(_utilesFiles); !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
               utileFile = _step2.value;
 
               // if (utileFile.indexOf('_')!=0) {
@@ -368,7 +325,7 @@ exports.default = function () {
             _iteratorError3 = undefined;
             _context3.prev = 43;
 
-            for (_iterator3 = _pluginFiles[Symbol.iterator](); !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+            for (_iterator3 = (0, _getIterator3.default)(_pluginFiles); !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
               pluginFile = _step3.value;
 
               // if (pluginFile.indexOf('_')!=0) {
@@ -428,8 +385,8 @@ exports.default = function () {
 
             // 封装koa中间件
             app.use(function () {
-              var _ref3 = _asyncToGenerator(regeneratorRuntime.mark(function _callee2(ctx, next) {
-                return regeneratorRuntime.wrap(function _callee2$(_context2) {
+              var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(ctx, next) {
+                return _regenerator2.default.wrap(function _callee2$(_context2) {
                   while (1) {
                     switch (_context2.prev = _context2.next) {
                       case 0:

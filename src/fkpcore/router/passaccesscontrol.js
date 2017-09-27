@@ -13,10 +13,10 @@ function passaccess(oridata) {
         }
         return passdata[1]
       } else {
-        if (passdata && passdata[1]==='') return Errors['1010']
+        if (passdata && passdata[1]==='') return {success: '1010', message: "链接正确，但数据为空"}
       }
       debug('java/php后端返回数据出错')
-      return Errors['60002']
+      return {error: "60002", message: "java或者php返回数据错误"}
     }
   }
 }

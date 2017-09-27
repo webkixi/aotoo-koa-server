@@ -57,7 +57,8 @@ function controlPages() {
             const stat = fs.statSync(_path)
             if (stat && stat.isDirectory()) return getCtrlFiles(_path)
             const okPath = _path.replace(controlPagePath, '')
-            ctrlFiles.push(Path.join(okPath))
+            ctrlFiles.push(okPath)
+            // ctrlFiles.push(Path.join(okPath))
           }) // end map
           Cache.set(_id, ctrlFiles)
           res(ctrlFiles)
@@ -153,7 +154,7 @@ function staticMapper(ctx, mapper, route, routerPrefix){
  * {param2} map of static file
  * return rende pages
 **/
-async function init(app, prefix='', options) {
+async function init(app, prefix, options) {
   let _controlPages = await controlPages()
   const router = prefix ? new Router({prefix: prefix}) : new Router()
   const routeParam = [
@@ -171,22 +172,25 @@ async function init(app, prefix='', options) {
       if (_.includes(['get', 'post', 'put', 'del'], key)) {
         if (typeof item == 'string') item = [item]
         if (!Array.isArray(item)) return
-        item.map((rt)=>{
-          if (key!='get' && rt.indexOf('p1')==-1) {
-            router[key](rt, router::(customControl||forBetter))
+        item.forEach( rt=>{
+          // if (key!='get' && rt.indexOf('p1')==-1) {
+          if (key!='get') {
+            if (rt!='/') {
+              router[key](rt, router::(customControl||forBetter))
+            }
           } else {
             router[key](rt, router::(customControl||forBetter))
           }
         })
       } else {
-        routeParam.map((_path)=>{
+        routeParam.forEach( _path=>{
           router.get(_path, router::(customControl||forBetter))
           router.post(_path, router::(customControl||forBetter))
         })
       }
     })
   } else {
-    routeParam.map((item)=>{
+    routeParam.forEach( item=>{
       router.get(item, router::forBetter)
       if (item!='/') {
         router.post(item, router::forBetter)
@@ -218,11 +222,12 @@ async function dealwithRoute(ctx, _mapper, ctrlPages){
   try {
     let isRender = filterRendeFile(ctx.params, ctx.url)
     let route = isRender ? makeRoute(ctx) : false
-    if (!isRender || !route) throw 'route配置不正确'
+    if (!route) throw 'route配置不正确'
     ctx.fkproute = route
+    ctx.routerPrefix = this.opts.prefix
     let routerPrefix = this.opts.prefix
     let pageData = staticMapper(ctx, _mapper, route, routerPrefix)
-    if (!_mapper || !pageData) throw 'mapper数据不正确'
+    if (!pageData) throw 'mapper数据不正确'
     return ctx::distribute(route, pageData, ctrlPages, this)
   } catch (e) {
     console.log(e);

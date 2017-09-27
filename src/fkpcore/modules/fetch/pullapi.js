@@ -52,15 +52,9 @@ module.exports = function(){
     get: async function(api, param){
       debug('get:'+ api)
       let [_api, _param] = this._parseClientForm(api, param, 'get')
-      if (!_api) return Errors['60001']
+      if (!_api) return {error: "60001", message: "指定api不存在"}
       if (_param && _param.json && _param.json.test && _param.json.test == '123') delete _param.json.test
       if (_param && _param.json && _param.json._stat_ ) delete _param.json._stat_
-      // if (CONFIG.apis.mock) {
-      //   return await this.mock(api, _param)
-      // } else {
-      //   let _data = await this._get(_api, _param)
-      //   return {data: _data}
-      // }
       let _data = await this._get(_api, _param)
       return {data: _data}
     },
@@ -68,14 +62,8 @@ module.exports = function(){
     post: async function(api, param){
       debug('post:'+ api);
       let [_api, _param] = this._parseClientForm(api, param, 'post')
-      if (!_api) return Errors['60001']
+      if (!_api) return {error: "60001", message: "指定api不存在"}
       if (_param && _param.form && _param.form.test && _param.form.test == '123') delete _param.form.test
-      // if (CONFIG.apis.mock) {
-      //   return await this.mock(api, _param)
-      // } else {
-      //   let _data = await this._post(_api, _param)
-      //   return {data: _data}
-      // }
       let _data = await this._post(_api, _param)
       return {data: _data}
     }

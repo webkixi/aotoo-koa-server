@@ -1,5 +1,9 @@
 'use strict';
 
+var _promise = require('babel-runtime/core-js/promise');
+
+var _promise2 = _interopRequireDefault(_promise);
+
 var _path = require('path');
 
 var _path2 = _interopRequireDefault(_path);
@@ -52,7 +56,7 @@ var __request = inherits(_request, {
     };
     if (options && _.isPlainObject(options)) opts = _.merge(opts, options);
     if (opts.json && opts.json.headers) {
-      var _headers = _.extend({}, opts.json.headers);
+      var _headers = _.merge({}, opts.json.headers);
       delete opts.json.headers;
       opts.headers = _headers;
     }
@@ -60,12 +64,12 @@ var __request = inherits(_request, {
       delete opts.fttype;
     }
     this.api = api;
-    this.opts = opts;
+    this.requestOptions = opts;
   },
 
   _get: function _get(api, options, cb) {
     this.setOpts(api, options, 'get');
-    var _opts = this.opts;
+    var _opts = this.requestOptions;
     var _api = this.api;
     debug('post');
     debug('api--' + api);
@@ -76,7 +80,7 @@ var __request = inherits(_request, {
       api = api + '?' + _q;
       delete _opts.json;
     }
-    return new Promise(function (res, rej) {
+    return new _promise2.default(function (res, rej) {
       _request3.default.get(api, _opts, function (err, rep, body) {
         if (err) {
           return rej("async search: no respons data");
@@ -91,14 +95,14 @@ var __request = inherits(_request, {
 
   _post: function _post(api, options, cb) {
     this.setOpts(api, options, 'post');
-    var _opts = this.opts;
+    var _opts = this.requestOptions;
     var _api = this.api;
     _opts.headers['Content-type'] = 'application/json; charset=utf-8';
     debug('post');
     debug('api--' + _api);
     debug('- options: ');
     debug(_opts);
-    return new Promise(function (res, rej) {
+    return new _promise2.default(function (res, rej) {
       _request3.default.post(_api, _opts, function (err, rep, body) {
         if (err) {
           return rej("async search: no respons data");

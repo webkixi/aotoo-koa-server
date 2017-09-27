@@ -42,7 +42,7 @@ let __request = inherits(_request, {
     }
     if (options && _.isPlainObject(options)) opts = _.merge(opts, options)
     if (opts.json && opts.json.headers) {
-      const _headers = _.extend({}, opts.json.headers)
+      const _headers = _.merge({}, opts.json.headers)
       delete opts.json.headers
       opts.headers = _headers
     }
@@ -50,12 +50,12 @@ let __request = inherits(_request, {
       delete opts.fttype;
     }
     this.api = api
-    this.opts = opts
+    this.requestOptions = opts
   },
 
   _get: function(api, options, cb){
     this.setOpts(api, options, 'get')
-    let _opts = this.opts
+    let _opts = this.requestOptions
     let _api = this.api
     debug('post')
     debug('api--'+api)
@@ -79,7 +79,7 @@ let __request = inherits(_request, {
 
   _post: function(api, options, cb){
     this.setOpts(api, options, 'post')
-    let _opts = this.opts
+    let _opts = this.requestOptions
     let _api = this.api
     _opts.headers['Content-type'] = 'application/json; charset=utf-8'
     debug('post')

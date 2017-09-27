@@ -12,31 +12,43 @@ class aotooServer {
   constructor(opts){
     this.middlewares = []
     this.configs = {
-      keys: opts.keys||['agzgz gogogo'],
-      index: opts.index||'index',
-      pages: opts.pages,
-      apis: opts.apis||{},
-      mapper: opts.mapper||{},
-      pluginsFolder: opts.pluginsFolder
+      keys: opts.keys||['aotoo koa'],    // cookie session关键字
+      index: opts.index||'index',        // 默认首页
+
+      apis: opts.apis||{list: {}},      // api接口集合
+      mapper: opts.mapper||{js: {}, css: {}},  // 静态资源映射文件
+
+      root: opts.root,              // 渲染默认目录
+      pages: opts.pages,        // control层文件夹，必须
+      pluginsFolder: opts.pluginsFolder   // 插件文件夹
     }
+
     this.state = {
       views: false,
       bodyparser: false
     }
   }
 
+  // 注册KOA2的中间间，与KOA2语法保持一致
   async use(midw){
     app.use(midw)
   }
 
+  // 注册一个Aotoo插件方法
   plugins(name, fn){
     fkp.plugins(name, fn)
   }
 
+  // 注册一个Aotoo助手方法
   utile(name, fn) {
     fkp.utileHand(name, fn)
   }
 
+  callback(){
+    return app.callback(arguments)
+  }
+
+  // 指定站点静态路径，如 /images, /uploader, /user
   async statics(dist, opts, files){
     let dft = {
       dynamic: false,
@@ -50,12 +62,15 @@ class aotooServer {
     app.use( statics(dist, dft, files) )
   }
 
+  // 注册api接口集，用于做接口层的数据访问
   async apis(obj={}){
     if (typeof obj == 'object') {
       this.configs.apis = obj
     }
   }
 
+
+  // 注册POST中间件，可以通过 ctx.bodys来访问post数据
   async bodyparser(obj={}) {
     if (typeof obj == 'object') {
       this.state.bodyparser = true
@@ -63,6 +78,8 @@ class aotooServer {
     }
   }
 
+
+  // 注册渲染方法
   async views(dist, opts){
     // import views from 'koa-views'   // 放到顶部
     // let dft = {
@@ -89,10 +106,19 @@ class aotooServer {
     render(app, dft)
   }
 
+
+  // 初始化
   async init(){
     try {
+      if (!this.configs.pages) {
+        throw '必须指定control目录'
+      }
       if (!this.state.views) {
-        throw '必须指定模板引擎的views目录'
+        if (!this.configs.root) {
+          throw '必须指定模板引擎的views目录'
+        } else {
+          this.views(this.configs.root)
+        }
       }
       if (!this.state.bodyparser) {
         app.use( bodyparser() )
