@@ -8,13 +8,18 @@ import core, {fkp} from './fkpcore'
 const app = new Koa()
 
 class aotooServer {
-  constructor(opts){
+  constructor(opts={}){
     this.middlewares = []
+    
+    let theApis = {
+      list: opts.apis || {}
+    }
+
     this.configs = {
       keys: opts.keys||['aotoo koa'],    // cookie session关键字
       index: opts.index||'index',        // 默认首页
 
-      apis: opts.apis||{list: {}},      // api接口集合
+      apis: theApis,                      // api接口集合
       mapper: opts.mapper||{js: {}, css: {}},  // 静态资源映射文件
 
       root: opts.root,              // 渲染默认目录

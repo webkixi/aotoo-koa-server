@@ -2,6 +2,20 @@ import path from 'path'
 import {stringify} from 'querystring'
 const DEBUG = debug('fkp:modules:pullapi')
 
+function getMyApi(api, apilist){
+  const apiAry = api.split(':')
+  let len = apiAry.length
+  const select = apilist[ _.trim(apiAry[0]) ]
+  if (len > 1 && select) {
+    const nAry = apiAry.splice(1)
+    const nApi = nAry.join(':')
+    const nCollect = select
+    return getMyApi(nApi, nCollect)
+  } else {
+    return select
+  }
+}
+
 module.exports = function(){
   return {
     _parseClientForm: function(api, param={}, method='get'){
@@ -39,7 +53,8 @@ module.exports = function(){
       }
 
       else {
-        url = this.apilist.list[api]
+        // url = this.apilist.list[api]
+        url = getMyApi(api, this.apilist.list)
         if( !url ) return [null, null]
       }
 

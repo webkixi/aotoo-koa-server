@@ -30,6 +30,20 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var DEBUG = debug('fkp:modules:pullapi');
 
+function getMyApi(api, apilist) {
+  var apiAry = api.split(':');
+  var len = apiAry.length;
+  var select = apilist[_.trim(apiAry[0])];
+  if (len > 1 && select) {
+    var nAry = apiAry.splice(1);
+    var nApi = nAry.join(':');
+    var nCollect = select;
+    return getMyApi(nApi, nCollect);
+  } else {
+    return select;
+  }
+}
+
 module.exports = function () {
   return {
     _parseClientForm: function _parseClientForm(api) {
@@ -66,7 +80,8 @@ module.exports = function () {
         method = 'get';
         url = api;
       } else {
-        url = this.apilist.list[api];
+        // url = this.apilist.list[api]
+        url = getMyApi(api, this.apilist.list);
         if (!url) return [null, null];
       }
 

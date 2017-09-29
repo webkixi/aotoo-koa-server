@@ -52,7 +52,7 @@ var _init = function () {
                 }, _callee8, _this);
               }));
 
-              return function (_x12, _x13) {
+              return function (_x13, _x14) {
                 return _ref9.apply(this, arguments);
               };
             }());
@@ -102,15 +102,21 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var app = new _koa2.default();
 
 var aotooServer = function () {
-  function aotooServer(opts) {
+  function aotooServer() {
+    var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
     (0, _classCallCheck3.default)(this, aotooServer);
 
     this.middlewares = [];
+
+    var theApis = {
+      list: opts.apis || {}
+    };
+
     this.configs = {
       keys: opts.keys || ['aotoo koa'], // cookie session关键字
       index: opts.index || 'index', // 默认首页
 
-      apis: opts.apis || { list: {} }, // api接口集合
+      apis: theApis, // api接口集合
       mapper: opts.mapper || { js: {}, css: {} }, // 静态资源映射文件
 
       root: opts.root, // 渲染默认目录
@@ -145,7 +151,7 @@ var aotooServer = function () {
         }, _callee, this);
       }));
 
-      function use(_x) {
+      function use(_x2) {
         return _ref.apply(this, arguments);
       }
 
@@ -204,7 +210,7 @@ var aotooServer = function () {
         }, _callee2, this);
       }));
 
-      function statics(_x2, _x3, _x4) {
+      function statics(_x3, _x4, _x5) {
         return _ref2.apply(this, arguments);
       }
 
@@ -316,7 +322,7 @@ var aotooServer = function () {
         }, _callee5, this);
       }));
 
-      function views(_x7, _x8) {
+      function views(_x8, _x9) {
         return _ref5.apply(this, arguments);
       }
 
@@ -413,7 +419,7 @@ var aotooServer = function () {
         }, _callee7, this);
       }));
 
-      function listen(_x9, _x10, _x11) {
+      function listen(_x10, _x11, _x12) {
         return _ref7.apply(this, arguments);
       }
 
