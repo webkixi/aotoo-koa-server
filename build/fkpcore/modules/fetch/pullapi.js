@@ -28,6 +28,8 @@ var _querystring = require('querystring');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var DEBUG = debug('fkp:modules:pullapi');
+
 module.exports = function () {
   return {
     _parseClientForm: function _parseClientForm(api) {
@@ -83,7 +85,7 @@ module.exports = function () {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                debug('get:' + api);
+                DEBUG('get api %s', api);
                 _parseClientForm2 = this._parseClientForm(api, param, 'get'), _parseClientForm3 = (0, _slicedToArray3.default)(_parseClientForm2, 2), _api = _parseClientForm3[0], _param = _parseClientForm3[1];
 
                 if (_api) {
@@ -96,14 +98,15 @@ module.exports = function () {
               case 4:
                 if (_param && _param.json && _param.json.test && _param.json.test == '123') delete _param.json.test;
                 if (_param && _param.json && _param.json._stat_) delete _param.json._stat_;
-                _context.next = 8;
+                DEBUG('get param %O', _param);
+                _context.next = 9;
                 return this._get(_api, _param);
 
-              case 8:
+              case 9:
                 _data = _context.sent;
                 return _context.abrupt('return', { data: _data });
 
-              case 10:
+              case 11:
               case 'end':
                 return _context.stop();
             }
@@ -126,7 +129,7 @@ module.exports = function () {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                debug('post:' + api);
+                DEBUG('post api %s', api);
                 _parseClientForm4 = this._parseClientForm(api, param, 'post'), _parseClientForm5 = (0, _slicedToArray3.default)(_parseClientForm4, 2), _api = _parseClientForm5[0], _param = _parseClientForm5[1];
 
                 if (_api) {
@@ -138,14 +141,15 @@ module.exports = function () {
 
               case 4:
                 if (_param && _param.form && _param.form.test && _param.form.test == '123') delete _param.form.test;
-                _context2.next = 7;
+                DEBUG('post param %O', _param);
+                _context2.next = 8;
                 return this._post(_api, _param);
 
-              case 7:
+              case 8:
                 _data = _context2.sent;
                 return _context2.abrupt('return', { data: _data });
 
-              case 9:
+              case 10:
               case 'end':
                 return _context2.stop();
             }

@@ -1,6 +1,7 @@
 /**
  * Module dependencies.
  */
+const DEBUG = debug('fkp:router')
 const fs = require('fs');
 const Path = require('path')
 const Url = require('url')
@@ -45,6 +46,7 @@ function controlPages() {
   if (!fs.existsSync(businessPages)) {
     fs.mkdirSync(businessPages, '0777')
   }
+  DEBUG('businessPages %s', businessPages)
   const controlPagePath = businessPages
   const _id = controlPagePath
   let ctrlFiles = []
@@ -156,6 +158,7 @@ function staticMapper(ctx, mapper, route, routerPrefix){
 **/
 async function init(app, prefix, options) {
   let _controlPages = await controlPages()
+  DEBUG('control pages === %O', _controlPages)
   const router = prefix ? new Router({prefix: prefix}) : new Router()
   const routeParam = [
     '/',
@@ -224,13 +227,17 @@ async function dealwithRoute(ctx, _mapper, ctrlPages){
     let route = isRender ? makeRoute(ctx) : false
     if (!route) throw 'route配置不正确'
     ctx.fkproute = route
-    ctx.routerPrefix = this.opts.prefix
     let routerPrefix = this.opts.prefix
+    ctx.routerPrefix = routerPrefix
+    DEBUG('dealwithRoute route = %s', route)
+    DEBUG('dealwithRoute routerPrefix = %s', routerPrefix)
+  
     let pageData = staticMapper(ctx, _mapper, route, routerPrefix)
     if (!pageData) throw 'mapper数据不正确'
     return ctx::distribute(route, pageData, ctrlPages, this)
   } catch (e) {
-    console.log(e);
+    DEBUG('dealwithRoute error = %O', e)
+    // console.log(e);
     // return ctx.redirect('404')
   }
 }
@@ -264,6 +271,7 @@ async function getctrlData(_path, route, ctx, _pageData, ctrl){
     }
     return _pageData
   } catch (e) {
+    DEBUG('getctrlData error = %O', e)
     return {nomatch: true}
   }
 }
@@ -316,13 +324,16 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance){
     }
     return [pageData, route]
   } catch (e) {
-    console.log(e.stack);
+    DEBUG('controler error = %O', e)
+    // console.log(e.stack);
   }
 }
 
 // dealwith the data from controlPage
 async function renderPage(ctx, route, data, isAjax){
   try {
+    DEBUG('renderPage pageData = %O', data)
+    DEBUG('renderPage route = %s', route)
     switch (ctx.method) {
       case 'GET':
         let getStat = ctx.local.query._stat_

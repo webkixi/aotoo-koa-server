@@ -15,6 +15,8 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var DEBUG = debug('fkp:router:passaccesscontrol');
+
 function passaccess(oridata) {
   return {
     get: function () {
@@ -54,7 +56,7 @@ function passaccess(oridata) {
             switch (_context2.prev = _context2.next) {
               case 0:
                 _context2.next = 2;
-                return Fetch.post(ctx.fkproute, ctx.body);
+                return Fetch.post(ctx.fkproute, ctx.request.body);
 
               case 2:
                 passdata = _context2.sent;
@@ -78,7 +80,7 @@ function passaccess(oridata) {
                 return _context2.abrupt('return', { success: '1010', message: "链接正确，但数据为空" });
 
               case 10:
-                debug('java/php后端返回数据出错');
+                DEBUG('%s', 'java/php后端返回数据出错');
                 return _context2.abrupt('return', { error: "60002", message: "java或者php返回数据错误" });
 
               case 12:

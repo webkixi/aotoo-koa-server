@@ -82,6 +82,8 @@ var init = function () {
 
           case 2:
             _controlPages = _context2.sent;
+
+            DEBUG('control pages === %O', _controlPages);
             router = prefix ? new Router({ prefix: prefix }) : new Router();
             routeParam = ['/', '/:cat', '/:cat/:title', '/:cat/:title/:id'];
 
@@ -124,7 +126,7 @@ var init = function () {
             app.use(router.routes());
             app.use(router.allowedMethods());
 
-          case 8:
+          case 9:
           case 'end':
             return _context2.stop();
         }
@@ -165,33 +167,38 @@ var dealwithRoute = function () {
 
           case 5:
             ctx.fkproute = route;
-            ctx.routerPrefix = this.opts.prefix;
             routerPrefix = this.opts.prefix;
+
+            ctx.routerPrefix = routerPrefix;
+            DEBUG('dealwithRoute route = %s', route);
+            DEBUG('dealwithRoute routerPrefix = %s', routerPrefix);
+
             pageData = staticMapper(ctx, _mapper, route, routerPrefix);
 
             if (pageData) {
-              _context3.next = 11;
+              _context3.next = 13;
               break;
             }
 
             throw 'mapper数据不正确';
 
-          case 11:
+          case 13:
             return _context3.abrupt('return', distribute.call(ctx, route, pageData, ctrlPages, this));
 
-          case 14:
-            _context3.prev = 14;
+          case 16:
+            _context3.prev = 16;
             _context3.t0 = _context3['catch'](0);
 
-            console.log(_context3.t0);
+            DEBUG('dealwithRoute error = %O', _context3.t0);
+            // console.log(e);
             // return ctx.redirect('404')
 
-          case 17:
+          case 19:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[0, 14]]);
+    }, _callee3, this, [[0, 16]]);
   }));
 
   return function dealwithRoute(_x6, _x7, _x8) {
@@ -330,9 +337,11 @@ var getctrlData = function () {
           case 34:
             _context5.prev = 34;
             _context5.t1 = _context5['catch'](0);
+
+            DEBUG('getctrlData error = %O', _context5.t1);
             return _context5.abrupt('return', { nomatch: true });
 
-          case 37:
+          case 38:
           case 'end':
             return _context5.stop();
         }
@@ -462,7 +471,8 @@ var controler = function () {
             _context6.prev = 50;
             _context6.t0 = _context6['catch'](2);
 
-            console.log(_context6.t0.stack);
+            DEBUG('controler error = %O', _context6.t0);
+            // console.log(e.stack);
 
           case 53:
           case 'end':
@@ -488,44 +498,47 @@ var renderPage = function () {
         switch (_context7.prev = _context7.next) {
           case 0:
             _context7.prev = 0;
+
+            DEBUG('renderPage pageData = %O', data);
+            DEBUG('renderPage route = %s', route);
             _context7.t0 = ctx.method;
-            _context7.next = _context7.t0 === 'GET' ? 4 : _context7.t0 === 'POST' ? 12 : 13;
+            _context7.next = _context7.t0 === 'GET' ? 6 : _context7.t0 === 'POST' ? 14 : 15;
             break;
 
-          case 4:
+          case 6:
             getStat = ctx.local.query._stat_;
 
             if (!(getStat && getStat === 'DATA' || isAjax)) {
-              _context7.next = 7;
+              _context7.next = 9;
               break;
             }
 
             return _context7.abrupt('return', ctx.body = data);
 
-          case 7:
+          case 9:
             if (!(data && data.nomatch)) {
-              _context7.next = 9;
+              _context7.next = 11;
               break;
             }
 
             throw new Error('你访问的页面/api不存在');
 
-          case 9:
-            _context7.next = 11;
+          case 11:
+            _context7.next = 13;
             return ctx.render(route, data);
 
-          case 11:
+          case 13:
             return _context7.abrupt('return', _context7.sent);
 
-          case 12:
+          case 14:
             return _context7.abrupt('return', ctx.body = data);
 
-          case 13:
-            _context7.next = 18;
+          case 15:
+            _context7.next = 20;
             break;
 
-          case 15:
-            _context7.prev = 15;
+          case 17:
+            _context7.prev = 17;
             _context7.t1 = _context7['catch'](0);
 
             if (isAjax) {
@@ -537,12 +550,12 @@ var renderPage = function () {
             }
             // return await ctx.render('404')
 
-          case 18:
+          case 20:
           case 'end':
             return _context7.stop();
         }
       }
-    }, _callee7, this, [[0, 15]]);
+    }, _callee7, this, [[0, 17]]);
   }));
 
   return function renderPage(_x23, _x24, _x25, _x26) {
@@ -555,6 +568,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 /**
  * Module dependencies.
  */
+var DEBUG = debug('fkp:router');
 var fs = require('fs');
 var Path = require('path');
 var Url = require('url');
@@ -598,6 +612,7 @@ function controlPages() {
   if (!fs.existsSync(businessPages)) {
     fs.mkdirSync(businessPages, '0777');
   }
+  DEBUG('businessPages %s', businessPages);
   var controlPagePath = businessPages;
   var _id = controlPagePath;
   var ctrlFiles = [];

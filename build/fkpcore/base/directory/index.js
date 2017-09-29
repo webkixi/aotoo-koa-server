@@ -35,7 +35,7 @@ var index = function () {
             _context.prev = 5;
             _context.t0 = _context['catch'](0);
 
-            debug('parsedir: ' + _context.t0.message);
+            DEBUG('parsedir: %s', _context.t0.message);
 
           case 8:
           case 'end':
@@ -67,6 +67,8 @@ var _glob = require('glob');
 var _glob2 = _interopRequireDefault(_glob);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var DEBUG = debug('fkp:base:directory');
 
 function folderInfo(_dir) {
   var tree = [];

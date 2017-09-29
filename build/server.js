@@ -99,8 +99,6 @@ var _fkpcore2 = _interopRequireDefault(_fkpcore);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // global.Aotoo
-global.debug = require('debug');
-
 var app = new _koa2.default();
 
 var aotooServer = function () {

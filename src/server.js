@@ -4,7 +4,6 @@ import render from 'koa-art-template'
 import statics from 'koa-static-cache'
 import bodyparser from 'koa-bodyparser'
 import core, {fkp} from './fkpcore'
-global.debug = require('debug')
 
 const app = new Koa()
 

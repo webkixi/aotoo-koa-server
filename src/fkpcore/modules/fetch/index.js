@@ -1,6 +1,7 @@
 import path from 'path'
 import request from 'request'
 import {stringify} from 'querystring'
+const DEBUG = debug('fkp:modules:fetch')
 
 function inherits( Super, protos, staticProtos ) {
   var child;
@@ -57,10 +58,8 @@ let __request = inherits(_request, {
     this.setOpts(api, options, 'get')
     let _opts = this.requestOptions
     let _api = this.api
-    debug('post')
-    debug('api--'+api)
-    debug('- options: ');
-    debug(_opts)
+    DEBUG('_get api %s', api)
+    DEBUG('_get options: %O', _opts);
     if (_opts && _opts.json){
       let _q = stringify(_opts.json)
       api = api + '?' + _q;
@@ -70,7 +69,7 @@ let __request = inherits(_request, {
       request.get(api, _opts, (err, rep, body)=>{
         if(err) { return rej("async search: no respons data")}
         if (rep.statusCode == 200){
-          debug(body)
+          DEBUG('_get response body %O', body)
           return res(body)
         }
       })
@@ -82,15 +81,13 @@ let __request = inherits(_request, {
     let _opts = this.requestOptions
     let _api = this.api
     _opts.headers['Content-type'] = 'application/json; charset=utf-8'
-    debug('post')
-    debug('api--'+_api)
-    debug('- options: ');
-    debug(_opts)
+    DEBUG('_post api %s', api)
+    DEBUG('_post options: %O', _opts);
     return new Promise( (res, rej) => {
       request.post(_api, _opts, (err, rep, body)=>{
         if(err) {return rej("async search: no respons data")}
         if (rep.statusCode == 200){
-          debug(body)
+          DEBUG('_get response body %O', body)
           return res(body)
         }
       })

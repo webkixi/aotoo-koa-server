@@ -1,5 +1,6 @@
 import path from 'path'
 import {stringify} from 'querystring'
+const DEBUG = debug('fkp:modules:pullapi')
 
 module.exports = function(){
   return {
@@ -50,20 +51,22 @@ module.exports = function(){
     },
 
     get: async function(api, param){
-      debug('get:'+ api)
+      DEBUG('get api %s', api)
       let [_api, _param] = this._parseClientForm(api, param, 'get')
       if (!_api) return {error: "60001", message: "指定api不存在"}
       if (_param && _param.json && _param.json.test && _param.json.test == '123') delete _param.json.test
       if (_param && _param.json && _param.json._stat_ ) delete _param.json._stat_
+      DEBUG('get param %O', _param)
       let _data = await this._get(_api, _param)
       return {data: _data}
     },
 
     post: async function(api, param){
-      debug('post:'+ api);
+      DEBUG('post api %s', api)
       let [_api, _param] = this._parseClientForm(api, param, 'post')
       if (!_api) return {error: "60001", message: "指定api不存在"}
       if (_param && _param.form && _param.form.test && _param.form.test == '123') delete _param.form.test
+      DEBUG('post param %O', _param)
       let _data = await this._post(_api, _param)
       return {data: _data}
     }

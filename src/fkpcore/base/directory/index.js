@@ -1,6 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import glob from 'glob'
+const DEBUG = debug('fkp:base:directory')
 
 function folderInfo(_dir){
   let tree = []
@@ -48,7 +49,7 @@ async function index(fkp, dir){
       return folderInfo(dir)
     }
   } catch (e) {
-    debug('parsedir: ' + e.message)
+    DEBUG('parsedir: %s', e.message)
   }
 }
 
