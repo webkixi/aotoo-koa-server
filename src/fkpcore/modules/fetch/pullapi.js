@@ -65,6 +65,18 @@ module.exports = function(){
       return [url, query]
     },
 
+    getApi: function(api){
+      return getMyApi(api, this.apilist.list)
+    },
+
+    setApi: function(api_collect){
+      this.apilist.list = api_collect || {}
+    },
+
+    appendApi: function(api_collect){
+      this.apilist.list = _.merge({}, this.apilist.list, api_collect)
+    },
+
     get: async function(api, param){
       DEBUG('get api %s', api)
       let [_api, _param] = this._parseClientForm(api, param, 'get')

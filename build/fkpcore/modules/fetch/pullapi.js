@@ -92,6 +92,18 @@ module.exports = function () {
       return [url, query];
     },
 
+    getApi: function getApi(api) {
+      return getMyApi(api, this.apilist.list);
+    },
+
+    setApi: function setApi(api_collect) {
+      this.apilist.list = api_collect || {};
+    },
+
+    appendApi: function appendApi(api_collect) {
+      this.apilist.list = _.merge({}, this.apilist.list, api_collect);
+    },
+
     get: function () {
       var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(api, param) {
         var _parseClientForm2, _parseClientForm3, _api, _param, _data;
