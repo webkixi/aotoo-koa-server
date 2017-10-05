@@ -3,218 +3,166 @@ web service, based on koa2, with router and plugins
 easier to build koa web service
 aotoo-koa-server基于koa2完成，支持基础路由、镜像路由，静态资源，插件plugins机制等
 
-## USAGE
-#### server.js
+* __支持KOA中间件__	*约定的数据结构、稳定的HTML结构*
+* __支持Aotoo组件__  *使用Aotoo的组件，可以在NODE中使用，一套结构，多端使用*
+* __支持镜像路由__   *按照目录命名规则，自动render及匹配相关静态资源*  
+* __灵活的自定义路由__  *自定义路由机制*  
+* __多层restful__  *简单、多层restful支持，默认3层*  
+* __API机制__ *组件间通信简单、灵活*
+* __插件机制__	*方便快捷的开发组件*  
+* __支持websocket__	  *组件都支持JSX与实例双模式*  
+
+
+## 目录结构 
+
+```
+root
+  │            
+  ├── dist 
+  │    ├── html 
+  │    │    └── demo.html
+  │    ├── js 
+  │    │    └── demo.js
+  │    └── css 
+  │         └── demo.css
+  │    
+  ├── server 
+  │    │
+  │    ├── index.js
+  │    │
+  │    ├── pages 
+  │    │    └── demo.js
+  │    │
+  │    └── plugins 
+  │         └──docs
+  │             └──index.js
+  │
+  └── .babelrc
+```
+
+## Babel依赖
+
+    ```json
+    // .babelrc
+    {
+      "presets": [
+        "react",
+        "es2015",
+        "stage-0"
+      ],
+      "plugins": [
+        [
+          "transform-runtime",
+          {
+            "polyfill": true,
+            "regenerator": true
+          }
+        ]
+      ]
+    }
+    ```
+
+# 前端 
+### 静态JS   
+/dist/js/demo.js  
+
+```js
+console.log('i am demo.js')
+```
+
+### 静态CSS
+/dist/css/demo.css  
+
+```css
+body{
+  font-size: 16px;
+}
+```
+
+# NODE端
+
+## 初始化  
+
+```bash
+cd root
+yarn init
+yarn add aotoo-koa-server
+```
+
+## 配置
+serve/index.js  
+
 ```js
 const path = require('path')
-const as = require('aotoo-koa-server')
-const logger = require('koa-logger')
+const aks = require('aotoo-koa-server')
 
-const app = as({
-  index: 'index',
-  root: path.join(__dirname, './html'),   // index.html
-  pages: path.join(__dirname, './pages')  // pages/index.js
+const _mapper = {
+  js: {
+    demo: '/js/demo.js'
+  },
+  css: {
+    demo: '/css/demo.css'
+  }
+}
+
+const app = aks({
+  root: path.join(__dirname, '../dist/html'),  
+  index: 'demo',
+  pages: path.join(__dirname, './pages'),
+  pluginsFolder: path.join(__dirname, './plugins'),
+  mapper: _mapper
 })
 
-app.use(logger())  
+app.statics(path.join(__dirname, '../dist/js'), {
+  prefix: '/js'
+})
+
+app.statics(path.join(__dirname, '../dist/css'), {
+  prefix: '/css'
+})
+
+
 app.listen(3000)
 ```
 
-#### pages/index.js
+## Control层  
+/server/pages/demo.js(C)  
+MVC的control层  
+
 ```js
 function index(oridata) {
   return {
     get: async function(ctx){
-      const fkp = ctx.fkp
       oridata.fkp = 'Aotoo-koa-server'
-      const test = <div>hello test</div>
-      oridata.react = Aotoo.html(test)
       return oridata;
     },
 
     post: async function(ctx){
-      return {pdata: '我是post数据'}
+      return {pdata: 'post数据'}
     }
   }
 }
 export { index as getData }
 ```
 
-#### html/index.html
-支持handbars语法，使用art-template模板引擎
+## View层
+/dist/html/index.html(V)  
+支持handbars语法，使用art-template模板引擎  
+
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Document</title>
-</head>
-<body>
-  <h1>Hello <%=fkp%></h1>
-  <%-react%>
-</body>
+  <head>
+    ...
+  </head>
+  <body>
+    <h1>Hello <%=fkp%></h1>
+  </body>
 </html>
 ```
 
-## FEATHER
-1. 标准MVC结构
-2. 动态路由
-3. 镜像路由
-4. 扩展插件机制
-5. 支持React同构，基于Aotoo库构建的插件同时适用前端与NODE端
+## 运行  
 
-## DEMO
-请参考`aotoo-O`开源项目, `aotoo-O`是一套JS全栈脚手架，支持开发、测试、生产等各种复杂环境
-[aotoo-O](https://github.com/webkixi/aotoo-O)
-
-## INSTALL
 ```bash
-  npm i aotoo-koa-server
-  # or  
-  yarn add aotoo-koa-server
-```
-
-## API
-- **use**  
-  同 `koa.use` 支持所有koa的中间件  
-  > aServer.use(midw)  
-  midw: koa的中间件  
-- **views**  
-  基于koa-views, Template rendering middleware for koa    
-
-  > aServer.views(dist, opts)   
-  dist: 指定解析目录  
-  opts: views的解析配置：参考-----  
-- **statics**  
-  基于koa-static-cache，Static server for koa
-  > aServer.statics(dist, opts, files)
-  dist: 指定解析目录  
-  opts: views的解析配置：参考-----  
-  files: 指定的特殊静态文件，参考-----  
-  
-- **init**  
-  应用配置，最后一步执行，必须执行  
-  >  aServer.init()
-
-- **utile**  
-  为fkp增加助手方法  
-  >  aServer.utile(name, fn)
-
-- **plugins**  
-  为fkp增加插件  
-  >  aServer.plugins(name, fn)
-
-
-## CONFIGS
-- keys: koa2的keys，用于cookie的加密设置,
-- apis: { list: {} }, aotoo-server的远程API访问，用于node端获取更后端(java,php)的数据
-- index: 指定网站访问的首页
-- pages: mvc的control层，必须指定
-- mapper: 模板渲染时，对应的静态文件资源JSON
-- pluginsFolder: 插件目录，需指定绝对路径
-
-## USAGE
-> server端配置，node提供路由，静态资源，views等web service
-```js
-  const app = require('aotoo-koa-server')({
-    keys: ['aotoo yes'],
-    
-    // Fixed structure 固定结构，必须有list
-    apis: { list: {} },   
-      
-      // 服务访问的首页 
-    index: 'index',   
-    
-    // dir for control, it's required, it's control层目录，绝对路径(abs path)
-    pages: Path.join(__dirname, './pages'),   
-
-	// Fixed structure 固定结构，必须有js 和 css
-    mapper: {js:{}, css:{}},  
-
-	// dir for plugins
-    pluginsFolder: Path.resolve(__dirname, './plugins')  
-  })
-
-  app.views(HTMLDIST)
-
-  app.statics(configs.static.uploads, {
-    dynamic: true,
-    prefix: '/uploader'
-  })
-
-  app.statics(configs.static.doc, {
-    dynamic: true,
-    prefix: '/docs'
-  })
-
-  app.statics(STATICSROOT, {
-    dynamic: true,
-    buffer: false,
-    gzip: true
-  })
-
-
-  // the third party middleware
-  // 第三方koa中间件
-  app.use(session({
-    key: 'aotoo-',
-    cookie: { maxage: 24*3600*1000 }
-  }))
-  app.use(conditional())
-  app.use(etag())
-  app.use(logger())  
-  // ...
-  // ...
-
-  const server = await app.init()
-  server.listen(configs.port, function(){ 
-    // ....
-  })
-
-  /*
-  * ===============================
-  * extend fkp
-  * fkp is the core function of aotoo-koa-server
-  * ===============================
-  */
-
-  // append fkp utile function
-  app.utile('xxx', function(fkp){
-    console.log('========= xxxx')
-  })
-
-  // append fkp plugins function
-  app.plugins('aaa', function(ctx, args){
-    const fkp = ctx.fkp
-    fkp.xxx()  // ========= xxxx
-    console.log(args)  // ========= plugin
-  })
-```
-
-## FKP
-> fkp is the core function of aotoo-koa-server
-
-#### 使用fkp插件
-> ===> aotoo-O/server/pages/index.js  [源码](https://github.com/webkixi/aotoo-O/blob/master/server/pages/index.js)
-> pages目录是node端的control层，默认支持get/post等方法
-
-```js
-"use strict";
-function index(oridata) {
-  return {
-    get: async function(ctx){
-      const fkp = ctx.fkp
-      fkp.aaa(arg)   // 参考上文用例
-      return oridata;
-    },
-
-    post: async function(ctx){
-      return {pdata: '我是post数据'}
-    }
-  }
-}
-
-export { index as getData }
+node server/index.js
 ```

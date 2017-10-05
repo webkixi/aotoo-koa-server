@@ -1,6 +1,6 @@
 {
   "name": "aotoo-koa-server",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "based on koa2",
   "main": "./build/index.js",
   "scripts": {
