@@ -33,6 +33,10 @@ class aotooServer {
     }
   }
 
+  public(opts){
+    Aotoo.inject.public = opts
+  }
+
   // 注册KOA2的中间间，与KOA2语法保持一致
   async use(midw){
     app.use(midw)

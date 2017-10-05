@@ -130,10 +130,15 @@ var aotooServer = function () {
     };
   }
 
-  // 注册KOA2的中间间，与KOA2语法保持一致
-
-
   (0, _createClass3.default)(aotooServer, [{
+    key: 'public',
+    value: function _public(opts) {
+      Aotoo.inject.public = opts;
+    }
+
+    // 注册KOA2的中间间，与KOA2语法保持一致
+
+  }, {
     key: 'use',
     value: function () {
       var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(midw) {
