@@ -3,22 +3,29 @@ web service, based on koa2, with router and plugins
 easier to build koa web service
 aotoo-koa-server基于koa2完成，支持基础路由、镜像路由，静态资源，插件plugins机制等
 
-## [demo source](https://github.com/webkixi/aks-sample)
+# [demo source](https://github.com/webkixi/aks-sample)
 
-* __支持KOA中间件__	 
-约定的数据结构、稳定的HTML结构
-* __支持Aotoo组件__   
-使用Aotoo的组件，可以在NODE中使用，一套结构，多端使用
-* __支持镜像路由__    
+* __支持KOA中间件(base on koa)__   	  
+基于KOA2，支持 koa2 middleware
+
+* __支持Aotoo组件(aotoo sync component)__   
+使用Aotoo的组件，可以在NODE中使用，一套结构，多端使用，[【aotoo】](https://www.npmjs.com/package/aotoo)
+
+* __支持镜像路由(mirror route)__    
 按照目录命名规则，自动render及匹配相关静态资源  
-* __灵活的自定义路由__   
+
+* __灵活的自定义路由(custom route)__   
 自定义路由机制  
-* __多层restful__   
+
+* __多层restful(multiple restful api)__   
 简单、多层restful支持，默认3层  
-* __API机制__   
+
+* __API机制(sandwich api across backend)__   
 组件间通信简单、灵活
-* __插件机制__	 
+
+* __插件机制(plugins)__	   
 方便快捷的开发组件
+
 * __支持websocket__	   
 组件都支持JSX与实例双模式
 
@@ -52,7 +59,7 @@ root
 
 ## Babel依赖
 
-```
+```json
 // .babelrc
 {
   "presets": [
@@ -108,10 +115,10 @@ const aks = require('aotoo-koa-server')
 
 const _mapper = {
   js: {
-    demo: '/js/demo.js'
+    demo: 'demo.js'
   },
   css: {
-    demo: '/css/demo.css'
+    demo: 'demo.css'
   }
 }
 
@@ -156,8 +163,9 @@ export { index as getData }
 ```
 
 ## View层
-/dist/html/index.html(V)  
-支持ejs、handbars语法，使用art-template模板引擎  
+/dist/html/index.html(V)   
+MVC的view层  
+支持ejs、handbars语法，基于art-template模板引擎  
 
 ```html
 <!DOCTYPE html>
