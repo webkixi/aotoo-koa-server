@@ -3,14 +3,24 @@ web service, based on koa2, with router and plugins
 easier to build koa web service
 aotoo-koa-server基于koa2完成，支持基础路由、镜像路由，静态资源，插件plugins机制等
 
-* __支持KOA中间件__	*约定的数据结构、稳定的HTML结构*
-* __支持Aotoo组件__  *使用Aotoo的组件，可以在NODE中使用，一套结构，多端使用*
-* __支持镜像路由__   *按照目录命名规则，自动render及匹配相关静态资源*  
-* __灵活的自定义路由__  *自定义路由机制*  
-* __多层restful__  *简单、多层restful支持，默认3层*  
-* __API机制__ *组件间通信简单、灵活*
-* __插件机制__	*方便快捷的开发组件*  
-* __支持websocket__	  *组件都支持JSX与实例双模式*  
+## [demo source](https://github.com/webkixi/aks-sample)
+
+* __支持KOA中间件__	 
+约定的数据结构、稳定的HTML结构
+* __支持Aotoo组件__   
+使用Aotoo的组件，可以在NODE中使用，一套结构，多端使用
+* __支持镜像路由__    
+按照目录命名规则，自动render及匹配相关静态资源  
+* __灵活的自定义路由__   
+自定义路由机制  
+* __多层restful__   
+简单、多层restful支持，默认3层  
+* __API机制__   
+组件间通信简单、灵活
+* __插件机制__	 
+方便快捷的开发组件
+* __支持websocket__	   
+组件都支持JSX与实例双模式
 
 
 ## 目录结构 
@@ -42,25 +52,25 @@ root
 
 ## Babel依赖
 
-    ```json
-    // .babelrc
-    {
-      "presets": [
-        "react",
-        "es2015",
-        "stage-0"
-      ],
-      "plugins": [
-        [
-          "transform-runtime",
-          {
-            "polyfill": true,
-            "regenerator": true
-          }
-        ]
-      ]
-    }
-    ```
+```
+// .babelrc
+{
+  "presets": [
+    "react",
+    "es2015",
+    "stage-0"
+  ],
+  "plugins": [
+    [
+      "transform-runtime",
+      {
+        "polyfill": true,
+        "regenerator": true
+      }
+    ]
+  ]
+}
+```
 
 # 前端 
 ### 静态JS   
@@ -147,7 +157,7 @@ export { index as getData }
 
 ## View层
 /dist/html/index.html(V)  
-支持handbars语法，使用art-template模板引擎  
+支持ejs、handbars语法，使用art-template模板引擎  
 
 ```html
 <!DOCTYPE html>
