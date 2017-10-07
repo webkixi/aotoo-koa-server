@@ -20,8 +20,8 @@
     through2 "^2.0.3"
 
 "@types/node@^6.0.46":
-  version "6.0.88"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-6.0.88.tgz#f618f11a944f6a18d92b5c472028728a3e3d4b66"
+  version "6.0.89"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-6.0.89.tgz#154be0e6a823760cd6083aa8c48f952e2e63e0b0"
 
 accepts@1.3.3:
   version "1.3.3"
@@ -78,18 +78,16 @@ any-promise@^1.0.0, any-promise@^1.1.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/any-promise/-/any-promise-1.3.0.tgz#abc6afeedcea52e809cdc0376aed3ce39635d17f"
 
-aotoo-common@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/aotoo-common/-/aotoo-common-1.0.6.tgz#b93a2400b6f6b739ac65294a189010f92b7cdc60"
+aotoo-common@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/aotoo-common/-/aotoo-common-2.0.0.tgz#34c5a12070eb4e26ec1d034fa6c7e51cb3ccb286"
   dependencies:
-    aotoo "^2.0.1"
-    aotoo-web-widgets "^1.0.5"
+    aotoo "^3.0.2"
+    aotoo-web-widgets "^1.0.11"
     cheerio "^1.0.0-rc.2"
     fkp-sax "^1.5.10"
     jquery "^2.2.4"
     lodash "^4.0.0"
-    react "^15.4.2"
-    react-dom "^15.4.2"
 
 aotoo-inject@^1.0.7:
   version "1.0.17"
@@ -98,17 +96,18 @@ aotoo-inject@^1.0.7:
     blueimp-md5 "^2.7.0"
     fkp-sax "^1.5.19"
 
-aotoo-web-widgets@^1.0.5:
-  version "1.0.9"
-  resolved "https://registry.yarnpkg.com/aotoo-web-widgets/-/aotoo-web-widgets-1.0.9.tgz#9cab2c5000c2b6d945f9332d45d2d19da472f08d"
+aotoo-web-widgets@^1.0.11:
+  version "1.0.11"
+  resolved "https://registry.yarnpkg.com/aotoo-web-widgets/-/aotoo-web-widgets-1.0.11.tgz#c311591f5287b7959f69a90c40f6d8f5529ff7e4"
   dependencies:
     path "^0.12.7"
 
-aotoo@^2.0.1:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/aotoo/-/aotoo-2.0.2.tgz#9eae5450bb6752af5f5be0463692fa2beb88df58"
+aotoo@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/aotoo/-/aotoo-3.0.2.tgz#ff79fd53a0110c6aa87679de243fdd02fbad649f"
   dependencies:
     aotoo-inject "^1.0.7"
+    fkp-sax "^1.5.19"
     lodash.clonedeep "^4.5.0"
     lodash.filter "^4.6.0"
     lodash.find "^4.6.0"
@@ -117,7 +116,8 @@ aotoo@^2.0.1:
     lodash.merge "^4.6.0"
     lodash.uniqueid "^4.0.1"
     path "^0.12.7"
-    react-combinex "^1.2.0"
+    react "^16.0.0"
+    react-dom "^16.0.0"
 
 archy@^1.0.0:
   version "1.0.0"
@@ -825,7 +825,7 @@ babel-preset-stage-0@^6.24.1:
     babel-plugin-transform-function-bind "^6.22.0"
     babel-preset-stage-1 "^6.24.1"
 
-babel-preset-stage-1@^6.16.0, babel-preset-stage-1@^6.24.1:
+babel-preset-stage-1@^6.24.1:
   version "6.24.1"
   resolved "https://registry.yarnpkg.com/babel-preset-stage-1/-/babel-preset-stage-1-6.24.1.tgz#7692cd7dcd6849907e6ae4a0a85589cfb9e2bfb0"
   dependencies:
@@ -842,7 +842,7 @@ babel-preset-stage-2@^6.24.1:
     babel-plugin-transform-decorators "^6.24.1"
     babel-preset-stage-3 "^6.24.1"
 
-babel-preset-stage-3@^6.24.1, babel-preset-stage-3@^6.5.0:
+babel-preset-stage-3@^6.24.1:
   version "6.24.1"
   resolved "https://registry.yarnpkg.com/babel-preset-stage-3/-/babel-preset-stage-3-6.24.1.tgz#836ada0a9e7a7fa37cb138fb9326f87934a48395"
   dependencies:
@@ -1128,14 +1128,6 @@ core-js@^2.4.0, core-js@^2.5.0:
 core-util-is@1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/core-util-is/-/core-util-is-1.0.2.tgz#b5fd54220aa2bc5ab57aab7140c940754503c1a7"
-
-create-react-class@^15.6.0:
-  version "15.6.2"
-  resolved "https://registry.yarnpkg.com/create-react-class/-/create-react-class-15.6.2.tgz#cf1ed15f12aad7f14ef5f2dfe05e6c42f91ef02a"
-  dependencies:
-    fbjs "^0.8.9"
-    loose-envify "^1.3.1"
-    object-assign "^4.1.1"
 
 cryptiles@3.x.x:
   version "3.1.2"
@@ -1508,7 +1500,7 @@ fast-levenshtein@~2.0.4:
   version "2.0.6"
   resolved "https://registry.yarnpkg.com/fast-levenshtein/-/fast-levenshtein-2.0.6.tgz#3d8a5c66883a16a30ca8643e851f19baa7797917"
 
-fbjs@^0.8.16, fbjs@^0.8.9:
+fbjs@^0.8.16:
   version "0.8.16"
   resolved "https://registry.yarnpkg.com/fbjs/-/fbjs-0.8.16.tgz#5e67432f550dc41b572bf55847b8aca64e5337db"
   dependencies:
@@ -2851,7 +2843,7 @@ promise@^7.1.1:
   dependencies:
     asap "~2.0.3"
 
-prop-types@^15.5.10:
+prop-types@^15.6.0:
   version "15.6.0"
   resolved "https://registry.yarnpkg.com/prop-types/-/prop-types-15.6.0.tgz#ceaf083022fc46b4a35f69e13ef75aed0d639856"
   dependencies:
@@ -2894,35 +2886,23 @@ raw-body@^2.2.0:
     iconv-lite "0.4.19"
     unpipe "1.0.0"
 
-react-combinex@^1.2.0:
-  version "1.2.17"
-  resolved "https://registry.yarnpkg.com/react-combinex/-/react-combinex-1.2.17.tgz#f952aa36b9d9f49518b02ba8cd65bc24a72ebf06"
+react-dom@^16.0.0:
+  version "16.0.0"
+  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-16.0.0.tgz#9cc3079c3dcd70d4c6e01b84aab2a7e34c303f58"
   dependencies:
-    fkp-sax "^1.5.10"
-    lodash.clonedeep "^4.5.0"
-    lodash.merge "^4.6.0"
-    lodash.uniqueid "^4.0.1"
-    react "^15.4.2"
-    react-dom "^15.4.2"
-
-react-dom@^15.4.2:
-  version "15.6.2"
-  resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-15.6.2.tgz#41cfadf693b757faf2708443a1d1fd5a02bef730"
-  dependencies:
-    fbjs "^0.8.9"
+    fbjs "^0.8.16"
     loose-envify "^1.1.0"
-    object-assign "^4.1.0"
-    prop-types "^15.5.10"
+    object-assign "^4.1.1"
+    prop-types "^15.6.0"
 
-react@^15.4.2:
-  version "15.6.2"
-  resolved "https://registry.yarnpkg.com/react/-/react-15.6.2.tgz#dba0434ab439cfe82f108f0f511663908179aa72"
+react@^16.0.0:
+  version "16.0.0"
+  resolved "https://registry.yarnpkg.com/react/-/react-16.0.0.tgz#ce7df8f1941b036f02b2cca9dbd0cb1f0e855e2d"
   dependencies:
-    create-react-class "^15.6.0"
-    fbjs "^0.8.9"
+    fbjs "^0.8.16"
     loose-envify "^1.1.0"
-    object-assign "^4.1.0"
-    prop-types "^15.5.10"
+    object-assign "^4.1.1"
+    prop-types "^15.6.0"
 
 "readable-stream@>=1.0.33-1 <1.1.0-0":
   version "1.0.34"

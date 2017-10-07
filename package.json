@@ -1,6 +1,6 @@
 {
   "name": "aotoo-koa-server",
-  "version": "1.7.3",
+  "version": "2.0.0",
   "description": "based on koa2",
   "main": "./build/index.js",
   "scripts": {
@@ -21,7 +21,7 @@
     "url": "git+https://github.com/webkixi/aotoo-koa-server.git"
   },
   "dependencies": {
-    "aotoo-common": "^1.0.6",
+    "aotoo-common": "^2.0.0",
     "art-template": "^4.12.1",
     "babel-core": "^6.26.0",
     "babel-plugin-add-module-exports": "^0.2.1",
