@@ -31,6 +31,19 @@ class aotooServer {
       views: false,
       bodyparser: false
     }
+
+    if (this.configs.mapper) {
+      let _public
+      let mapper = this.configs.mapper
+      if (mapper.public) {
+        _public = mapper.public
+        delete mapper.public
+      }
+      if (_public) {
+        Aotoo.inject.public = _public
+      }
+      Aotoo.inject.mapper = mapper
+    }
   }
 
   public(opts){

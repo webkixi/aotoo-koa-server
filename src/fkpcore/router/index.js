@@ -117,12 +117,16 @@ function makeRoute(ctx, prefix){
 }
 
 function staticMapper(ctx, mapper, route, routerPrefix){
+  const jspath = Aotoo.inject.public.js
+  const csspath = Aotoo.inject.public.css
   let tmpletStatic = (src, type) => {
     if (type == 'js') {
-      return '<script type="text/javascript" src="/js/'+src+'" ></script>'
+      const jspagesrc = Path.join(jspath, src)
+      return '<script type="text/javascript" src="' + jspagesrc+'" ></script>'
     }
     if (type == 'css') {
-      return '<link rel="stylesheet" href="/css/'+src+'" />'
+      const csspagesrc = Path.join(csspath, src)
+      return '<link rel="stylesheet" href="' + csspagesrc+'" />'
     }
   }
 
