@@ -128,6 +128,19 @@ var aotooServer = function () {
       views: false,
       bodyparser: false
     };
+
+    if (this.configs.mapper) {
+      var _public = void 0;
+      var mapper = this.configs.mapper;
+      if (mapper.public) {
+        _public = mapper.public;
+        delete mapper.public;
+      }
+      if (_public) {
+        Aotoo.inject.public = _public;
+      }
+      Aotoo.inject.mapper = mapper;
+    }
   }
 
   (0, _createClass3.default)(aotooServer, [{

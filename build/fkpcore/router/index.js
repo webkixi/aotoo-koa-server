@@ -675,12 +675,16 @@ function makeRoute(ctx, prefix) {
 }
 
 function staticMapper(ctx, mapper, route, routerPrefix) {
+  var jspath = Aotoo.inject.public.js;
+  var csspath = Aotoo.inject.public.css;
   var tmpletStatic = function tmpletStatic(src, type) {
     if (type == 'js') {
-      return '<script type="text/javascript" src="/js/' + src + '" ></script>';
+      var jspagesrc = Path.join(jspath, src);
+      return '<script type="text/javascript" src="' + jspagesrc + '" ></script>';
     }
     if (type == 'css') {
-      return '<link rel="stylesheet" href="/css/' + src + '" />';
+      var csspagesrc = Path.join(csspath, src);
+      return '<link rel="stylesheet" href="' + csspagesrc + '" />';
     }
   };
 
