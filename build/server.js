@@ -134,7 +134,7 @@ var aotooServer = function () {
       var mapper = this.configs.mapper;
       if (mapper.public) {
         _public = mapper.public;
-        delete mapper.public;
+        // delete mapper.public
       }
       if (_public) {
         Aotoo.inject.public = _public;
