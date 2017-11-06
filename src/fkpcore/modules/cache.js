@@ -3,11 +3,15 @@
 */
 var md5 = require('blueimp-md5');
 var LRU = require('lru-cache'),
-	options = { max: 500
+	options = { max: 300
 		  , length: function (n, key) { return n * 2 + key.length }
 		  , dispose: function (key, value) {  }
-		  , maxAge: 24 * 60 * 60 },
-	cache = LRU(options);
+			, maxAge: 24 * 60 * 60 * 1000 };
+	
+	if (typeof Configs != 'undefined') {
+		options = Aotoo.merge(options, Configs.cache)
+	}
+	var cache = LRU(options);
 
 var cac = {
 	has: function(key){
