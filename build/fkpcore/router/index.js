@@ -170,35 +170,43 @@ var dealwithRoute = function () {
             routerPrefix = this.opts.prefix;
 
             ctx.routerPrefix = routerPrefix;
+            myStore.append({
+              route: {
+                runtime: {
+                  route: route,
+                  prefix: routerPrefix
+                }
+              }
+            });
             DEBUG('dealwithRoute route = %s', route);
             DEBUG('dealwithRoute routerPrefix = %s', routerPrefix);
 
             pageData = staticMapper(ctx, _mapper, route, routerPrefix);
 
             if (pageData) {
-              _context3.next = 13;
+              _context3.next = 14;
               break;
             }
 
             throw 'mapper数据不正确';
 
-          case 13:
+          case 14:
             return _context3.abrupt('return', distribute.call(ctx, route, pageData, ctrlPages, this));
 
-          case 16:
-            _context3.prev = 16;
+          case 17:
+            _context3.prev = 17;
             _context3.t0 = _context3['catch'](0);
 
             DEBUG('dealwithRoute error = %O', _context3.t0);
             // console.log(e);
             // return ctx.redirect('404')
 
-          case 19:
+          case 20:
           case 'end':
             return _context3.stop();
         }
       }
-    }, _callee3, this, [[0, 16]]);
+    }, _callee3, this, [[0, 17]]);
   }));
 
   return function dealwithRoute(_x6, _x7, _x8) {
@@ -356,7 +364,7 @@ var getctrlData = function () {
 
 var controler = function () {
   var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(ctx, route, pageData, ctrlPages, routerInstance) {
-    var routerPrefix, ctrl, passAccess, xData, controlFile, prefixIndexFile, prefixCatFile, paramsCatFile, xRoute, apilist, isAjax;
+    var routerPrefix, ctrl, passAccess, xData, controlFile, prefixRootFile, prefixIndexFile, prefixCatFile, paramsCatFile, xRoute, apilist, isAjax;
     return _regenerator2.default.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
@@ -381,7 +389,7 @@ var controler = function () {
             pageData = _context6.sent;
 
             route = ctrl.store.route || route;
-            _context6.next = 47;
+            _context6.next = 48;
             break;
 
           case 12:
@@ -400,86 +408,87 @@ var controler = function () {
 
           case 17:
             xData = _context6.sent;
-            _context6.next = 35;
+            _context6.next = 36;
             break;
 
           case 20:
             if (!routerPrefix) {
-              _context6.next = 29;
+              _context6.next = 30;
               break;
             }
 
             route = routerPrefix;
+            prefixRootFile = Path.join(businessPagesPath, routerPrefix);
             prefixIndexFile = Path.join(businessPagesPath, routerPrefix, '/index');
             prefixCatFile = Path.join(businessPagesPath, routerPrefix, ctx.params.cat || '');
-            _context6.next = 26;
-            return getctrlData([prefixIndexFile, prefixCatFile], route, ctx, pageData, ctrl);
+            _context6.next = 27;
+            return getctrlData([prefixCatFile, prefixIndexFile, prefixRootFile], route, ctx, pageData, ctrl);
 
-          case 26:
+          case 27:
             xData = _context6.sent;
-            _context6.next = 35;
+            _context6.next = 36;
             break;
 
-          case 29:
+          case 30:
             if (!ctx.params.cat) {
-              _context6.next = 35;
+              _context6.next = 36;
               break;
             }
 
             paramsCatFile = Path.join(businessPagesPath, ctx.params.cat);
             xRoute = ctx.params.cat;
-            _context6.next = 34;
+            _context6.next = 35;
             return getctrlData([paramsCatFile], xRoute, ctx, pageData, ctrl);
 
-          case 34:
+          case 35:
             xData = _context6.sent;
 
-          case 35:
+          case 36:
             if (xData) {
-              _context6.next = 45;
+              _context6.next = 46;
               break;
             }
 
             apilist = Fetch.apilist;
 
             if (!(apilist.list[route] || route === 'redirect')) {
-              _context6.next = 44;
+              _context6.next = 45;
               break;
             }
 
             passAccess = true;
-            _context6.next = 41;
+            _context6.next = 42;
             return getctrlData(['./passaccesscontrol'], route, ctx, pageData, ctrl);
 
-          case 41:
+          case 42:
             xData = _context6.sent;
-            _context6.next = 45;
+            _context6.next = 46;
             break;
 
-          case 44:
+          case 45:
             xData = { nomatch: true };
 
-          case 45:
+          case 46:
             isAjax = ctx.fkp.isAjax();
 
             if (passAccess || isAjax) pageData = xData;
 
-          case 47:
+          case 48:
             return _context6.abrupt('return', [pageData, route]);
 
-          case 50:
-            _context6.prev = 50;
+          case 51:
+            _context6.prev = 51;
             _context6.t0 = _context6['catch'](2);
 
             DEBUG('controler error = %O', _context6.t0);
             // console.log(e.stack);
 
-          case 53:
+          case 54:
           case 'end':
             return _context6.stop();
         }
       }
-    }, _callee6, this, [[2, 50]]);
+    }, _callee6, this, [[2, 51]]);
   }));
 
   return function controler(_x18, _x19, _x20, _x21, _x22) {
@@ -488,8 +497,6 @@ var controler = function () {
 }();
 
 // dealwith the data from controlPage
-
-
 var renderPage = function () {
   var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(ctx, route, data, isAjax) {
     var getStat;
@@ -501,44 +508,45 @@ var renderPage = function () {
 
             DEBUG('renderPage pageData = %O', data);
             DEBUG('renderPage route = %s', route);
+            route = preRender(route);
             _context7.t0 = ctx.method;
-            _context7.next = _context7.t0 === 'GET' ? 6 : _context7.t0 === 'POST' ? 14 : 15;
+            _context7.next = _context7.t0 === 'GET' ? 7 : _context7.t0 === 'POST' ? 15 : 16;
             break;
 
-          case 6:
+          case 7:
             getStat = ctx.local.query._stat_;
 
             if (!(getStat && getStat === 'DATA' || isAjax)) {
-              _context7.next = 9;
+              _context7.next = 10;
               break;
             }
 
             return _context7.abrupt('return', ctx.body = data);
 
-          case 9:
+          case 10:
             if (!(data && data.nomatch)) {
-              _context7.next = 11;
+              _context7.next = 12;
               break;
             }
 
             throw new Error('你访问的页面/api不存在');
 
-          case 11:
-            _context7.next = 13;
+          case 12:
+            _context7.next = 14;
             return ctx.render(route, data);
 
-          case 13:
+          case 14:
             return _context7.abrupt('return', _context7.sent);
 
-          case 14:
+          case 15:
             return _context7.abrupt('return', ctx.body = data);
 
-          case 15:
-            _context7.next = 20;
+          case 16:
+            _context7.next = 21;
             break;
 
-          case 17:
-            _context7.prev = 17;
+          case 18:
+            _context7.prev = 18;
             _context7.t1 = _context7['catch'](0);
 
             if (isAjax) {
@@ -550,12 +558,12 @@ var renderPage = function () {
             }
             // return await ctx.render('404')
 
-          case 20:
+          case 21:
           case 'end':
             return _context7.stop();
         }
       }
-    }, _callee7, this, [[0, 17]]);
+    }, _callee7, this, [[0, 18]]);
   }));
 
   return function renderPage(_x23, _x24, _x25, _x26) {
@@ -570,10 +578,12 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  */
 var DEBUG = debug('fkp:router');
 var fs = require('fs');
+var glob = require('glob');
 var Path = require('path');
 var Url = require('url');
 var Router = require('koa-router');
 var md5 = require('blueimp-md5');
+var myStore = SAX('AOTOO-KOA-SERVER');
 var control = require('./control').default;
 // const businessPagesPath = '../../pages'
 var businessPagesPath = '';
@@ -709,6 +719,21 @@ function staticMapper(ctx, mapper, route, routerPrefix) {
   }
 
   return pageData;
+}
+
+function preRender(rt) {
+  var mydata = myStore.get();
+  var myentry = mydata.entry;
+  var myroute = mydata.route.runtime.route;
+  var viewsRoot = myentry.state.viewsRoot;
+  var viewsFiles = myentry.state.views;
+  if (rt != myroute) {
+    var absOriRoute = Path.join(viewsRoot, myroute + '.html');
+    if (viewsFiles.indexOf(absOriRoute) > -1) {
+      return myroute;
+    }
+  }
+  return rt;
 }
 
 init.makeRoute = makeRoute;

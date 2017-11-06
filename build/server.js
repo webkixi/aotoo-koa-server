@@ -1,22 +1,22 @@
-'use strict';
+"use strict";
 
-var _typeof2 = require('babel-runtime/helpers/typeof');
+var _typeof2 = require("babel-runtime/helpers/typeof");
 
 var _typeof3 = _interopRequireDefault(_typeof2);
 
-var _regenerator = require('babel-runtime/regenerator');
+var _regenerator = require("babel-runtime/regenerator");
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
-var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
+var _asyncToGenerator2 = require("babel-runtime/helpers/asyncToGenerator");
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
-var _classCallCheck2 = require('babel-runtime/helpers/classCallCheck');
+var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
 
-var _createClass2 = require('babel-runtime/helpers/createClass');
+var _createClass2 = require("babel-runtime/helpers/createClass");
 
 var _createClass3 = _interopRequireDefault(_createClass2);
 
@@ -24,16 +24,21 @@ var _init = function () {
   var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9() {
     var _this = this;
 
-    var server;
+    var that, server;
     return _regenerator2.default.wrap(function _callee9$(_context9) {
       while (1) {
         switch (_context9.prev = _context9.next) {
           case 0:
+            that = this;
+
+            myStore.append({
+              entry: that
+            });
             app.keys = this.configs.keys;
-            _context9.next = 3;
+            _context9.next = 5;
             return _fkpcore2.default.call(this, app, this.configs);
 
-          case 3:
+          case 5:
             server = _context9.sent;
 
             app.on('error', function () {
@@ -45,7 +50,7 @@ var _init = function () {
                         console.error('server error', err, ctx);
 
                       case 1:
-                      case 'end':
+                      case "end":
                         return _context8.stop();
                     }
                   }
@@ -57,10 +62,10 @@ var _init = function () {
               };
             }());
 
-            return _context9.abrupt('return', server);
+            return _context9.abrupt("return", server);
 
-          case 6:
-          case 'end':
+          case 8:
+          case "end":
             return _context9.stop();
         }
       }
@@ -72,33 +77,47 @@ var _init = function () {
   };
 }();
 
-var _koa = require('koa');
+var _fs = require("fs");
+
+var _fs2 = _interopRequireDefault(_fs);
+
+var _glob = require("glob");
+
+var _glob2 = _interopRequireDefault(_glob);
+
+var _blueimpMd = require("blueimp-md5");
+
+var _blueimpMd2 = _interopRequireDefault(_blueimpMd);
+
+var _koa = require("koa");
 
 var _koa2 = _interopRequireDefault(_koa);
 
-var _aotooCommon = require('aotoo-common');
+var _aotooCommon = require("aotoo-common");
 
 var _aotooCommon2 = _interopRequireDefault(_aotooCommon);
 
-var _koaArtTemplate = require('koa-art-template');
+var _koaArtTemplate = require("koa-art-template");
 
 var _koaArtTemplate2 = _interopRequireDefault(_koaArtTemplate);
 
-var _koaStaticCache = require('koa-static-cache');
+var _koaStaticCache = require("koa-static-cache");
 
 var _koaStaticCache2 = _interopRequireDefault(_koaStaticCache);
 
-var _koaBodyparser = require('koa-bodyparser');
+var _koaBodyparser = require("koa-bodyparser");
 
 var _koaBodyparser2 = _interopRequireDefault(_koaBodyparser);
 
-var _fkpcore = require('./fkpcore');
+var _fkpcore = require("./fkpcore");
 
 var _fkpcore2 = _interopRequireDefault(_fkpcore);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // global.Aotoo
+var myStore = SAX('AOTOO-KOA-SERVER');
+
 var app = new _koa2.default();
 
 var aotooServer = function () {
@@ -144,7 +163,7 @@ var aotooServer = function () {
   }
 
   (0, _createClass3.default)(aotooServer, [{
-    key: 'public',
+    key: "public",
     value: function _public(opts) {
       Aotoo.inject.public = opts;
     }
@@ -152,7 +171,7 @@ var aotooServer = function () {
     // 注册KOA2的中间间，与KOA2语法保持一致
 
   }, {
-    key: 'use',
+    key: "use",
     value: function () {
       var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(midw) {
         return _regenerator2.default.wrap(function _callee$(_context) {
@@ -162,7 +181,7 @@ var aotooServer = function () {
                 app.use(midw);
 
               case 1:
-              case 'end':
+              case "end":
                 return _context.stop();
             }
           }
@@ -179,7 +198,7 @@ var aotooServer = function () {
     // 注册一个Aotoo插件方法
 
   }, {
-    key: 'plugins',
+    key: "plugins",
     value: function plugins(name, fn) {
       _fkpcore.fkp.plugins(name, fn);
     }
@@ -187,12 +206,12 @@ var aotooServer = function () {
     // 注册一个Aotoo助手方法
 
   }, {
-    key: 'utile',
+    key: "utile",
     value: function utile(name, fn) {
       _fkpcore.fkp.utileHand(name, fn);
     }
   }, {
-    key: 'callback',
+    key: "callback",
     value: function callback() {
       return app.callback(arguments);
     }
@@ -200,7 +219,7 @@ var aotooServer = function () {
     // 指定站点静态路径，如 /images, /uploader, /user
 
   }, {
-    key: 'statics',
+    key: "statics",
     value: function () {
       var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(dist, opts, files) {
         var dft;
@@ -221,7 +240,7 @@ var aotooServer = function () {
                 app.use((0, _koaStaticCache2.default)(dist, dft, files));
 
               case 3:
-              case 'end':
+              case "end":
                 return _context2.stop();
             }
           }
@@ -238,7 +257,7 @@ var aotooServer = function () {
     // 注册api接口集，用于做接口层的数据访问
 
   }, {
-    key: 'apis',
+    key: "apis",
     value: function () {
       var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3() {
         var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -246,12 +265,12 @@ var aotooServer = function () {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                if ((typeof obj === 'undefined' ? 'undefined' : (0, _typeof3.default)(obj)) == 'object') {
+                if ((typeof obj === "undefined" ? "undefined" : (0, _typeof3.default)(obj)) == 'object') {
                   this.configs.apis = obj;
                 }
 
               case 1:
-              case 'end':
+              case "end":
                 return _context3.stop();
             }
           }
@@ -268,7 +287,7 @@ var aotooServer = function () {
     // 注册POST中间件，可以通过 ctx.bodys来访问post数据
 
   }, {
-    key: 'bodyparser',
+    key: "bodyparser",
     value: function () {
       var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4() {
         var obj = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -276,13 +295,13 @@ var aotooServer = function () {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                if ((typeof obj === 'undefined' ? 'undefined' : (0, _typeof3.default)(obj)) == 'object') {
+                if ((typeof obj === "undefined" ? "undefined" : (0, _typeof3.default)(obj)) == 'object') {
                   this.state.bodyparser = true;
                   app.use((0, _koaBodyparser2.default)(obj));
                 }
 
               case 1:
-              case 'end':
+              case "end":
                 return _context4.stop();
             }
           }
@@ -299,10 +318,11 @@ var aotooServer = function () {
     // 注册渲染方法
 
   }, {
-    key: 'views',
+    key: "views",
     value: function () {
       var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(dist, opts) {
-        var dft;
+        var dft, _views, distState;
+
         return _regenerator2.default.wrap(function _callee5$(_context5) {
           while (1) {
             switch (_context5.prev = _context5.next) {
@@ -329,11 +349,26 @@ var aotooServer = function () {
                 };
 
                 dft = _.merge({}, dft, opts);
-                this.state.views = true;
+
+                if (dist) {
+                  _views = [];
+
+                  if (_fs2.default.existsSync(dist)) {
+                    distState = _fs2.default.statSync(dist);
+
+                    if (distState.isDirectory()) {
+                      _glob2.default.sync(dist + '/**/*.html').forEach(function (item) {
+                        _views.push(item);
+                      });
+                      this.state.viewsRoot = dist;
+                    }
+                  }
+                  this.state.views = _views;
+                }
                 (0, _koaArtTemplate2.default)(app, dft);
 
               case 4:
-              case 'end':
+              case "end":
                 return _context5.stop();
             }
           }
@@ -350,7 +385,7 @@ var aotooServer = function () {
     // 初始化
 
   }, {
-    key: 'init',
+    key: "init",
     value: function () {
       var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6() {
         return _regenerator2.default.wrap(function _callee6$(_context6) {
@@ -390,16 +425,16 @@ var aotooServer = function () {
                 return _init.call(this);
 
               case 12:
-                return _context6.abrupt('return', _context6.sent);
+                return _context6.abrupt("return", _context6.sent);
 
               case 15:
                 _context6.prev = 15;
-                _context6.t0 = _context6['catch'](0);
+                _context6.t0 = _context6["catch"](0);
 
                 console.error(_context6.t0);
 
               case 18:
-              case 'end':
+              case "end":
                 return _context6.stop();
             }
           }
@@ -413,7 +448,7 @@ var aotooServer = function () {
       return init;
     }()
   }, {
-    key: 'listen',
+    key: "listen",
     value: function () {
       var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(port, dom, cb) {
         var server;
@@ -430,7 +465,7 @@ var aotooServer = function () {
                 server.listen(port, dom, cb);
 
               case 4:
-              case 'end':
+              case "end":
                 return _context7.stop();
             }
           }
