@@ -117,16 +117,24 @@ function makeRoute(ctx, prefix) {
   return route
 }
 
+function path_join(jspath, src) {
+  if (jspath.indexOf('http') == 0 || jspath.indexOf('//') == 0) {
+    return Url.resolve(jspath, src)
+  } else {
+    return Path.join(jspath, src)
+  }
+}
+
 function staticMapper(ctx, mapper, route, routerPrefix) {
   const jspath = Aotoo.inject.public.js
   const csspath = Aotoo.inject.public.css
   let tmpletStatic = (src, type) => {
     if (type == 'js') {
-      const jspagesrc = Path.join(jspath, src)
+      const jspagesrc = path_join(jspath, src)
       return '<script type="text/javascript" src="' + jspagesrc + '" ></script>'
     }
     if (type == 'css') {
-      const csspagesrc = Path.join(csspath, src)
+      const csspagesrc = path_join(csspath, src)
       return '<link rel="stylesheet" href="' + csspagesrc + '" />'
     }
   }

@@ -684,16 +684,24 @@ function makeRoute(ctx, prefix) {
   return route;
 }
 
+function path_join(jspath, src) {
+  if (jspath.indexOf('http') == 0 || jspath.indexOf('//') == 0) {
+    return Url.resolve(jspath, src);
+  } else {
+    return Path.join(jspath, src);
+  }
+}
+
 function staticMapper(ctx, mapper, route, routerPrefix) {
   var jspath = Aotoo.inject.public.js;
   var csspath = Aotoo.inject.public.css;
   var tmpletStatic = function tmpletStatic(src, type) {
     if (type == 'js') {
-      var jspagesrc = Path.join(jspath, src);
+      var jspagesrc = path_join(jspath, src);
       return '<script type="text/javascript" src="' + jspagesrc + '" ></script>';
     }
     if (type == 'css') {
-      var csspagesrc = Path.join(csspath, src);
+      var csspagesrc = path_join(csspath, src);
       return '<link rel="stylesheet" href="' + csspagesrc + '" />';
     }
   };
