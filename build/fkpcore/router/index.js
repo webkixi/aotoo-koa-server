@@ -716,7 +716,9 @@ function staticMapper(ctx, mapper, route, routerPrefix) {
     pagecss: '',
     pagedata: {}
     //静态资源初始化
-  };if (mapper.css[route]) pageData.pagecss = tmpletStatic(mapper.css[route], 'css');
+  };if (route.indexOf('/') == 0) route = route.substring(1);
+  if (route.lastIndexOf('/') == route.length - 1) route = route.substring(0, route.length - 1);
+  if (mapper.css[route]) pageData.pagecss = tmpletStatic(mapper.css[route], 'css');
   if (mapper.js[route]) pageData.pagejs = tmpletStatic(mapper.js[route], 'js');
 
   var _route = route;
