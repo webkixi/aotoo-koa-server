@@ -119,9 +119,17 @@ function makeRoute(ctx, prefix) {
 
 function path_join(jspath, src) {
   if (jspath.indexOf('http') == 0 || jspath.indexOf('//') == 0) {
-    return Url.resolve(jspath, src)
+    if (jspath.charAt(jspath.length-1) == '/') {
+      jspath = jspath.substring(0, jspath.length-1)
+    }
+    if (src.charAt(0) == '/') {
+      return jspath+src
+    } else {
+      return jspath + '/' +src
+    }
+    // return Url.resolve(jspath, src);
   } else {
-    return Path.join(jspath, src)
+    return Path.join(jspath, src);
   }
 }
 
