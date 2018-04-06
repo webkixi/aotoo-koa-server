@@ -1,6 +1,6 @@
 {
   "name": "aotoo-koa-server",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "based on koa2",
   "main": "./build/index.js",
   "scripts": {
@@ -38,7 +38,6 @@
     "bluebird": "^3.5.1",
     "blueimp-md5": "^2.7.0",
     "debug": "^2.6.8",
-    "diskdb": "^0.1.17",
     "glob": "^7.1.2",
     "koa": "^2.3.0",
     "koa-art-template": "^1.1.1",
