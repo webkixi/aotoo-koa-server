@@ -2,7 +2,8 @@
  * Module dependencies.
  */
 const DEBUG = debug('fkp:router')
-const fs = require('fs');
+let fs = require('fs');
+const Promise = require('bluebird')
 const glob = require('glob')
 const Path = require('path')
 const Url = require('url')
@@ -10,12 +11,22 @@ const Router = require('koa-router')
 const md5 = require('blueimp-md5')
 const myStore = SAX('AOTOO-KOA-SERVER')
 const control = require('./control').default
+fs = Promise.promisifyAll(fs)
+
 // const businessPagesPath = '../../pages'
 let businessPagesPath = ''
+const ignoreStacic = ['css', 'js', 'images', 'img']
+const routeParam = [
+  '/',
+  '/:cat',
+  '/:cat/:title',
+  '/:cat/:title/:id'
+]
 
 function getObjType(object) {
   return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1].toLowerCase();
 };
+
 /**
  * 过滤渲染文件
  * {param1} {json}   this.params
@@ -34,41 +45,81 @@ function filterRendeFile(pms, url) {
 
   if (!ext) rtn = true;
 
-  if (_.indexOf(tempExts, ext) > -1) rtn = true;
-  if (_.indexOf(noPassCat, cat) > -1) rtn = false;
+  return !ext || tempExts.includes(ext) || noPassCat.includes(cat)
 
-  return rtn;
+  // if (_.indexOf(tempExts, ext) > -1) rtn = true;
+  // if (_.indexOf(noPassCat, cat) > -1) rtn = false;
+
+  // return rtn;
+}
+
+/**
+ * 
+ * @param {String} dir 遍历的目标目录
+ * @param {String} rootpath 根目录的绝对路径
+ */
+async function getCtrlFiles(dir, rootpath) {
+  const __myControlFiles = []
+  const dirData = await fs.readdirAsync(dir)
+  dirData.map(async (file) => {
+    const _path = Path.join(dir, file)
+    const stat = fs.statSync(_path)
+    if (stat) {
+      if (stat.isDirectory()) {
+        __myControlFiles.concat(await getCtrlFiles(_path, rootpath))
+      } else {
+        __myControlFiles.push(_path.replace(rootpath, ''))
+      }
+    }
+  })
+  return __myControlFiles
 }
 
 // 预读取pages目录下的所有文件路径，并保存
 function controlPages() {
   // const businessPages = Path.join(__dirname, businessPagesPath)
   const businessPages = businessPagesPath
+
   if (!fs.existsSync(businessPages)) {
     fs.mkdirSync(businessPages, '0777')
   }
+
   DEBUG('businessPages %s', businessPages)
   const controlPagePath = businessPages
   const _id = controlPagePath
-  let ctrlFiles = []
-  return Cache.ifid(_id, () => new Promise((res, rej) => {
-    return function getCtrlFiles(dir) {
-      fs.readdir(dir, (err, data) => {
-        if (err) throw err
-        data.map(file => {
-          const _path = Path.join(dir, file)
-          const stat = fs.statSync(_path)
-          if (stat && stat.isDirectory()) return getCtrlFiles(_path)
-          const okPath = _path.replace(controlPagePath, '')
-          ctrlFiles.push(okPath)
-          // ctrlFiles.push(Path.join(okPath))
-        }) // end map
-        Cache.set(_id, ctrlFiles)
-        res(ctrlFiles)
+
+  try {
+    if (fs.existsSync(controlPagePath)) {
+      return Cache.ifid(_id, async () => {
+        const __cfile = await getCtrlFiles(controlPagePath, controlPagePath);  Cache.set(_id, __cfile)
+        return __cfile
       })
-    }(controlPagePath)
-  })
-  )
+    } else {
+      throw new Error('控制层目录不存在')
+    }
+  } catch (err) {
+    console.error(err.stack);
+  }
+
+  // let ctrlFiles = []
+  // return Cache.ifid(_id, () => new Promise((res, rej) => {
+  //   return function getCtrlFiles(dir) {
+  //     fs.readdir(dir, (err, data) => {
+  //       if (err) throw err
+  //       data.map(file => {
+  //         const _path = Path.join(dir, file)
+  //         const stat = fs.statSync(_path)
+  //         if (stat && stat.isDirectory()) return getCtrlFiles(_path)
+  //         const okPath = _path.replace(controlPagePath, '')
+  //         ctrlFiles.push(okPath)
+  //         // ctrlFiles.push(Path.join(okPath))
+  //       }) // end map
+  //       Cache.set(_id, ctrlFiles)
+  //       res(ctrlFiles)
+  //     })
+  //   }(controlPagePath)
+  // })
+  // )
 }
 
 function makeRoute(ctx, prefix) {
@@ -77,7 +128,6 @@ function makeRoute(ctx, prefix) {
   const fkp = ctx.fkp
   const indexRoot = fkp.index
   ctx.local = Url.parse(ctx.url, true)
-
 
   let _ext = Path.extname(ctx.url)
   let ctxurl = ctx.url.slice(1).replace(_ext, '') || ''
@@ -119,15 +169,14 @@ function makeRoute(ctx, prefix) {
 
 function path_join(jspath, src) {
   if (jspath.indexOf('http') == 0 || jspath.indexOf('//') == 0) {
-    if (jspath.charAt(jspath.length-1) == '/') {
-      jspath = jspath.substring(0, jspath.length-1)
+    if (jspath.charAt(jspath.length - 1) == '/') {
+      jspath = jspath.substring(0, jspath.length - 1)
     }
     if (src.charAt(0) == '/') {
-      return jspath+src
+      return jspath + src
     } else {
-      return jspath + '/' +src
+      return jspath + '/' + src
     }
-    // return Url.resolve(jspath, src);
   } else {
     return Path.join(jspath, src);
   }
@@ -183,14 +232,8 @@ async function init(app, prefix, options) {
   let _controlPages = await controlPages()
   DEBUG('control pages === %O', _controlPages)
   const router = prefix ? new Router({ prefix: prefix }) : new Router()
-  const routeParam = [
-    '/',
-    '/:cat',
-    '/:cat/:title',
-    '/:cat/:title/:id'
-  ]
   if (options && _.isPlainObject(options)) {
-    let customControl = false
+    let customControl
     if (options.customControl) {
       customControl = options.customControl
     }
@@ -199,43 +242,43 @@ async function init(app, prefix, options) {
         if (typeof item == 'string') item = [item]
         if (!Array.isArray(item)) return
         item.forEach(rt => {
-          // if (key!='get' && rt.indexOf('p1')==-1) {
           if (key != 'get') {
             if (rt != '/') {
-              router[key](rt, router::(customControl || forBetter))
+              router[key](rt, router:: (customControl || forBetter(router, _controlPages)))
             }
           } else {
-            router[key](rt, router::(customControl || forBetter))
+            router[key](rt, router:: (customControl || forBetter(router, _controlPages)))
           }
         })
       } else {
         routeParam.forEach(_path => {
-          router.get(_path, router::(customControl || forBetter))
-          router.post(_path, router::(customControl || forBetter))
+          router.get(_path, router:: (customControl || forBetter(router, _controlPages)))
+          router.post(_path, router:: (customControl || forBetter(router, _controlPages)))
         })
       }
     })
   } else {
     routeParam.forEach(item => {
-      router.get(item, router::forBetter)
+      router.get(item, forBetter(router, _controlPages))
       if (item != '/') {
-        router.post(item, router::forBetter)
+        router.post(item, forBetter(router, _controlPages))
       }
     })
   }
-
   app.use(router.routes())
   app.use(router.allowedMethods())
+}
 
-  async function forBetter(ctx, next) {
+function forBetter(router, ctrlPages) {
+  return async function(ctx, next) {
     try {
-      let ignoreStacic = ['css', 'js', 'images', 'img']
-      if (ignoreStacic.indexOf(ctx.params.cat) > -1) return
-      return await this::dealwithRoute(ctx, ctx.fkp.staticMapper, _controlPages)
+      if (ignoreStacic.indexOf(ctx.params.cat) == -1){
+        return await dealwithRoute.call(this, ctx, ctx.fkp.staticMapper, ctrlPages)
+      }
     } catch (e) {
       console.log(e.stack)
     }
-  }
+  }.bind(router)
 }
 
 /**
@@ -280,36 +323,11 @@ async function distribute(route, pageData, ctrlPages, routerInstance) {
 }
 
 
-// match的control文件，并返回数据
-async function getctrlData(_path, route, ctx, _pageData, ctrl) {
-  try {
-    let _names = []
-    ctrl.set('route', route)
-    if (Array.isArray(_path)) {
-      for (let _filename of _path) {
-        _filename = Path.resolve(__dirname, _filename + '.js')
-        if (fs.existsSync(_filename)) {
-          let _stat = fs.statSync(_filename)
-          if (_stat && _stat.isFile()) _names.push(_filename)
-        }
-      }
-    }
-    if (_names.length) {
-      let controlConfig = require(_names[0]).getData.call(ctx, _pageData)
-      _pageData = await ctrl.run(ctx, controlConfig)
-    } else {
-      _pageData = false
-    }
-    return _pageData
-  } catch (e) {
-    DEBUG('getctrlData error = %O', e)
-    return { nomatch: true }
-  }
-}
-
 async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
   let routerPrefix = routerInstance.opts.prefix
-  if (_.isString(routerPrefix) && routerPrefix.indexOf('/') == 0) routerPrefix = routerPrefix.replace('/', '')
+  if (_.isString(routerPrefix) && routerPrefix.indexOf('/') == 0) {
+    routerPrefix = routerPrefix.replace('/', '')
+  }
 
   try {
     let ctrl = control(route, ctx, pageData, routerInstance)
@@ -318,7 +336,6 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
       pageData = await ctrl.run(ctx)
       route = ctrl.store.route || route
     } else {
-
       let xData = false
       // 根据route匹配到control文件+三层路由
       const controlFile = Path.sep + route + '.js'
@@ -361,6 +378,33 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
   }
 }
 
+// match的control文件，并返回数据
+async function getctrlData(_path, route, ctx, _pageData, ctrl) {
+  try {
+    let _names = []
+    ctrl.set('route', route)
+    if (Array.isArray(_path)) {
+      for (let _filename of _path) {
+        _filename = Path.resolve(__dirname, _filename + '.js')
+        if (fs.existsSync(_filename)) {
+          let _stat = fs.statSync(_filename)
+          if (_stat && _stat.isFile()) _names.push(_filename)
+        }
+      }
+    }
+    if (_names.length) {
+      let controlConfig = require(_names[0]).getData.call(ctx, _pageData)
+      _pageData = await ctrl.run(ctx, controlConfig)
+    } else {
+      _pageData = false
+    }
+    return _pageData
+  } catch (e) {
+    DEBUG('getctrlData error = %O', e)
+    return { nomatch: true }
+  }
+}
+
 function preRender(rt) {
   const mydata = myStore.get()
   const myentry = mydata.entry
@@ -397,7 +441,7 @@ async function renderPage(ctx, route, data, isAjax) {
         error: '找不到相关信息'
       }
     } else {
-      ctx.body = "<div>找不到页面，呃！</div>"
+      ctx.body = "找不到页面，呃"
     }
     // return await ctx.render('404')
   }

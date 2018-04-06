@@ -59,6 +59,7 @@ Control.prototype = {
 }
 
 function control(route, ctx, odata, routerIns){
+  // return new Control(ctx, odata, routerIns)1
   let _id = route+'_controler'
   return Cache.ifid(_id, function(){
     let instance = new Control(ctx, odata, routerIns)

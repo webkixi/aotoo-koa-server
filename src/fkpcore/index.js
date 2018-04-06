@@ -1,29 +1,74 @@
-import fs from 'fs'
 import Path from 'path'
 import request from 'request'
 
+let fs = require('fs')
 let socketio = require('./modules/wsocket'); global.Sio = socketio.sio
 let cache = require('./modules/cache');      global.Cache = cache
 let _fetch = require('./modules/fetch');
 let router = require('./router')
+const Promise = require('bluebird')
+fs = Promise.promisifyAll(fs)
 
+// 内部变量
+let innerData = {
+  route: {
+    prefix: [],
+    presets: {}
+  }
+}
+
+const IGNORE_CHARS = ['_', '.']
 
 // 实例, fkp中间件
 function _fkp(ctx, opts){
   this.ctx = ctx
   this.opts = opts
-
+  const that = this
   this.isAjax = function() {
-    return header('X-Requested-With') === 'XMLHttpRequest';
+    return header(that.ctx, 'X-Requested-With') === 'XMLHttpRequest';
   }
+}
 
-  function header(name, value) {
+function header(ctx, name, value) {
+  if (ctx) {
     if (value != undefined) {
       ctx.request.set(name, value);
     } else {
       return ctx.request.get(name);
     }
   }
+}
+
+async function _routepreset(app) {
+  const presets = innerData.route.presets
+  const preset_keys = Object.keys(presets)
+  const short_prefix = []
+
+  const multi_part_prefix = preset_keys.filter(item => item.split('/').length > 2)
+  const single_part_prefix = preset_keys.filter(item => item.split('/').length <= 2)
+  const sort_prefixs = [...multi_part_prefix, ...single_part_prefix]
+
+  sort_prefixs.forEach(async (prefix) => {
+    // console.log(prefix);
+    await router(app, prefix, presets[prefix])
+  });
+
+  // const presets = innerData.route.presets
+  // const preset_keys = Object.keys(presets)
+  // const short_prefix = []
+
+  // preset_keys.forEach(async (_prefix) => {
+  //   const len = _prefix.split('/').length
+  //   if (len > 2) {
+  //     await router(app, _prefix, presets[_prefix])
+  //   } else {
+  //     short_prefix.push(_prefix)
+  //   }
+  // })
+
+  // short_prefix.forEach(async (_prefix) => {
+  //   await router(app, _prefix, presets[_prefix])
+  // })
 }
 
 // 静态, fkp()返回实例
@@ -64,15 +109,57 @@ fkp.use = function(name, fn){
   }
 }
 
-function valideFile(_file){
+function valideFile(_file) {
   const firstChar = _file && _file.charAt(0)
-  const invalideChars = ['_', '.']
-  if (invalideChars.indexOf(firstChar)>-1) return false
-  return true
+  return IGNORE_CHARS.indexOf(firstChar) > -1 ? false : true
+}
+
+async function registerUtile(app) {
+  // register utile
+  const fkp = app.fkp
+  const baseRoot = './base'
+  let _utilesFiles = await fs.readdirAsync(Path.resolve(__dirname, baseRoot))
+  if (_utilesFiles && _utilesFiles.length) {
+    for (let utileFile of _utilesFiles) {
+      if (valideFile(utileFile)) {
+        let utileFun = require('./base/' + utileFile).default()
+        fkp.utileHand(Path.parse(utileFile).name, utileFun)
+      }
+    }
+  }
+}
+
+async function registerPlugins(pluginRoot, app) {
+  const fkp = app.fkp
+  const pluginStat = fs.statSync(pluginRoot)
+  if (pluginStat.isDirectory()) {
+    let _pluginFiles = await fs.readdirAsync(pluginRoot)
+    if (_pluginFiles && _pluginFiles.length) {
+      for (let pluginFile of _pluginFiles) {
+        if (valideFile(pluginFile)) {
+          let plugin = require(Path.join(pluginRoot, pluginFile)).default(fkp)
+          fkp.plugins(Path.parse(pluginFile).name, plugin)
+        }
+      }
+    }
+
+    // let _pluginFiles = fs.readdirSync(pluginRoot)
+    // if (_pluginFiles && _pluginFiles.length) {
+    //   for (let pluginFile of _pluginFiles) {
+    //     if (valideFile(pluginFile)) {
+    //       let plugin = require(Path.join(pluginRoot, pluginFile)).default(fkp)
+    //       fkp.plugins(Path.parse(pluginFile).name, plugin)
+    //     }
+    //   }
+    // }
+  }
 }
 
 export default async function(app, options) {
   const instance = this
+  // =========== 注册fkp中间件 =============
+  app.fkp = fkp
+
   let dfts = {
     apis: options.apis,
     pages: options.pages,      
@@ -91,13 +178,6 @@ export default async function(app, options) {
   const fetch = _fetch({apis: dfts.apis});     
   global.Fetch = fetch
 
-  // 内部变量
-  let innerData = {
-    route: {
-      prefix: []
-    }
-  }
-
   fkp.staticMapper = dfts.mapper
   fkp.router = router
   fkp.apilist = dfts.apis
@@ -111,12 +191,23 @@ export default async function(app, options) {
    * @param  {JSON}  routerOptions   koa-router's route
   */
   fkp.routepreset = async function(prefix, routerOptions) {
-    if (!prefix) return
-    if (prefix.indexOf('/')==-1) return
-    let prefixs = innerData.route.prefix
-    if (prefixs.indexOf(prefix)>-1) return
-    prefixs.push(prefix)
-    await router(app, prefix, routerOptions)
+    if (prefix) {
+      prefix = Path.join('/', prefix)
+      innerData.route.presets[prefix] = routerOptions
+      // prefix = Path.join('/', prefix)
+      // let presets = innerData.route.presets
+      // if (!presets[prefix]) {
+      //   presets[prefix] = true
+      //   await router(app, prefix, routerOptions)
+      // }
+    }
+
+    // if (!prefix) return
+    // if (prefix.indexOf('/')==-1) return
+    // let prefixs = innerData.route.prefix
+    // if (prefixs.indexOf(prefix)>-1) return
+    // prefixs.push(prefix)
+    // await router(app, prefix, routerOptions)
   }
 
 
@@ -128,60 +219,39 @@ export default async function(app, options) {
 
   try {
     // register utile
-    const baseRoot = './base'
-    let _utilesFiles = fs.readdirSync(Path.resolve(__dirname, baseRoot))
-    if (_utilesFiles && _utilesFiles.length) {
-      for (let utileFile of _utilesFiles) {
-        // if (utileFile.indexOf('_')!=0) {
-        if (valideFile(utileFile)) {
-          let utileFun = require( './base/'+utileFile ).default()
-          fkp.utileHand(Path.parse(utileFile).name, utileFun)
-        }
-      }
-    }
+    await registerUtile(app)
 
     // register plugins
     const pluginRoot = dfts.pluginsFolder
-    // if ( fs.existsSync(Path.resolve(__dirname, pluginRoot)) ) {
     if ( pluginRoot && fs.existsSync(pluginRoot) ) {
-      let _pluginFiles = fs.readdirSync(pluginRoot)
-      if (_pluginFiles && _pluginFiles.length) {
-        for (let pluginFile of _pluginFiles) {
-          // if (pluginFile.indexOf('_')!=0) {
-          if (valideFile(pluginFile)) {
-            let plugin = require( Path.join(pluginRoot, pluginFile) ).default(fkp)
-            fkp.plugins(Path.parse(pluginFile).name, plugin)
-          }
-        }
-      }
+      await registerPlugins(pluginRoot, app)
     }
   } catch (e) {
     console.log(e);
   }
+  
+  // 获取当前的路由信息
+  fkp.getRouter = function(){
+    return router.getRoute(ctx)
+  }
 
-  // =========== 注册fkp中间件 =============
-  app.fkp = fkp
-
+  const myfkp = fkp(null)
+  
   // 封装koa中间件
   app.use(async (ctx, next) => {
-
-    // 初始化路由
-    await router(app)
-
-    // 获取当前的路由信息
-    fkp.getRouter = function(){
-      return router.getRoute(ctx)
-    }
-
     // controle层使用的fkp都是实例化的fkp
-    ctx.fkp = fkp(ctx)
+    myfkp.ctx = ctx
+    ctx.fkp = myfkp
 
     // 定义Fetch的上下文环境
     Fetch.init(ctx)
-
     await next()
   })
-
+  
+  await _routepreset(app)
+  
+  // 初始化路由
+  await router(app)
 
   // socketio运行时
   socketio.run()

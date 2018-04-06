@@ -1,78 +1,99 @@
 'use strict';
 
-var _keys2 = require('babel-runtime/core-js/object/keys');
+var _keys = require('babel-runtime/core-js/object/keys');
 
-var _keys3 = _interopRequireDefault(_keys2);
+var _keys2 = _interopRequireDefault(_keys);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var http = require('http'),
-    socket_config = {},
-    io,
-    sio,
-    Server = require('socket.io');
+var noop = function noop(params) {};
+var Server = require('socket.io');
+var http = require('http');
+var socket_config = {};
+var io,
+    sio = {
+  on: noop,
+  off: noop,
+  emit: noop,
+  use: noop
+};
 
-function of(path) {
-  if (io) {
-    io.of(path);
-    run();
-  }
+function ioof(io) {
+  return function (path) {
+    if (io) {
+      io.of(path);
+      run();
+    }
+  };
+}
+
+function wspush(io) {
+  return function (name, msg) {
+    io.emit(name, msg);
+  };
+}
+
+function wsuse(io) {
+  return function (cb) {
+    if (io) return io.use(cb);
+  };
+}
+
+function wson() {
+  // cb is function and cb.length = 3 / cb({Json}, skt{SOCKET}, client{Json})
+  var scfg = socket_config;
+  return function (name, cb) {
+    if (typeof cb == 'function') scfg[name] = cb;
+  };
 }
 
 function websocket(app) {
   var scfg = socket_config;
-  var srv = http.createServer(app.callback());
-  io = new Server(srv);
-
-  // websocket emit something
-  function wspush(name, msg) {
-    io.emit(name, msg);
-  }
-
-  function wson(name, cb) {
-    // cb is function and cb.length = 3 / cb({Json}, skt{SOCKET}, client{Json})
-    if (scfg[name]) return;
-    scfg[name] = cb;
-  }
-
-  function wsuse(cb) {
-    if (io) return io.use(cb);
-  }
+  var _server_ = http.createServer(app.callback());
+  io = new Server(_server_);
 
   sio = {
-    on: wson,
-    of: of,
-    emit: wspush,
-    use: wsuse
+    on: wson(),
+    of: ioof(io),
+    emit: wspush(io),
+    use: wsuse(io)
   };
 
-  return srv;
+  return _server_;
 }
 
-function run() {
-  function mkmkon(cb, skt) {
-    var client = skt.handshake;
-    return function (data) {
-      cb.call({ io: io }, data, skt, client);
-    };
-  }
+function mkon(socket) {
+  // const client = socket.handshake
+  (0, _keys2.default)(socket_config).forEach(function (item) {
+    var cb = socket_config[item];
+    if (typeof cb == 'function') {
+      socket.on(item, function (data) {
+        cb(data, socket);
+      });
+    }
+  });
 
-  function mkon(skt) {
-    var scfg = socket_config;
-    var _keys = (0, _keys3.default)(scfg);
-    _keys.map(function (item, i) {
-      var _cb = mkmkon(scfg[item], skt);
-      skt.on(item, _cb);
-    });
-  }
+  // var _keys = Object.keys(scfg)
+  // _keys.map(function (item, i) {
+  //   var _cb = mkmkon(scfg[item], socket)
+  //   socket.on(item, _cb)
+  // })
+}
+
+// function mkmkon(cb, _socket) {
+//   const client = _socket.handshake
+//   return function (data) {
+//     cb.call({ io: io }, data, _socket, client)
+//   }
+// }
+
+function run() {
   if (io) {
     io.on('connection', function (socket) {
       mkon(socket);
-
-      // socket.on('imchat', function(data){
-      //     io.emit('imchat', {data: { user: 'world',message:'ni mei' }});
+      // socket.on('first', function(data){
+      //   io.emit('first', {data: { user: 'world',message:'ni mei' }});
       // })
-
       socket.on('disconnect', function () {
         console.log('user disconnect');
       });
@@ -82,7 +103,7 @@ function run() {
 
 module.exports = {
   init: websocket,
-  of: of,
+  of: ioof(io),
   run: run,
   sio: sio
 };

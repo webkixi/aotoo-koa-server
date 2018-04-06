@@ -8,7 +8,6 @@ function passaccess(oridata) {
     },
 
     post: async function(ctx){
-      // let passdata = await Fetch.post(ctx.fkproute, ctx.body)
       let passdata = await Fetch.post(ctx.fkproute, ctx.request.body)
       if (passdata && passdata[1]) {
         if (passdata[0].headers.login){

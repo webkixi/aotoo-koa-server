@@ -4,14 +4,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 
-var _regenerator = require('babel-runtime/regenerator');
-
-var _regenerator2 = _interopRequireDefault(_regenerator);
-
-var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
-
-var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
-
 var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
 
 var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
@@ -24,11 +16,268 @@ var _getIterator2 = require('babel-runtime/core-js/get-iterator');
 
 var _getIterator3 = _interopRequireDefault(_getIterator2);
 
+var _regenerator = require('babel-runtime/regenerator');
+
+var _regenerator2 = _interopRequireDefault(_regenerator);
+
+var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
+
+var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
+
+var _keys = require('babel-runtime/core-js/object/keys');
+
+var _keys2 = _interopRequireDefault(_keys);
+
+var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
+
+var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
+var _routepreset = function () {
+  var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(app) {
+    var _this = this;
+
+    var presets, preset_keys, short_prefix, multi_part_prefix, single_part_prefix, sort_prefixs;
+    return _regenerator2.default.wrap(function _callee2$(_context2) {
+      while (1) {
+        switch (_context2.prev = _context2.next) {
+          case 0:
+            presets = innerData.route.presets;
+            preset_keys = (0, _keys2.default)(presets);
+            short_prefix = [];
+            multi_part_prefix = preset_keys.filter(function (item) {
+              return item.split('/').length > 2;
+            });
+            single_part_prefix = preset_keys.filter(function (item) {
+              return item.split('/').length <= 2;
+            });
+            sort_prefixs = [].concat((0, _toConsumableArray3.default)(multi_part_prefix), (0, _toConsumableArray3.default)(single_part_prefix));
+
+
+            sort_prefixs.forEach(function () {
+              var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(prefix) {
+                return _regenerator2.default.wrap(function _callee$(_context) {
+                  while (1) {
+                    switch (_context.prev = _context.next) {
+                      case 0:
+                        _context.next = 2;
+                        return router(app, prefix, presets[prefix]);
+
+                      case 2:
+                      case 'end':
+                        return _context.stop();
+                    }
+                  }
+                }, _callee, _this);
+              }));
+
+              return function (_x2) {
+                return _ref2.apply(this, arguments);
+              };
+            }());
+
+            // const presets = innerData.route.presets
+            // const preset_keys = Object.keys(presets)
+            // const short_prefix = []
+
+            // preset_keys.forEach(async (_prefix) => {
+            //   const len = _prefix.split('/').length
+            //   if (len > 2) {
+            //     await router(app, _prefix, presets[_prefix])
+            //   } else {
+            //     short_prefix.push(_prefix)
+            //   }
+            // })
+
+            // short_prefix.forEach(async (_prefix) => {
+            //   await router(app, _prefix, presets[_prefix])
+            // })
+
+          case 7:
+          case 'end':
+            return _context2.stop();
+        }
+      }
+    }, _callee2, this);
+  }));
+
+  return function _routepreset(_x) {
+    return _ref.apply(this, arguments);
+  };
+}();
+
+// 静态, fkp()返回实例
+
+
+var registerUtile = function () {
+  var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(app) {
+    var fkp, baseRoot, _utilesFiles, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, utileFile, utileFun;
+
+    return _regenerator2.default.wrap(function _callee3$(_context3) {
+      while (1) {
+        switch (_context3.prev = _context3.next) {
+          case 0:
+            // register utile
+            fkp = app.fkp;
+            baseRoot = './base';
+            _context3.next = 4;
+            return fs.readdirAsync(_path2.default.resolve(__dirname, baseRoot));
+
+          case 4:
+            _utilesFiles = _context3.sent;
+
+            if (!(_utilesFiles && _utilesFiles.length)) {
+              _context3.next = 25;
+              break;
+            }
+
+            _iteratorNormalCompletion2 = true;
+            _didIteratorError2 = false;
+            _iteratorError2 = undefined;
+            _context3.prev = 9;
+
+            for (_iterator2 = (0, _getIterator3.default)(_utilesFiles); !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+              utileFile = _step2.value;
+
+              if (valideFile(utileFile)) {
+                utileFun = require('./base/' + utileFile).default();
+
+                fkp.utileHand(_path2.default.parse(utileFile).name, utileFun);
+              }
+            }
+            _context3.next = 17;
+            break;
+
+          case 13:
+            _context3.prev = 13;
+            _context3.t0 = _context3['catch'](9);
+            _didIteratorError2 = true;
+            _iteratorError2 = _context3.t0;
+
+          case 17:
+            _context3.prev = 17;
+            _context3.prev = 18;
+
+            if (!_iteratorNormalCompletion2 && _iterator2.return) {
+              _iterator2.return();
+            }
+
+          case 20:
+            _context3.prev = 20;
+
+            if (!_didIteratorError2) {
+              _context3.next = 23;
+              break;
+            }
+
+            throw _iteratorError2;
+
+          case 23:
+            return _context3.finish(20);
+
+          case 24:
+            return _context3.finish(17);
+
+          case 25:
+          case 'end':
+            return _context3.stop();
+        }
+      }
+    }, _callee3, this, [[9, 13, 17, 25], [18,, 20, 24]]);
+  }));
+
+  return function registerUtile(_x3) {
+    return _ref3.apply(this, arguments);
+  };
+}();
+
+var registerPlugins = function () {
+  var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(pluginRoot, app) {
+    var fkp, pluginStat, _pluginFiles, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, pluginFile, plugin;
+
+    return _regenerator2.default.wrap(function _callee4$(_context4) {
+      while (1) {
+        switch (_context4.prev = _context4.next) {
+          case 0:
+            fkp = app.fkp;
+            pluginStat = fs.statSync(pluginRoot);
+
+            if (!pluginStat.isDirectory()) {
+              _context4.next = 26;
+              break;
+            }
+
+            _context4.next = 5;
+            return fs.readdirAsync(pluginRoot);
+
+          case 5:
+            _pluginFiles = _context4.sent;
+
+            if (!(_pluginFiles && _pluginFiles.length)) {
+              _context4.next = 26;
+              break;
+            }
+
+            _iteratorNormalCompletion3 = true;
+            _didIteratorError3 = false;
+            _iteratorError3 = undefined;
+            _context4.prev = 10;
+
+            for (_iterator3 = (0, _getIterator3.default)(_pluginFiles); !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+              pluginFile = _step3.value;
+
+              if (valideFile(pluginFile)) {
+                plugin = require(_path2.default.join(pluginRoot, pluginFile)).default(fkp);
+
+                fkp.plugins(_path2.default.parse(pluginFile).name, plugin);
+              }
+            }
+            _context4.next = 18;
+            break;
+
+          case 14:
+            _context4.prev = 14;
+            _context4.t0 = _context4['catch'](10);
+            _didIteratorError3 = true;
+            _iteratorError3 = _context4.t0;
+
+          case 18:
+            _context4.prev = 18;
+            _context4.prev = 19;
+
+            if (!_iteratorNormalCompletion3 && _iterator3.return) {
+              _iterator3.return();
+            }
+
+          case 21:
+            _context4.prev = 21;
+
+            if (!_didIteratorError3) {
+              _context4.next = 24;
+              break;
+            }
+
+            throw _iteratorError3;
+
+          case 24:
+            return _context4.finish(21);
+
+          case 25:
+            return _context4.finish(18);
+
+          case 26:
+          case 'end':
+            return _context4.stop();
+        }
+      }
+    }, _callee4, this, [[10, 14, 18, 26], [19,, 21, 25]]);
+  }));
+
+  return function registerPlugins(_x4, _x5) {
+    return _ref4.apply(this, arguments);
+  };
+}();
+
 exports.fkp = fkp;
-
-var _fs = require('fs');
-
-var _fs2 = _interopRequireDefault(_fs);
 
 var _path = require('path');
 
@@ -40,21 +289,36 @@ var _request2 = _interopRequireDefault(_request);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var fs = require('fs');
 var socketio = require('./modules/wsocket');global.Sio = socketio.sio;
 var cache = require('./modules/cache');global.Cache = cache;
 var _fetch = require('./modules/fetch');
 var router = require('./router');
+var Promise = require('bluebird');
+fs = Promise.promisifyAll(fs);
+
+// 内部变量
+var innerData = {
+  route: {
+    prefix: [],
+    presets: {}
+  }
+};
+
+var IGNORE_CHARS = ['_', '.'];
 
 // 实例, fkp中间件
 function _fkp(ctx, opts) {
   this.ctx = ctx;
   this.opts = opts;
-
+  var that = this;
   this.isAjax = function () {
-    return header('X-Requested-With') === 'XMLHttpRequest';
+    return header(that.ctx, 'X-Requested-With') === 'XMLHttpRequest';
   };
+}
 
-  function header(name, value) {
+function header(ctx, name, value) {
+  if (ctx) {
     if (value != undefined) {
       ctx.request.set(name, value);
     } else {
@@ -63,7 +327,6 @@ function _fkp(ctx, opts) {
   }
 }
 
-// 静态, fkp()返回实例
 function fkp(ctx, opts) {
   var fkpInstanc = new _fkp(ctx, opts);
   var _iteratorNormalCompletion = true;
@@ -132,22 +395,23 @@ fkp.use = function (name, fn) {
 
 function valideFile(_file) {
   var firstChar = _file && _file.charAt(0);
-  var invalideChars = ['_', '.'];
-  if (invalideChars.indexOf(firstChar) > -1) return false;
-  return true;
+  return IGNORE_CHARS.indexOf(firstChar) > -1 ? false : true;
 }
 
 exports.default = function () {
-  var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(app, options) {
-    var _this = this;
+  var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(app, options) {
+    var _this2 = this;
 
-    var instance, dfts, server, fetch, innerData, baseRoot, _utilesFiles, _iteratorNormalCompletion2, _didIteratorError2, _iteratorError2, _iterator2, _step2, utileFile, utileFun, pluginRoot, _pluginFiles, _iteratorNormalCompletion3, _didIteratorError3, _iteratorError3, _iterator3, _step3, pluginFile, plugin;
-
-    return _regenerator2.default.wrap(function _callee3$(_context3) {
+    var instance, dfts, server, fetch, pluginRoot, myfkp;
+    return _regenerator2.default.wrap(function _callee7$(_context7) {
       while (1) {
-        switch (_context3.prev = _context3.next) {
+        switch (_context7.prev = _context7.next) {
           case 0:
             instance = this;
+            // =========== 注册fkp中间件 =============
+
+            app.fkp = fkp;
+
             dfts = {
               apis: options.apis,
               pages: options.pages,
@@ -168,14 +432,6 @@ exports.default = function () {
 
             global.Fetch = fetch;
 
-            // 内部变量
-            innerData = {
-              route: {
-                prefix: []
-              }
-            };
-
-
             fkp.staticMapper = dfts.mapper;
             fkp.router = router;
             fkp.apilist = dfts.apis;
@@ -188,52 +444,39 @@ exports.default = function () {
              * @param  {JSON}  routerOptions   koa-router's route
             */
             fkp.routepreset = function () {
-              var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee(prefix, routerOptions) {
-                var prefixs;
-                return _regenerator2.default.wrap(function _callee$(_context) {
+              var _ref6 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(prefix, routerOptions) {
+                return _regenerator2.default.wrap(function _callee5$(_context5) {
                   while (1) {
-                    switch (_context.prev = _context.next) {
+                    switch (_context5.prev = _context5.next) {
                       case 0:
                         if (prefix) {
-                          _context.next = 2;
-                          break;
+                          prefix = _path2.default.join('/', prefix);
+                          innerData.route.presets[prefix] = routerOptions;
+                          // prefix = Path.join('/', prefix)
+                          // let presets = innerData.route.presets
+                          // if (!presets[prefix]) {
+                          //   presets[prefix] = true
+                          //   await router(app, prefix, routerOptions)
+                          // }
                         }
 
-                        return _context.abrupt('return');
+                        // if (!prefix) return
+                        // if (prefix.indexOf('/')==-1) return
+                        // let prefixs = innerData.route.prefix
+                        // if (prefixs.indexOf(prefix)>-1) return
+                        // prefixs.push(prefix)
+                        // await router(app, prefix, routerOptions)
 
-                      case 2:
-                        if (!(prefix.indexOf('/') == -1)) {
-                          _context.next = 4;
-                          break;
-                        }
-
-                        return _context.abrupt('return');
-
-                      case 4:
-                        prefixs = innerData.route.prefix;
-
-                        if (!(prefixs.indexOf(prefix) > -1)) {
-                          _context.next = 7;
-                          break;
-                        }
-
-                        return _context.abrupt('return');
-
-                      case 7:
-                        prefixs.push(prefix);
-                        _context.next = 10;
-                        return router(app, prefix, routerOptions);
-
-                      case 10:
+                      case 1:
                       case 'end':
-                        return _context.stop();
+                        return _context5.stop();
                     }
                   }
-                }, _callee, this);
+                }, _callee5, this);
               }));
 
-              return function (_x3, _x4) {
-                return _ref2.apply(this, arguments);
+              return function (_x8, _x9) {
+                return _ref6.apply(this, arguments);
               };
             }();
 
@@ -243,199 +486,95 @@ exports.default = function () {
             2、插件方法为new fkp后的对象方法，带有this的上下文，第一个参数ctx，为koa环境对象，插件方法挂载在fkp上，调用方法同样为fkp.xxx
             =================================================*/
 
-            _context3.prev = 13;
+            _context7.prev = 13;
+            _context7.next = 16;
+            return registerUtile(app);
 
-            // register utile
-            baseRoot = './base';
-            _utilesFiles = _fs2.default.readdirSync(_path2.default.resolve(__dirname, baseRoot));
-
-            if (!(_utilesFiles && _utilesFiles.length)) {
-              _context3.next = 36;
-              break;
-            }
-
-            _iteratorNormalCompletion2 = true;
-            _didIteratorError2 = false;
-            _iteratorError2 = undefined;
-            _context3.prev = 20;
-
-            for (_iterator2 = (0, _getIterator3.default)(_utilesFiles); !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-              utileFile = _step2.value;
-
-              // if (utileFile.indexOf('_')!=0) {
-              if (valideFile(utileFile)) {
-                utileFun = require('./base/' + utileFile).default();
-
-                fkp.utileHand(_path2.default.parse(utileFile).name, utileFun);
-              }
-            }
-            _context3.next = 28;
-            break;
-
-          case 24:
-            _context3.prev = 24;
-            _context3.t0 = _context3['catch'](20);
-            _didIteratorError2 = true;
-            _iteratorError2 = _context3.t0;
-
-          case 28:
-            _context3.prev = 28;
-            _context3.prev = 29;
-
-            if (!_iteratorNormalCompletion2 && _iterator2.return) {
-              _iterator2.return();
-            }
-
-          case 31:
-            _context3.prev = 31;
-
-            if (!_didIteratorError2) {
-              _context3.next = 34;
-              break;
-            }
-
-            throw _iteratorError2;
-
-          case 34:
-            return _context3.finish(31);
-
-          case 35:
-            return _context3.finish(28);
-
-          case 36:
+          case 16:
 
             // register plugins
             pluginRoot = dfts.pluginsFolder;
-            // if ( fs.existsSync(Path.resolve(__dirname, pluginRoot)) ) {
 
-            if (!(pluginRoot && _fs2.default.existsSync(pluginRoot))) {
-              _context3.next = 59;
+            if (!(pluginRoot && fs.existsSync(pluginRoot))) {
+              _context7.next = 20;
               break;
             }
 
-            _pluginFiles = _fs2.default.readdirSync(pluginRoot);
+            _context7.next = 20;
+            return registerPlugins(pluginRoot, app);
 
-            if (!(_pluginFiles && _pluginFiles.length)) {
-              _context3.next = 59;
-              break;
-            }
-
-            _iteratorNormalCompletion3 = true;
-            _didIteratorError3 = false;
-            _iteratorError3 = undefined;
-            _context3.prev = 43;
-
-            for (_iterator3 = (0, _getIterator3.default)(_pluginFiles); !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-              pluginFile = _step3.value;
-
-              // if (pluginFile.indexOf('_')!=0) {
-              if (valideFile(pluginFile)) {
-                plugin = require(_path2.default.join(pluginRoot, pluginFile)).default(fkp);
-
-                fkp.plugins(_path2.default.parse(pluginFile).name, plugin);
-              }
-            }
-            _context3.next = 51;
+          case 20:
+            _context7.next = 25;
             break;
 
-          case 47:
-            _context3.prev = 47;
-            _context3.t1 = _context3['catch'](43);
-            _didIteratorError3 = true;
-            _iteratorError3 = _context3.t1;
+          case 22:
+            _context7.prev = 22;
+            _context7.t0 = _context7['catch'](13);
 
-          case 51:
-            _context3.prev = 51;
-            _context3.prev = 52;
+            console.log(_context7.t0);
 
-            if (!_iteratorNormalCompletion3 && _iterator3.return) {
-              _iterator3.return();
-            }
+          case 25:
 
-          case 54:
-            _context3.prev = 54;
+            // 获取当前的路由信息
+            fkp.getRouter = function () {
+              return router.getRoute(ctx);
+            };
 
-            if (!_didIteratorError3) {
-              _context3.next = 57;
-              break;
-            }
-
-            throw _iteratorError3;
-
-          case 57:
-            return _context3.finish(54);
-
-          case 58:
-            return _context3.finish(51);
-
-          case 59:
-            _context3.next = 64;
-            break;
-
-          case 61:
-            _context3.prev = 61;
-            _context3.t2 = _context3['catch'](13);
-
-            console.log(_context3.t2);
-
-          case 64:
-
-            // =========== 注册fkp中间件 =============
-            app.fkp = fkp;
+            myfkp = fkp(null);
 
             // 封装koa中间件
+
             app.use(function () {
-              var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(ctx, next) {
-                return _regenerator2.default.wrap(function _callee2$(_context2) {
+              var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(ctx, next) {
+                return _regenerator2.default.wrap(function _callee6$(_context6) {
                   while (1) {
-                    switch (_context2.prev = _context2.next) {
+                    switch (_context6.prev = _context6.next) {
                       case 0:
-                        _context2.next = 2;
-                        return router(app);
-
-                      case 2:
-
-                        // 获取当前的路由信息
-                        fkp.getRouter = function () {
-                          return router.getRoute(ctx);
-                        };
-
                         // controle层使用的fkp都是实例化的fkp
-                        ctx.fkp = fkp(ctx);
+                        myfkp.ctx = ctx;
+                        ctx.fkp = myfkp;
 
                         // 定义Fetch的上下文环境
                         Fetch.init(ctx);
-
-                        _context2.next = 7;
+                        _context6.next = 5;
                         return next();
 
-                      case 7:
+                      case 5:
                       case 'end':
-                        return _context2.stop();
+                        return _context6.stop();
                     }
                   }
-                }, _callee2, _this);
+                }, _callee6, _this2);
               }));
 
-              return function (_x5, _x6) {
-                return _ref3.apply(this, arguments);
+              return function (_x10, _x11) {
+                return _ref7.apply(this, arguments);
               };
             }());
 
+            _context7.next = 30;
+            return _routepreset(app);
+
+          case 30:
+            _context7.next = 32;
+            return router(app);
+
+          case 32:
+
             // socketio运行时
             socketio.run();
-            return _context3.abrupt('return', server);
+            return _context7.abrupt('return', server);
 
-          case 68:
+          case 34:
           case 'end':
-            return _context3.stop();
+            return _context7.stop();
         }
       }
-    }, _callee3, this, [[13, 61], [20, 24, 28, 36], [29,, 31, 35], [43, 47, 51, 59], [52,, 54, 58]]);
+    }, _callee7, this, [[13, 22]]);
   }));
 
-  return function (_x, _x2) {
-    return _ref.apply(this, arguments);
+  return function (_x6, _x7) {
+    return _ref5.apply(this, arguments);
   };
 }();
 //# sourceMappingURL=../maps/fkpcore/index.js.map
