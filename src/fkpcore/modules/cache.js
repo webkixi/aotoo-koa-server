@@ -53,7 +53,7 @@ module.exports = function(params) {
 		ifid: (key, callback) => {
 			if (typeof key == 'string') {
 				var tmp = cache.has(md5(key))
-				return tmp ? tmp : (function() {
+				return tmp ? cache.get(md5(key)) : (function () {
 					return typeof callback == 'function' ? callback() : undefined
 				})()
 			}
