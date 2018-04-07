@@ -501,11 +501,6 @@ var aotooServer = function () {
 }();
 
 module.exports = function (opts) {
-  try {
-    if (!opts.pages) throw '必须指定 pages 目录选项, pages目录放置control层文件';
-    return new aotooServer(opts);
-  } catch (e) {
-    console.error(e);
-  }
+  return new aotooServer(opts);
 };
 //# sourceMappingURL=maps/server.js.map
