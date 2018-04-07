@@ -291,8 +291,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var fs = require('fs');
 var socketio = require('./modules/wsocket');global.Sio = socketio.sio;
-var cache = require('./modules/cache');global.Cache = cache;
-var _fetch = require('./modules/fetch');
+// let cache = require('./modules/cache');      global.Cache = cache
+// let _fetch = require('./modules/fetch');
 var router = require('./router');
 var Promise = require('bluebird');
 fs = Promise.promisifyAll(fs);
@@ -402,7 +402,7 @@ exports.default = function () {
   var _ref5 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(app, options) {
     var _this2 = this;
 
-    var instance, dfts, server, fetch, pluginRoot, myfkp;
+    var instance, dfts, server, pluginRoot, myfkp;
     return _regenerator2.default.wrap(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
@@ -427,10 +427,8 @@ exports.default = function () {
             server = socketio.init(app);
 
             // 传入apis
-
-            fetch = _fetch({ apis: dfts.apis });
-
-            global.Fetch = fetch;
+            // const fetch = _fetch({apis: dfts.apis});     
+            // global.Fetch = fetch
 
             fkp.staticMapper = dfts.mapper;
             fkp.router = router;
@@ -486,34 +484,34 @@ exports.default = function () {
             2、插件方法为new fkp后的对象方法，带有this的上下文，第一个参数ctx，为koa环境对象，插件方法挂载在fkp上，调用方法同样为fkp.xxx
             =================================================*/
 
-            _context7.prev = 13;
-            _context7.next = 16;
+            _context7.prev = 11;
+            _context7.next = 14;
             return registerUtile(app);
 
-          case 16:
+          case 14:
 
             // register plugins
             pluginRoot = dfts.pluginsFolder;
 
             if (!(pluginRoot && fs.existsSync(pluginRoot))) {
-              _context7.next = 20;
+              _context7.next = 18;
               break;
             }
 
-            _context7.next = 20;
+            _context7.next = 18;
             return registerPlugins(pluginRoot, app);
 
-          case 20:
-            _context7.next = 25;
+          case 18:
+            _context7.next = 23;
             break;
 
-          case 22:
-            _context7.prev = 22;
-            _context7.t0 = _context7['catch'](13);
+          case 20:
+            _context7.prev = 20;
+            _context7.t0 = _context7['catch'](11);
 
             console.log(_context7.t0);
 
-          case 25:
+          case 23:
 
             // 获取当前的路由信息
             fkp.getRouter = function () {
@@ -552,25 +550,25 @@ exports.default = function () {
               };
             }());
 
-            _context7.next = 30;
+            _context7.next = 28;
             return _routepreset(app);
 
-          case 30:
-            _context7.next = 32;
+          case 28:
+            _context7.next = 30;
             return router(app);
 
-          case 32:
+          case 30:
 
             // socketio运行时
             socketio.run();
             return _context7.abrupt('return', server);
 
-          case 34:
+          case 32:
           case 'end':
             return _context7.stop();
         }
       }
-    }, _callee7, this, [[13, 22]]);
+    }, _callee7, this, [[11, 20]]);
   }));
 
   return function (_x6, _x7) {

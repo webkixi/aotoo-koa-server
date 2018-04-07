@@ -23,8 +23,15 @@ function inherits( Super, protos, staticProtos ) {
 }
 
 let _request = function(opts){
-  this.opts = opts
-  this.apilist = this.opts.apis
+  var default_options = {
+    headers: { },
+    timeout: 10000
+  }
+  if (opts.apis) {
+    this.apilist = opts.apis
+    delete opts.apis
+  }
+  this.options = _.merge(default_options, opts)
   this.fetchRemote = false
 }
 _request.prototype = {
@@ -33,29 +40,35 @@ _request.prototype = {
   }
 }
 
-let __request = inherits(_request, {
+function setOpts(api, options, method) {
+  let opts = {
+    json: {},
+  }
+  // if (options && _.isPlainObject(options)) opts = _.merge(opts, options)
+  opts = _.merge(opts, this.options, options)
+  if (opts.json && opts.json.headers) {
+    opts.headers = opts.json.headers
+    delete opts.json.headers
+    // opts.headers = _headers
+  }
+  if (opts.fttype) {
+    delete opts.fttype;
+  }
+  this.api = api
+  this.requestOptions = opts
+}
 
-  setOpts: function(api, options, method){
-    let opts = {
-      headers: {},
-      json: {},
-      timeout: 10000
+let __request = inherits(_request, {
+  setOptions: function(params) {
+    if (params.apis) {
+      this.apilist = params.apis
+      delete params.apis
     }
-    if (options && _.isPlainObject(options)) opts = _.merge(opts, options)
-    if (opts.json && opts.json.headers) {
-      const _headers = _.merge({}, opts.json.headers)
-      delete opts.json.headers
-      opts.headers = _headers
-    }
-    if (opts.fttype){
-      delete opts.fttype;
-    }
-    this.api = api
-    this.requestOptions = opts
+    this.options = _.merge(this.options, params)
   },
 
   _get: function(api, options, cb){
-    this.setOpts(api, options, 'get')
+    setOpts.call(this, api, options, 'get')
     let _opts = this.requestOptions
     let _api = this.api
     DEBUG('_get api %s', api)
@@ -77,7 +90,7 @@ let __request = inherits(_request, {
   },
 
   _post: function(api, options, cb){
-    this.setOpts(api, options, 'post')
+    setOpts.call(this, api, options, 'post')
     let _opts = this.requestOptions
     let _api = this.api
     _opts.headers['Content-type'] = 'application/json; charset=utf-8'

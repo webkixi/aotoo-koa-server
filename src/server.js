@@ -7,6 +7,9 @@ import render from 'koa-art-template'
 import statics from 'koa-static-cache'
 import bodyparser from 'koa-bodyparser'
 import core, { fkp } from './fkpcore'
+import fetch from './fkpcore/modules/fetch'
+import cache from './fkpcore/modules/cache'
+
 const myStore = SAX('AOTOO-KOA-SERVER')
 
 const app = new Koa()
@@ -26,8 +29,11 @@ class aotooServer {
       apis: theApis,                      // api接口集合
       mapper: opts.mapper || { js: {}, css: {} },  // 静态资源映射文件
 
+      fetchOptions: opts.fetchOptions || {},
+      cacheOptions: opts.cacheOptions || {},
+
       root: opts.root,              // 渲染默认目录
-      pages: opts.pages,        // control层文件夹，必须
+      pages: opts.pages||opts.pagesFolder||opts.controls,        // control层文件夹，必须
       pluginsFolder: opts.pluginsFolder   // 插件文件夹
     }
 
@@ -35,6 +41,10 @@ class aotooServer {
       views: false,
       bodyparser: false
     }
+
+    // 传入apis
+    global.Fetch = this.fetch = fetch({ apis: this.configs.apis, ...this.fetchOptions});
+    global.Cache = this.cache = cache(this.cacheOptions)
 
     if (this.configs.mapper) {
       let _public

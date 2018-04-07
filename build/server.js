@@ -12,6 +12,10 @@ var _asyncToGenerator2 = require("babel-runtime/helpers/asyncToGenerator");
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
+var _extends2 = require("babel-runtime/helpers/extends");
+
+var _extends3 = _interopRequireDefault(_extends2);
+
 var _classCallCheck2 = require("babel-runtime/helpers/classCallCheck");
 
 var _classCallCheck3 = _interopRequireDefault(_classCallCheck2);
@@ -113,6 +117,14 @@ var _fkpcore = require("./fkpcore");
 
 var _fkpcore2 = _interopRequireDefault(_fkpcore);
 
+var _fetch = require("./fkpcore/modules/fetch");
+
+var _fetch2 = _interopRequireDefault(_fetch);
+
+var _cache = require("./fkpcore/modules/cache");
+
+var _cache2 = _interopRequireDefault(_cache);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // global.Aotoo
@@ -138,15 +150,21 @@ var aotooServer = function () {
       apis: theApis, // api接口集合
       mapper: opts.mapper || { js: {}, css: {} }, // 静态资源映射文件
 
+      fetchOptions: opts.fetchOptions || {},
+      cacheOptions: opts.cacheOptions || {},
+
       root: opts.root, // 渲染默认目录
-      pages: opts.pages, // control层文件夹，必须
+      pages: opts.pages || opts.pagesFolder || opts.controls, // control层文件夹，必须
       pluginsFolder: opts.pluginsFolder // 插件文件夹
     };
 
     this.state = {
       views: false,
       bodyparser: false
-    };
+
+      // 传入apis
+    };global.Fetch = this.fetch = (0, _fetch2.default)((0, _extends3.default)({ apis: this.configs.apis }, this.fetchOptions));
+    global.Cache = this.cache = (0, _cache2.default)(this.cacheOptions);
 
     if (this.configs.mapper) {
       var _public = void 0;

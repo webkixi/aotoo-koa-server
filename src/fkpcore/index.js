@@ -3,8 +3,8 @@ import request from 'request'
 
 let fs = require('fs')
 let socketio = require('./modules/wsocket'); global.Sio = socketio.sio
-let cache = require('./modules/cache');      global.Cache = cache
-let _fetch = require('./modules/fetch');
+// let cache = require('./modules/cache');      global.Cache = cache
+// let _fetch = require('./modules/fetch');
 let router = require('./router')
 const Promise = require('bluebird')
 fs = Promise.promisifyAll(fs)
@@ -175,8 +175,8 @@ export default async function(app, options) {
   let server = socketio.init(app)  
 
   // 传入apis
-  const fetch = _fetch({apis: dfts.apis});     
-  global.Fetch = fetch
+  // const fetch = _fetch({apis: dfts.apis});     
+  // global.Fetch = fetch
 
   fkp.staticMapper = dfts.mapper
   fkp.router = router
