@@ -58,22 +58,41 @@ function filterRendeFile(pms, url) {
  * @param {String} dir 遍历的目标目录
  * @param {String} rootpath 根目录的绝对路径
  */
-async function getCtrlFiles(dir, rootpath) {
-  const __myControlFiles = []
-  const dirData = await fs.readdirAsync(dir)
-  dirData.map(async (file) => {
-    const _path = Path.join(dir, file)
-    const stat = fs.statSync(_path)
-    if (stat) {
-      if (stat.isDirectory()) {
-        __myControlFiles.concat(await getCtrlFiles(_path, rootpath))
-      } else {
-        __myControlFiles.push(_path.replace(rootpath, ''))
+// async function getCtrlFiles(dir, rootpath) {
+//   const __myControlFiles = []
+//   const dirData = await fs.readdirAsync(dir)
+//   dirData.map(async (file) => {
+//     const _path = Path.join(dir, file)
+//     const stat = fs.statSync(_path)
+//     if (stat) {
+//       if (stat.isDirectory()) {
+//         __myControlFiles.concat(await getCtrlFiles(_path, rootpath))
+//       } else {
+//         __myControlFiles.push(_path.replace(rootpath, ''))
+//       }
+//     }
+//   })
+//   return __myControlFiles
+// }
+
+function getCtrlFiles(dir, opts = {}) {
+  var controlFiles = []
+  if (!fs.existsSync(dir)) return;
+  const stat = fs.statSync(dir)
+  if (!stat.isDirectory()) return
+
+  const _partten = /^[_\.](\w)+/;   // ?? 不兼容windows
+  glob.sync(dir + '/**/*').forEach(function (item) {
+    var obj = Path.parse(item)
+    const xxx = _partten.test(obj.name)
+    if (!xxx) {
+      if (obj.ext) {
+        controlFiles.push(item.replace(dir, ''))
       }
     }
   })
-  return __myControlFiles
-}
+  return controlFiles
+};
 
 // 预读取pages目录下的所有文件路径，并保存
 function controlPages() {
