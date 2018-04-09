@@ -28,21 +28,39 @@ var _init = function () {
   var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9() {
     var _this = this;
 
-    var that, server;
+    var _configs, keys, apis, mapper, server;
+
     return _regenerator2.default.wrap(function _callee9$(_context9) {
       while (1) {
         switch (_context9.prev = _context9.next) {
           case 0:
-            that = this;
+            _context9.prev = 0;
 
-            myStore.append({
-              entry: that
-            });
+            myStore.append({ entry: this });
+            _configs = this.configs, keys = _configs.keys, apis = _configs.apis, mapper = _configs.mapper;
+
             app.keys = this.configs.keys;
-            _context9.next = 5;
+
+            if (apis.list) {
+              _context9.next = 6;
+              break;
+            }
+
+            throw new Error('api 列表必须封装为list的子属性');
+
+          case 6:
+            if (!(!mapper.js || !mapper.css)) {
+              _context9.next = 8;
+              break;
+            }
+
+            throw new Error('请将静态资源列表分别配置作为mapper.js和mapper.css的子元素');
+
+          case 8:
+            _context9.next = 10;
             return _fkpcore2.default.call(this, app, this.configs);
 
-          case 5:
+          case 10:
             server = _context9.sent;
 
             app.on('error', function () {
@@ -68,12 +86,18 @@ var _init = function () {
 
             return _context9.abrupt("return", server);
 
-          case 8:
+          case 15:
+            _context9.prev = 15;
+            _context9.t0 = _context9["catch"](0);
+
+            console.log(_context9.t0.stack);
+
+          case 18:
           case "end":
             return _context9.stop();
         }
       }
-    }, _callee9, this);
+    }, _callee9, this, [[0, 15]]);
   }));
 
   return function _init() {
@@ -131,6 +155,36 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var myStore = SAX('AOTOO-KOA-SERVER');
 
 var app = new _koa2.default();
+var DEFAULTCONFIGS = {
+  mapper: {
+    js: {},
+    css: {},
+    public: {
+      js: '/js',
+      css: '/css'
+    }
+  },
+
+  apis: {
+    list: {}
+  },
+
+  fetchOptions: {
+    headers: {},
+    timeout: 10000
+  },
+
+  cacheOptions: {
+    max: 300,
+    length: function length(n, key) {
+      return n * 2 + key.length;
+    },
+    dispose: function dispose(key, value) {},
+    maxAge: 2 * 60 * 60 * 1000
+  },
+
+  bodyOptions: {}
+};
 
 var aotooServer = function () {
   function aotooServer() {
@@ -147,11 +201,12 @@ var aotooServer = function () {
       keys: opts.keys || ['aotoo koa'], // cookie session关键字
       index: opts.index || 'index', // 默认首页
 
-      apis: theApis, // api接口集合
-      mapper: opts.mapper || { js: {}, css: {} }, // 静态资源映射文件
+      apis: theApis || DEFAULTCONFIGS.apis, // api接口集合
+      mapper: opts.mapper || DEFAULTCONFIGS.mapper, // 静态资源映射文件
 
-      fetchOptions: opts.fetchOptions || {},
-      cacheOptions: opts.cacheOptions || {},
+      fetchOptions: opts.fetchOptions || DEFAULTCONFIGS.fetchOptions,
+      cacheOptions: opts.cacheOptions || DEFAULTCONFIGS.cacheOptions,
+      bodyOptions: opts.bodyOptions || DEFAULTCONFIGS.bodyOptions,
 
       root: opts.root, // 渲染默认目录
       pages: opts.pages || opts.pagesFolder || opts.controls, // control层文件夹，必须
@@ -161,9 +216,15 @@ var aotooServer = function () {
     this.state = {
       views: false,
       bodyparser: false
+    };
 
-      // 传入apis
-    };global.Fetch = this.fetch = (0, _fetch2.default)((0, _extends3.default)({ apis: this.configs.apis }, this.fetchOptions));
+    if (this.configs.bodyOptions) {
+      this.state.bodyparser = true;
+      app.use((0, _koaBodyparser2.default)(this.configs.bodyOptions));
+    }
+
+    // 传入apis
+    global.Fetch = this.fetch = (0, _fetch2.default)((0, _extends3.default)({ apis: this.configs.apis }, this.fetchOptions));
     global.Cache = this.cache = (0, _cache2.default)(this.cacheOptions);
 
     if (this.configs.mapper) {

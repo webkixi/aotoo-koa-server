@@ -13,6 +13,35 @@ import cache from './fkpcore/modules/cache'
 const myStore = SAX('AOTOO-KOA-SERVER')
 
 const app = new Koa()
+const DEFAULTCONFIGS = {
+  mapper: {
+    js: {},
+    css: {},
+    public: {
+      js: '/js',
+      css: '/css'
+    }
+  },
+  
+  apis: {
+    list: {}
+  },
+
+  fetchOptions: {
+    headers: { }
+    , timeout: 10000
+  },
+
+  cacheOptions: {
+    max: 300
+    , length: function (n, key) { return n * 2 + key.length }
+    , dispose: function (key, value) { }
+    , maxAge: 2 * 60 * 60 * 1000
+  },
+
+  bodyOptions: {}
+}
+
 
 class aotooServer {
   constructor(opts = {}) {
@@ -26,11 +55,12 @@ class aotooServer {
       keys: opts.keys || ['aotoo koa'],    // cookie session关键字
       index: opts.index || 'index',        // 默认首页
 
-      apis: theApis,                      // api接口集合
-      mapper: opts.mapper || { js: {}, css: {} },  // 静态资源映射文件
+      apis: theApis || DEFAULTCONFIGS.apis,                      // api接口集合
+      mapper: opts.mapper || DEFAULTCONFIGS.mapper,  // 静态资源映射文件
 
-      fetchOptions: opts.fetchOptions || {},
-      cacheOptions: opts.cacheOptions || {},
+      fetchOptions: opts.fetchOptions || DEFAULTCONFIGS.fetchOptions,
+      cacheOptions: opts.cacheOptions || DEFAULTCONFIGS.cacheOptions,
+      bodyOptions: opts.bodyOptions || DEFAULTCONFIGS.bodyOptions,
 
       root: opts.root,              // 渲染默认目录
       pages: opts.pages||opts.pagesFolder||opts.controls,        // control层文件夹，必须
@@ -40,6 +70,11 @@ class aotooServer {
     this.state = {
       views: false,
       bodyparser: false
+    }
+
+    if (this.configs.bodyOptions) {
+      this.state.bodyparser = true
+      app.use(bodyparser(this.configs.bodyOptions))
     }
 
     // 传入apis
@@ -186,17 +221,28 @@ class aotooServer {
 
 
 async function _init() {
-  const that = this
-  myStore.append({
-    entry: that
-  })
-  app.keys = this.configs.keys
-  const server = await core.call(this, app, this.configs)
-  app.on('error', async (err, ctx) => {
-    console.error('server error', err, ctx)
-  })
+  try {
+    myStore.append({ entry: this })
+    const {keys, apis, mapper} = this.configs
+    app.keys = this.configs.keys
 
-  return server
+    if (!apis.list) {
+      throw new Error('api 列表必须封装为list的子属性')
+    }
+
+    if (!mapper.js || !mapper.css) {
+      throw new Error('请将静态资源列表分别配置作为mapper.js和mapper.css的子元素')
+    }
+
+    const server = await core.call(this, app, this.configs)
+    app.on('error', async (err, ctx) => {
+      console.error('server error', err, ctx)
+    })
+  
+    return server
+  } catch (error) {
+    console.log(error.stack);
+  }
 }
 
 module.exports = function (opts) {
