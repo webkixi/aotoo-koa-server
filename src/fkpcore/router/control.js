@@ -58,8 +58,56 @@ Control.prototype = {
   }
 }
 
+const dft = {
+  get: '',
+  GET: '',
+
+  post: '',
+  POST: '',
+
+  put: '',
+  PUT: '',
+
+  delete: '',
+  DELETE: ''
+}
+
+function myControl(route, ctx, odata, routerIns, options) {
+  var controlConfigs = _.merge({}, dft, options)
+  const _get = controlConfigs.get || controlConfigs.GET
+  const _post = controlConfigs.post || controlConfigs.POST
+  const _put = controlConfigs.put || controlConfigs.PUT
+  const _delete = controlConfigs.delete || controlConfigs.DELETE
+
+  switch (ctx.method) {
+    case 'GET':
+      if (_.isFunction(_get)) {
+        return _get.call(routerIns, ctx)
+      }
+      break;
+
+    case 'POST':
+      if (_.isFunction(_post)) {
+        return _post.call(routerIns, ctx)
+      }
+      break;
+
+    case 'PUT':
+      if (_.isFunction(_put)) {
+        return _put.call(routerIns, ctx)
+      }
+      break;
+
+    case 'DELETE':
+      if (_.isFunction(_delete)) {
+        return _delete.call(routerIns, ctx)
+      }
+      break;
+  }
+}
+
 function control(route, ctx, odata, routerIns){
-  // return new Control(ctx, odata, routerIns)1
+  // return new Control(ctx, odata, routerIns)
   let _id = route+'_controler'
   return Cache.ifid(_id, function(){
     let instance = new Control(ctx, odata, routerIns)
@@ -68,4 +116,4 @@ function control(route, ctx, odata, routerIns){
   })
 }
 
-export default control
+export default myControl

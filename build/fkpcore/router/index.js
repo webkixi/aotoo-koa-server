@@ -202,7 +202,7 @@ var distribute = function () {
 
 var controler = function () {
   var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee6(ctx, route, pageData, ctrlPages, routerInstance) {
-    var routerPrefix, ctrl, passAccess, xData, controlFile, prefixRootFile, prefixIndexFile, prefixCatFile, paramsCatFile, xRoute, apilist, isAjax;
+    var routerPrefix, passAccess, xData, controlFile, prefixRootFile, prefixIndexFile, prefixCatFile, paramsCatFile, xRoute, apilist, isAjax;
     return _regenerator2.default.wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
@@ -214,46 +214,36 @@ var controler = function () {
             }
 
             _context6.prev = 2;
-            ctrl = control(route, ctx, pageData, routerInstance);
+
+            // let ctrl = control(route, ctx, pageData, routerInstance)
             passAccess = false;
+            // if (ctrl.initStat) {
+            //   pageData = await ctrl.run(ctx)
+            //   route = ctrl.store.route || route
+            // } else {
+            // }
 
-            if (!ctrl.initStat) {
-              _context6.next = 12;
-              break;
-            }
-
-            _context6.next = 8;
-            return ctrl.run(ctx);
-
-          case 8:
-            pageData = _context6.sent;
-
-            route = ctrl.store.route || route;
-            _context6.next = 48;
-            break;
-
-          case 12:
             xData = false;
             // 根据route匹配到control文件+三层路由
 
             controlFile = Path.sep + route + '.js';
 
             if (!(ctrlPages.indexOf(controlFile) > -1)) {
-              _context6.next = 20;
+              _context6.next = 12;
               break;
             }
 
-            _context6.next = 17;
-            return getctrlData([businessPagesPath + '/' + route], route, ctx, pageData, ctrl);
+            _context6.next = 9;
+            return getctrlData([businessPagesPath + '/' + route], route, ctx, pageData, routerInstance);
 
-          case 17:
+          case 9:
             xData = _context6.sent;
-            _context6.next = 36;
+            _context6.next = 28;
             break;
 
-          case 20:
+          case 12:
             if (!routerPrefix) {
-              _context6.next = 30;
+              _context6.next = 22;
               break;
             }
 
@@ -261,74 +251,72 @@ var controler = function () {
             prefixRootFile = Path.join(businessPagesPath, routerPrefix);
             prefixIndexFile = Path.join(businessPagesPath, routerPrefix, '/index');
             prefixCatFile = Path.join(businessPagesPath, routerPrefix, ctx.params.cat || '');
-            _context6.next = 27;
-            return getctrlData([prefixCatFile, prefixIndexFile, prefixRootFile], route, ctx, pageData, ctrl);
+            _context6.next = 19;
+            return getctrlData([prefixCatFile, prefixIndexFile, prefixRootFile], route, ctx, pageData, routerInstance);
 
-          case 27:
+          case 19:
             xData = _context6.sent;
-            _context6.next = 36;
+            _context6.next = 28;
             break;
 
-          case 30:
+          case 22:
             if (!ctx.params.cat) {
-              _context6.next = 36;
+              _context6.next = 28;
               break;
             }
 
             paramsCatFile = Path.join(businessPagesPath, ctx.params.cat);
             xRoute = ctx.params.cat;
-            _context6.next = 35;
-            return getctrlData([paramsCatFile], xRoute, ctx, pageData, ctrl);
+            _context6.next = 27;
+            return getctrlData([paramsCatFile], xRoute, ctx, pageData, routerInstance);
 
-          case 35:
+          case 27:
             xData = _context6.sent;
 
-          case 36:
+          case 28:
             if (xData) {
-              _context6.next = 46;
+              _context6.next = 38;
               break;
             }
 
             apilist = Fetch.apilist;
 
             if (!(apilist.list[route] || route === 'redirect')) {
-              _context6.next = 45;
+              _context6.next = 37;
               break;
             }
 
             passAccess = true;
-            _context6.next = 42;
-            return getctrlData(['./passaccesscontrol'], route, ctx, pageData, ctrl);
+            _context6.next = 34;
+            return getctrlData(['./passaccesscontrol'], route, ctx, pageData, routerInstance);
 
-          case 42:
+          case 34:
             xData = _context6.sent;
-            _context6.next = 46;
+            _context6.next = 38;
             break;
 
-          case 45:
+          case 37:
             xData = { nomatch: true };
 
-          case 46:
+          case 38:
             isAjax = ctx.fkp.isAjax();
 
             if (passAccess || isAjax) pageData = xData;
-
-          case 48:
             return _context6.abrupt('return', [pageData, route]);
 
-          case 51:
-            _context6.prev = 51;
+          case 43:
+            _context6.prev = 43;
             _context6.t0 = _context6['catch'](2);
 
             DEBUG('controler error = %O', _context6.t0);
             // console.log(e.stack);
 
-          case 54:
+          case 46:
           case 'end':
             return _context6.stop();
         }
       }
-    }, _callee6, this, [[2, 51]]);
+    }, _callee6, this, [[2, 43]]);
   }));
 
   return function controler(_x14, _x15, _x16, _x17, _x18) {
@@ -340,7 +328,7 @@ var controler = function () {
 
 
 var getctrlData = function () {
-  var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(_path, route, ctx, _pageData, ctrl) {
+  var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(_path, route, ctx, _pageData, routerInstance) {
     var _names, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _filename, _stat, controlConfig;
 
     return _regenerator2.default.wrap(function _callee7$(_context7) {
@@ -349,18 +337,17 @@ var getctrlData = function () {
           case 0:
             _context7.prev = 0;
             _names = [];
-
-            ctrl.set('route', route);
+            // ctrl.set('route', route)
 
             if (!Array.isArray(_path)) {
-              _context7.next = 23;
+              _context7.next = 22;
               break;
             }
 
             _iteratorNormalCompletion = true;
             _didIteratorError = false;
             _iteratorError = undefined;
-            _context7.prev = 7;
+            _context7.prev = 6;
 
             for (_iterator = (0, _getIterator3.default)(_path); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
               _filename = _step.value;
@@ -372,73 +359,76 @@ var getctrlData = function () {
                 if (_stat && _stat.isFile()) _names.push(_filename);
               }
             }
-            _context7.next = 15;
+            _context7.next = 14;
             break;
 
-          case 11:
-            _context7.prev = 11;
-            _context7.t0 = _context7['catch'](7);
+          case 10:
+            _context7.prev = 10;
+            _context7.t0 = _context7['catch'](6);
             _didIteratorError = true;
             _iteratorError = _context7.t0;
 
-          case 15:
+          case 14:
+            _context7.prev = 14;
             _context7.prev = 15;
-            _context7.prev = 16;
 
             if (!_iteratorNormalCompletion && _iterator.return) {
               _iterator.return();
             }
 
-          case 18:
-            _context7.prev = 18;
+          case 17:
+            _context7.prev = 17;
 
             if (!_didIteratorError) {
-              _context7.next = 21;
+              _context7.next = 20;
               break;
             }
 
             throw _iteratorError;
 
+          case 20:
+            return _context7.finish(17);
+
           case 21:
-            return _context7.finish(18);
+            return _context7.finish(14);
 
           case 22:
-            return _context7.finish(15);
-
-          case 23:
             if (!_names.length) {
-              _context7.next = 30;
+              _context7.next = 29;
               break;
             }
 
-            controlConfig = require(_names[0]).getData.call(ctx, _pageData);
-            _context7.next = 27;
-            return ctrl.run(ctx, controlConfig);
+            // let controlConfig = require(_names[0]).getData.call(ctx, _pageData)
+            // _pageData = await ctrl.run(ctx, controlConfig)
 
-          case 27:
+            controlConfig = require(_names[0]).getData.call(ctx, _pageData);
+            _context7.next = 26;
+            return control(route, ctx, _pageData, routerInstance, controlConfig);
+
+          case 26:
             _pageData = _context7.sent;
-            _context7.next = 31;
+            _context7.next = 30;
             break;
 
-          case 30:
+          case 29:
             _pageData = false;
 
-          case 31:
+          case 30:
             return _context7.abrupt('return', _pageData);
 
-          case 34:
-            _context7.prev = 34;
+          case 33:
+            _context7.prev = 33;
             _context7.t1 = _context7['catch'](0);
 
             DEBUG('getctrlData error = %O', _context7.t1);
             return _context7.abrupt('return', { nomatch: true });
 
-          case 38:
+          case 37:
           case 'end':
             return _context7.stop();
         }
       }
-    }, _callee7, this, [[0, 34], [7, 11, 15, 23], [16,, 18, 22]]);
+    }, _callee7, this, [[0, 33], [6, 10, 14, 22], [15,, 17, 21]]);
   }));
 
   return function getctrlData(_x19, _x20, _x21, _x22, _x23) {
@@ -492,13 +482,14 @@ var renderPage = function () {
             return _context8.abrupt('return', ctx.body = data);
 
           case 16:
-            _context8.next = 21;
+            _context8.next = 22;
             break;
 
           case 18:
             _context8.prev = 18;
             _context8.t1 = _context8['catch'](0);
 
+            console.log(_context8.t1);
             if (isAjax) {
               ctx.body = {
                 error: '找不到相关信息'
@@ -508,7 +499,7 @@ var renderPage = function () {
             }
             // return await ctx.render('404')
 
-          case 21:
+          case 22:
           case 'end':
             return _context8.stop();
         }

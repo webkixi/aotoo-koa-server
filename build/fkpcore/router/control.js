@@ -60,8 +60,56 @@ Control.prototype = {
   }
 };
 
+var dft = {
+  get: '',
+  GET: '',
+
+  post: '',
+  POST: '',
+
+  put: '',
+  PUT: '',
+
+  delete: '',
+  DELETE: ''
+};
+
+function myControl(route, ctx, odata, routerIns, options) {
+  var controlConfigs = _.merge({}, dft, options);
+  var _get = controlConfigs.get || controlConfigs.GET;
+  var _post = controlConfigs.post || controlConfigs.POST;
+  var _put = controlConfigs.put || controlConfigs.PUT;
+  var _delete = controlConfigs.delete || controlConfigs.DELETE;
+
+  switch (ctx.method) {
+    case 'GET':
+      if (_.isFunction(_get)) {
+        return _get.call(routerIns, ctx);
+      }
+      break;
+
+    case 'POST':
+      if (_.isFunction(_post)) {
+        return _post.call(routerIns, ctx);
+      }
+      break;
+
+    case 'PUT':
+      if (_.isFunction(_put)) {
+        return _put.call(routerIns, ctx);
+      }
+      break;
+
+    case 'DELETE':
+      if (_.isFunction(_delete)) {
+        return _delete.call(routerIns, ctx);
+      }
+      break;
+  }
+}
+
 function control(route, ctx, odata, routerIns) {
-  // return new Control(ctx, odata, routerIns)1
+  // return new Control(ctx, odata, routerIns)
   var _id = route + '_controler';
   return Cache.ifid(_id, function () {
     var instance = new Control(ctx, odata, routerIns);
@@ -70,5 +118,5 @@ function control(route, ctx, odata, routerIns) {
   });
 }
 
-exports.default = control;
+exports.default = myControl;
 //# sourceMappingURL=../../maps/fkpcore/router/control.js.map

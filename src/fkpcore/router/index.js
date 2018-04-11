@@ -349,47 +349,47 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
   }
 
   try {
-    let ctrl = control(route, ctx, pageData, routerInstance)
+    // let ctrl = control(route, ctx, pageData, routerInstance)
     let passAccess = false
-    if (ctrl.initStat) {
-      pageData = await ctrl.run(ctx)
-      route = ctrl.store.route || route
-    } else {
-      let xData = false
-      // 根据route匹配到control文件+三层路由
-      const controlFile = Path.sep + route + '.js'
-      if (ctrlPages.indexOf(controlFile) > -1) {
-        xData = await getctrlData([businessPagesPath + '/' + route], route, ctx, pageData, ctrl)
-      }
-      // 根据prefix匹配到control文件+三层路由
-      else if (routerPrefix) {
-        route = routerPrefix
-        let prefixRootFile = Path.join(businessPagesPath, routerPrefix)
-        let prefixIndexFile = Path.join(businessPagesPath, routerPrefix, '/index')
-        let prefixCatFile = Path.join(businessPagesPath, routerPrefix, ctx.params.cat || '')
-        xData = await getctrlData([prefixCatFile, prefixIndexFile, prefixRootFile], route, ctx, pageData, ctrl)
-      }
-      // pages根目录+三层路由
-      else {
-        if (ctx.params.cat) {
-          let paramsCatFile = Path.join(businessPagesPath, ctx.params.cat)
-          const xRoute = ctx.params.cat
-          xData = await getctrlData([paramsCatFile], xRoute, ctx, pageData, ctrl)
-        }
-      }
-      // 根据 Fetch.apilist 匹配到api接口，从远程借口拿去数据
-      if (!xData) {
-        let apilist = Fetch.apilist
-        if (apilist.list[route] || route === 'redirect') {
-          passAccess = true
-          xData = await getctrlData(['./passaccesscontrol'], route, ctx, pageData, ctrl)
-        } else {
-          xData = { nomatch: true }
-        }
-      }
-      const isAjax = ctx.fkp.isAjax()
-      if (passAccess || isAjax) pageData = xData
+    // if (ctrl.initStat) {
+    //   pageData = await ctrl.run(ctx)
+    //   route = ctrl.store.route || route
+    // } else {
+    // }
+    let xData = false
+    // 根据route匹配到control文件+三层路由
+    const controlFile = Path.sep + route + '.js'
+    if (ctrlPages.indexOf(controlFile) > -1) {
+      xData = await getctrlData([businessPagesPath + '/' + route], route, ctx, pageData, routerInstance)
     }
+    // 根据prefix匹配到control文件+三层路由
+    else if (routerPrefix) {
+      route = routerPrefix
+      let prefixRootFile = Path.join(businessPagesPath, routerPrefix)
+      let prefixIndexFile = Path.join(businessPagesPath, routerPrefix, '/index')
+      let prefixCatFile = Path.join(businessPagesPath, routerPrefix, ctx.params.cat || '')
+      xData = await getctrlData([prefixCatFile, prefixIndexFile, prefixRootFile], route, ctx, pageData, routerInstance)
+    }
+    // pages根目录+三层路由
+    else {
+      if (ctx.params.cat) {
+        let paramsCatFile = Path.join(businessPagesPath, ctx.params.cat)
+        const xRoute = ctx.params.cat
+        xData = await getctrlData([paramsCatFile], xRoute, ctx, pageData, routerInstance)
+      }
+    }
+    // 根据 Fetch.apilist 匹配到api接口，从远程借口拿去数据
+    if (!xData) {
+      let apilist = Fetch.apilist
+      if (apilist.list[route] || route === 'redirect') {
+        passAccess = true
+        xData = await getctrlData(['./passaccesscontrol'], route, ctx, pageData, routerInstance)
+      } else {
+        xData = { nomatch: true }
+      }
+    }
+    const isAjax = ctx.fkp.isAjax()
+    if (passAccess || isAjax) pageData = xData
     return [pageData, route]
   } catch (e) {
     DEBUG('controler error = %O', e)
@@ -398,10 +398,10 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
 }
 
 // match的control文件，并返回数据
-async function getctrlData(_path, route, ctx, _pageData, ctrl) {
+async function getctrlData(_path, route, ctx, _pageData, routerInstance) {
   try {
     let _names = []
-    ctrl.set('route', route)
+    // ctrl.set('route', route)
     if (Array.isArray(_path)) {
       for (let _filename of _path) {
         _filename = Path.resolve(__dirname, _filename + '.js')
@@ -412,8 +412,11 @@ async function getctrlData(_path, route, ctx, _pageData, ctrl) {
       }
     }
     if (_names.length) {
+      // let controlConfig = require(_names[0]).getData.call(ctx, _pageData)
+      // _pageData = await ctrl.run(ctx, controlConfig)
+
       let controlConfig = require(_names[0]).getData.call(ctx, _pageData)
-      _pageData = await ctrl.run(ctx, controlConfig)
+      _pageData = await control(route, ctx, _pageData, routerInstance, controlConfig)
     } else {
       _pageData = false
     }
@@ -455,6 +458,7 @@ async function renderPage(ctx, route, data, isAjax) {
         return ctx.body = data
     }
   } catch (e) {
+    console.log(e);
     if (isAjax) {
       ctx.body = {
         error: '找不到相关信息'
