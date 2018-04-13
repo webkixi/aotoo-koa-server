@@ -152,6 +152,8 @@ var _cache2 = _interopRequireDefault(_cache);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 // global.Aotoo
+global.ReactDomServer = require('react-dom/server');
+
 var myStore = SAX('AOTOO-KOA-SERVER');
 
 var app = new _koa2.default();

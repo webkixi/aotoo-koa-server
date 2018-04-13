@@ -9,6 +9,7 @@ import bodyparser from 'koa-bodyparser'
 import core, { fkp } from './fkpcore'
 import fetch from './fkpcore/modules/fetch'
 import cache from './fkpcore/modules/cache'
+global.ReactDomServer = require('react-dom/server')
 
 const myStore = SAX('AOTOO-KOA-SERVER')
 
