@@ -427,6 +427,13 @@ var aotooServer = function () {
                   debug: process.env.NODE_ENV !== 'production'
                 };
 
+
+                if (typeof opts == 'function') {
+                  opts = {
+                    render: opts
+                  };
+                }
+
                 dft = _.merge({}, dft, opts);
 
                 if (dist) {
@@ -444,9 +451,13 @@ var aotooServer = function () {
                   }
                   this.state.views = _views;
                 }
-                (0, _koaArtTemplate2.default)(app, dft);
+                if (dft.render && typeof dft.render == 'function') {
+                  app.use(dft.render);
+                } else {
+                  (0, _koaArtTemplate2.default)(app, dft);
+                }
 
-              case 4:
+              case 5:
               case "end":
                 return _context5.stop();
             }
@@ -478,7 +489,7 @@ var aotooServer = function () {
                   break;
                 }
 
-                throw '必须指定control目录';
+                throw new Error('控制器目录没有指定');
 
               case 3:
                 if (this.state.views) {
@@ -491,7 +502,7 @@ var aotooServer = function () {
                   break;
                 }
 
-                throw '必须指定模板引擎的views目录';
+                throw new Error('koa的模板解析引擎没有配置且需设置app.state.views=true; app.state.viewsRoot=HTMLDIST');
 
               case 8:
                 this.views(this.configs.root);

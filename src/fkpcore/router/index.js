@@ -110,7 +110,7 @@ function controlPages() {
   try {
     if (fs.existsSync(controlPagePath)) {
       return Cache.ifid(_id, async () => {
-        const __cfile = await getCtrlFiles(controlPagePath, controlPagePath);  Cache.set(_id, __cfile)
+        const __cfile = await getCtrlFiles(controlPagePath, controlPagePath); Cache.set(_id, __cfile)
         return __cfile
       })
     } else {
@@ -183,6 +183,9 @@ function makeRoute(ctx, prefix) {
   }
   if (ctxurl && route !== ctxurl) route = ctxurl
   if (prefix) route = prefix.indexOf('/') == 0 ? prefix.substring(1) : prefix
+  if (route.lastIndexOf('/') == (route.length - 1)) {
+    route = route.substring(0, route.length - 1)
+  }
   return route
 }
 
@@ -289,9 +292,9 @@ async function init(app, prefix, options) {
 }
 
 function forBetter(router, ctrlPages) {
-  return async function(ctx, next) {
+  return async function (ctx, next) {
     try {
-      if (ignoreStacic.indexOf(ctx.params.cat) == -1){
+      if (ignoreStacic.indexOf(ctx.params.cat) == -1) {
         return await dealwithRoute.call(this, ctx, ctx.fkp.staticMapper, ctrlPages)
       }
     } catch (e) {
@@ -327,7 +330,7 @@ async function dealwithRoute(ctx, _mapper, ctrlPages) {
 
     let pageData = staticMapper(ctx, _mapper, route, routerPrefix)
     if (!pageData) throw 'mapper数据不正确'
-    return ctx::distribute(route, pageData, ctrlPages, this)
+    return ctx:: distribute(route, pageData, ctrlPages, this)
   } catch (e) {
     DEBUG('dealwithRoute error = %O', e)
     // console.log(e);
@@ -349,13 +352,7 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
   }
 
   try {
-    // let ctrl = control(route, ctx, pageData, routerInstance)
     let passAccess = false
-    // if (ctrl.initStat) {
-    //   pageData = await ctrl.run(ctx)
-    //   route = ctrl.store.route || route
-    // } else {
-    // }
     let xData = false
     // 根据route匹配到control文件+三层路由
     const controlFile = Path.sep + route + '.js'
@@ -365,10 +362,23 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
     // 根据prefix匹配到control文件+三层路由
     else if (routerPrefix) {
       route = routerPrefix
-      let prefixRootFile = Path.join(businessPagesPath, routerPrefix)
-      let prefixIndexFile = Path.join(businessPagesPath, routerPrefix, '/index')
-      let prefixCatFile = Path.join(businessPagesPath, routerPrefix, ctx.params.cat || '')
-      xData = await getctrlData([prefixCatFile, prefixIndexFile, prefixRootFile], route, ctx, pageData, routerInstance)
+      // let prefixRootFile = Path.join(businessPagesPath, routerPrefix)
+      // let prefixIndexFile = Path.join(businessPagesPath, routerPrefix, '/index')
+      // let prefixCatFile = Path.join(businessPagesPath, routerPrefix, ctx.params.cat || '')
+      // xData = await getctrlData([prefixCatFile, prefixIndexFile, prefixRootFile], route, ctx, pageData, routerInstance)
+
+      const hitedControlFile = []
+      const controlFile = Path.join(Path.sep, routerPrefix)
+      const controlIndexFile = Path.join(Path.sep, routerPrefix, 'index')
+      const controlCatFile = Path.join(Path.sep, routerPrefix, (ctx.params.cat||''))
+      Array.forEach([controlFile, controlIndexFile, controlCatFile], item => {
+        const item_file = item + '.js'
+        if (ctrlPages.indexOf(item_file) > -1) {
+          hitedControlFile.push(Path.join(businessPagesPath, item))
+        }
+      })
+      
+      xData = await getctrlData(hitedControlFile, route, ctx, pageData, routerInstance)
     }
     // pages根目录+三层路由
     else {
@@ -401,29 +411,33 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
 async function getctrlData(_path, route, ctx, _pageData, routerInstance) {
   try {
     let _names = []
-    // ctrl.set('route', route)
     if (Array.isArray(_path)) {
       for (let _filename of _path) {
         _filename = Path.resolve(__dirname, _filename + '.js')
-        if (fs.existsSync(_filename)) {
-          let _stat = fs.statSync(_filename)
-          if (_stat && _stat.isFile()) _names.push(_filename)
-        }
+        _names.push(_filename)
       }
     }
-    if (_names.length) {
-      // let controlConfig = require(_names[0]).getData.call(ctx, _pageData)
-      // _pageData = await ctrl.run(ctx, controlConfig)
-
-      let controlConfig = require(_names[0]).getData.call(ctx, _pageData)
-      _pageData = await control(route, ctx, _pageData, routerInstance, controlConfig)
+    const controlModule = require(_names[0])
+    if (controlModule) {
+      const controlConfig = typeof controlModule == 'function' 
+      ? controlModule.call(ctx, _pageData)
+        : controlModule.getData && controlModule.getData && typeof controlModule.getData == 'function'
+          ? controlModule.getData.call(ctx, _pageData)
+          : undefined
+      
+      if (controlConfig) {
+        _pageData = await control(route, ctx, _pageData, routerInstance, controlConfig)
+      } else {
+        throw new Error('控制器文件不符合规范')
+      }
     } else {
-      _pageData = false
+      _pageData = undefined
     }
     return _pageData
   } catch (e) {
+    console.log(e);
     DEBUG('getctrlData error = %O', e)
-    return { nomatch: true }
+    // return { nomatch: true }
   }
 }
 
@@ -431,15 +445,21 @@ function preRender(rt) {
   const mydata = myStore.get()
   const myentry = mydata.entry
   const myroute = mydata.route.runtime.route
+  const prefix = mydata.route.runtime.prefix
   const viewsRoot = myentry.state.viewsRoot
+  const absOriRoute = Path.join(viewsRoot, myroute + '.html')
+
   const viewsFiles = myentry.state.views
-  if (rt != myroute) {
-    const absOriRoute = Path.join(viewsRoot, myroute + '.html')
-    if (viewsFiles.indexOf(absOriRoute) > -1) {
-      return myroute
+  if (viewsFiles.indexOf(absOriRoute) > -1) {
+    if (rt != myroute) return myroute
+    return rt
+  } else {
+    if (prefix) {
+      return rt
+    } else {
+      throw new Error(`模板文件不存在，${absOriRoute}`)
     }
   }
-  return rt
 }
 
 // dealwith the data from controlPage
@@ -455,16 +475,17 @@ async function renderPage(ctx, route, data, isAjax) {
         if (data && data.nomatch) throw new Error('你访问的页面/api不存在')
         return await ctx.render(route, data)
       case 'POST':
-        return ctx.body = data
+        ctx.body = data
     }
   } catch (e) {
     console.log(e);
     if (isAjax) {
       ctx.body = {
-        error: '找不到相关信息'
+        error: 'node - 找不到相关信息'
       }
     } else {
-      ctx.body = "找不到页面，呃"
+      return await ctx.redirect('/404')
+      // ctx.body = "找不到页面，呃"
     }
     // return await ctx.render('404')
   }

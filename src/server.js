@@ -171,6 +171,13 @@ class aotooServer {
       extname: '.html',
       debug: process.env.NODE_ENV !== 'production'
     }
+
+    if (typeof opts == 'function') {
+      opts = {
+        render: opts
+      }
+    }
+
     dft = _.merge({}, dft, opts)
 
     if (dist) {
@@ -186,7 +193,11 @@ class aotooServer {
       }
       this.state.views = views
     }
-    render(app, dft)
+    if (dft.render && typeof dft.render == 'function') {
+      app.use(dft.render)
+    } else {
+      render(app, dft)
+    }
   }
 
 
@@ -194,11 +205,11 @@ class aotooServer {
   async init() {
     try {
       if (!this.configs.pages) {
-        throw '必须指定control目录'
+        throw new Error('控制器目录没有指定')
       }
       if (!this.state.views) {
         if (!this.configs.root) {
-          throw '必须指定模板引擎的views目录'
+          throw new Error('koa的模板解析引擎没有配置且需设置app.state.views=true; app.state.viewsRoot=HTMLDIST')
         } else {
           this.views(this.configs.root)
         }
