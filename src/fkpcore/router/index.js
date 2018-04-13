@@ -353,7 +353,7 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
 
   try {
     let passAccess = false
-    let xData = false
+    let xData = undefined
     // 根据route匹配到control文件+三层路由
     const controlFile = Path.sep + route + '.js'
     if (ctrlPages.indexOf(controlFile) > -1) {
@@ -407,6 +407,8 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
   }
 }
 
+var existsControlFun = {}
+
 // match的control文件，并返回数据
 async function getctrlData(_path, route, ctx, _pageData, routerInstance) {
   try {
@@ -417,18 +419,35 @@ async function getctrlData(_path, route, ctx, _pageData, routerInstance) {
         _names.push(_filename)
       }
     }
-    const controlModule = require(_names[0])
-    if (controlModule) {
-      const controlConfig = typeof controlModule == 'function' 
-      ? controlModule.call(ctx, _pageData)
-        : controlModule.getData && controlModule.getData && typeof controlModule.getData == 'function'
-          ? controlModule.getData.call(ctx, _pageData)
-          : undefined
-      
+
+    if (existsControlFun[_names[0]]) {
+      const controlFun = existsControlFun[_names[0]]
+      const controlConfig = controlFun ? controlFun.call(ctx, _pageData) : undefined
       if (controlConfig) {
-        _pageData = await control(route, ctx, _pageData, routerInstance, controlConfig)
+        return await control(route, ctx, _pageData, routerInstance, controlConfig)
       } else {
         throw new Error('控制器文件不符合规范')
+      }
+    }
+
+    if (fs.existsSync(_names[0])) {
+      const controlModule = require(_names[0])
+      if (controlModule) {
+        const controlFun = typeof controlModule == 'function' 
+        ? controlModule 
+        : controlModule.getData && controlModule.getData && typeof controlModule.getData == 'function' 
+        ? controlModule.getData 
+        : undefined
+
+        existsControlFun[_names[0]] = controlFun
+        const controlConfig = controlFun ? controlFun.call(ctx, _pageData) : undefined
+        if (controlConfig) {
+          _pageData = await control(route, ctx, _pageData, routerInstance, controlConfig)
+        } else {
+          throw new Error('控制器文件不符合规范')
+        }
+      } else {
+        _pageData = undefined
       }
     } else {
       _pageData = undefined
@@ -438,6 +457,9 @@ async function getctrlData(_path, route, ctx, _pageData, routerInstance) {
     console.log(e);
     DEBUG('getctrlData error = %O', e)
     // return { nomatch: true }
+  } finally {
+    _pageData = undefined
+    return _pageData
   }
 }
 

@@ -220,7 +220,7 @@ var controler = function () {
 
             _context6.prev = 2;
             passAccess = false;
-            xData = false;
+            xData = undefined;
             // 根据route匹配到control文件+三层路由
 
             controlFile = Path.sep + route + '.js';
@@ -336,11 +336,9 @@ var controler = function () {
 }();
 
 // match的control文件，并返回数据
-
-
 var getctrlData = function () {
   var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee7(_path, route, ctx, _pageData, routerInstance) {
-    var _names, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _filename, controlModule, controlConfig;
+    var _names, _iteratorNormalCompletion, _didIteratorError, _iteratorError, _iterator, _step, _filename, controlFun, controlConfig, controlModule, _controlFun, _controlConfig;
 
     return _regenerator2.default.wrap(function _callee7$(_context7) {
       while (1) {
@@ -399,14 +397,13 @@ var getctrlData = function () {
             return _context7.finish(14);
 
           case 22:
-            controlModule = require(_names[0]);
-
-            if (!controlModule) {
-              _context7.next = 34;
+            if (!existsControlFun[_names[0]]) {
+              _context7.next = 32;
               break;
             }
 
-            controlConfig = typeof controlModule == 'function' ? controlModule.call(ctx, _pageData) : controlModule.getData && controlModule.getData && typeof controlModule.getData == 'function' ? controlModule.getData.call(ctx, _pageData) : undefined;
+            controlFun = existsControlFun[_names[0]];
+            controlConfig = controlFun ? controlFun.call(ctx, _pageData) : undefined;
 
             if (!controlConfig) {
               _context7.next = 31;
@@ -417,37 +414,83 @@ var getctrlData = function () {
             return control(route, ctx, _pageData, routerInstance, controlConfig);
 
           case 28:
-            _pageData = _context7.sent;
-            _context7.next = 32;
-            break;
+            return _context7.abrupt('return', _context7.sent);
 
           case 31:
             throw new Error('控制器文件不符合规范');
 
           case 32:
-            _context7.next = 35;
+            if (!fs.existsSync(_names[0])) {
+              _context7.next = 50;
+              break;
+            }
+
+            controlModule = require(_names[0]);
+
+            if (!controlModule) {
+              _context7.next = 47;
+              break;
+            }
+
+            _controlFun = typeof controlModule == 'function' ? controlModule : controlModule.getData && controlModule.getData && typeof controlModule.getData == 'function' ? controlModule.getData : undefined;
+
+
+            existsControlFun[_names[0]] = _controlFun;
+            _controlConfig = _controlFun ? _controlFun.call(ctx, _pageData) : undefined;
+
+            if (!_controlConfig) {
+              _context7.next = 44;
+              break;
+            }
+
+            _context7.next = 41;
+            return control(route, ctx, _pageData, routerInstance, _controlConfig);
+
+          case 41:
+            _pageData = _context7.sent;
+            _context7.next = 45;
             break;
 
-          case 34:
+          case 44:
+            throw new Error('控制器文件不符合规范');
+
+          case 45:
+            _context7.next = 48;
+            break;
+
+          case 47:
             _pageData = undefined;
 
-          case 35:
+          case 48:
+            _context7.next = 51;
+            break;
+
+          case 50:
+            _pageData = undefined;
+
+          case 51:
             return _context7.abrupt('return', _pageData);
 
-          case 38:
-            _context7.prev = 38;
+          case 54:
+            _context7.prev = 54;
             _context7.t1 = _context7['catch'](0);
 
             console.log(_context7.t1);
             DEBUG('getctrlData error = %O', _context7.t1);
             // return { nomatch: true }
 
-          case 42:
+          case 58:
+            _context7.prev = 58;
+
+            _pageData = undefined;
+            return _context7.abrupt('return', _pageData);
+
+          case 62:
           case 'end':
             return _context7.stop();
         }
       }
-    }, _callee7, this, [[0, 38], [6, 10, 14, 22], [15,, 17, 21]]);
+    }, _callee7, this, [[0, 54, 58, 62], [6, 10, 14, 22], [15,, 17, 21]]);
   }));
 
   return function getctrlData(_x19, _x20, _x21, _x22, _x23) {
@@ -840,6 +883,8 @@ function forBetter(router, ctrlPages) {
     };
   }().bind(router);
 }
+
+var existsControlFun = {};
 
 function preRender(rt) {
   var mydata = myStore.get();

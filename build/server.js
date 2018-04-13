@@ -439,6 +439,7 @@ var aotooServer = function () {
                 if (dist) {
                   _views = [];
 
+                  this.state.viewsRoot = dist;
                   if (_fs2.default.existsSync(dist)) {
                     distState = _fs2.default.statSync(dist);
 
@@ -446,7 +447,6 @@ var aotooServer = function () {
                       _glob2.default.sync(dist + '/**/*.html').forEach(function (item) {
                         _views.push(item);
                       });
-                      this.state.viewsRoot = dist;
                     }
                   }
                   this.state.views = _views;

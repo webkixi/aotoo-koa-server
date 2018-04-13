@@ -182,13 +182,13 @@ class aotooServer {
 
     if (dist) {
       let views = []
+      this.state.viewsRoot = dist
       if (fs.existsSync(dist)) {
         const distState = fs.statSync(dist)
         if (distState.isDirectory()) {
           glob.sync(dist + '/**/*.html').forEach(function (item) {
             views.push(item)
           })
-          this.state.viewsRoot = dist
         }
       }
       this.state.views = views
