@@ -1,18 +1,23 @@
 import fs from "fs";
-import glob from "glob";
-import md5 from "blueimp-md5";
 import Koa from 'koa'
-import aotoo from 'aotoo-common'   // global.Aotoo
+import glob from "glob";
+import path from 'path'
+import 'aotoo'
+import 'aotoo-web-widgets'
+import md5 from "blueimp-md5";
 import render from 'koa-art-template'
 import statics from 'koa-static-cache'
 import bodyparser from 'koa-bodyparser'
 import core, { fkp } from './fkpcore'
 import fetch from './fkpcore/modules/fetch'
 import cache from './fkpcore/modules/cache'
-global.ReactDomServer = require('react-dom/server')
 
-const myStore = SAX('AOTOO-KOA-SERVER')
+ReactDom = require('react-dom/server')
+global.ReactDomServer = ReactDom
+Aotoo.render = ReactDomServer.renderToString
+Aotoo.html = ReactDomServer.renderToStaticMarkup
 
+const AKSHOOKS = SAX('AOTOO-KOA-SERVER')
 const app = new Koa()
 const DEFAULTCONFIGS = {
   mapper: {
@@ -47,6 +52,10 @@ const DEFAULTCONFIGS = {
 class aotooServer {
   constructor(opts = {}) {
     this.middlewares = []
+    this._public = {
+      js: '/js',
+      css: '/css'
+    }
 
     let theApis = {
       list: opts.apis || {}
@@ -90,13 +99,24 @@ class aotooServer {
         // delete mapper.public
       }
       if (_public) {
+        this._public = _public
         Aotoo.inject.public = _public
       }
       Aotoo.inject.mapper = mapper
     }
+
+    this.on = AKSHOOKS::AKSHOOKS.on
+    this.one = AKSHOOKS::AKSHOOKS.one
+    this.off = AKSHOOKS::AKSHOOKS.off
+    this.emit = AKSHOOKS::AKSHOOKS.emit
+    this.hasOn = AKSHOOKS::AKSHOOKS.hasOn
+    this.append = AKSHOOKS::AKSHOOKS.append
+    this.set = AKSHOOKS::AKSHOOKS.set
+    this.get = AKSHOOKS::AKSHOOKS.get
   }
 
   public(opts) {
+    this._public = opts
     Aotoo.inject.public = opts
   }
 
@@ -126,9 +146,7 @@ class aotooServer {
       buffer: false,
       gzip: false
     }
-    if (opts) {
-      dft = _.merge(dft, opts)
-    }
+    dft = _.merge(dft, opts)
 
     app.use(statics(dist, dft, files))
   }
@@ -187,6 +205,7 @@ class aotooServer {
       if (fs.existsSync(dist)) {
         const distState = fs.statSync(dist)
         if (distState.isDirectory()) {
+          // glob.sync(dist + '/**/*.html').forEach(function (item) {
           glob.sync(dist + '/**/*.html').forEach(function (item) {
             views.push(item)
           })
@@ -234,7 +253,7 @@ class aotooServer {
 
 async function _init() {
   try {
-    myStore.append({ entry: this })
+    AKSHOOKS.append({ entry: this })
     const {keys, apis, mapper} = this.configs
     app.keys = this.configs.keys
 

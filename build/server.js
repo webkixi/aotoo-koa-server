@@ -36,7 +36,7 @@ var _init = function () {
           case 0:
             _context9.prev = 0;
 
-            myStore.append({ entry: this });
+            AKSHOOKS.append({ entry: this });
             _configs = this.configs, keys = _configs.keys, apis = _configs.apis, mapper = _configs.mapper;
 
             app.keys = this.configs.keys;
@@ -109,21 +109,25 @@ var _fs = require("fs");
 
 var _fs2 = _interopRequireDefault(_fs);
 
-var _glob = require("glob");
-
-var _glob2 = _interopRequireDefault(_glob);
-
-var _blueimpMd = require("blueimp-md5");
-
-var _blueimpMd2 = _interopRequireDefault(_blueimpMd);
-
 var _koa = require("koa");
 
 var _koa2 = _interopRequireDefault(_koa);
 
-var _aotooCommon = require("aotoo-common");
+var _glob = require("glob");
 
-var _aotooCommon2 = _interopRequireDefault(_aotooCommon);
+var _glob2 = _interopRequireDefault(_glob);
+
+var _path = require("path");
+
+var _path2 = _interopRequireDefault(_path);
+
+require("aotoo");
+
+require("aotoo-web-widgets");
+
+var _blueimpMd = require("blueimp-md5");
+
+var _blueimpMd2 = _interopRequireDefault(_blueimpMd);
 
 var _koaArtTemplate = require("koa-art-template");
 
@@ -151,11 +155,12 @@ var _cache2 = _interopRequireDefault(_cache);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// global.Aotoo
-global.ReactDomServer = require('react-dom/server');
+ReactDom = require('react-dom/server');
+global.ReactDomServer = ReactDom;
+Aotoo.render = ReactDomServer.renderToString;
+Aotoo.html = ReactDomServer.renderToStaticMarkup;
 
-var myStore = SAX('AOTOO-KOA-SERVER');
-
+var AKSHOOKS = SAX('AOTOO-KOA-SERVER');
 var app = new _koa2.default();
 var DEFAULTCONFIGS = {
   mapper: {
@@ -194,6 +199,10 @@ var aotooServer = function () {
     (0, _classCallCheck3.default)(this, aotooServer);
 
     this.middlewares = [];
+    this._public = {
+      js: '/js',
+      css: '/css'
+    };
 
     var theApis = {
       list: opts.apis || {}
@@ -237,15 +246,26 @@ var aotooServer = function () {
         // delete mapper.public
       }
       if (_public) {
+        this._public = _public;
         Aotoo.inject.public = _public;
       }
       Aotoo.inject.mapper = mapper;
     }
+
+    this.on = AKSHOOKS.on.bind(AKSHOOKS);
+    this.one = AKSHOOKS.one.bind(AKSHOOKS);
+    this.off = AKSHOOKS.off.bind(AKSHOOKS);
+    this.emit = AKSHOOKS.emit.bind(AKSHOOKS);
+    this.hasOn = AKSHOOKS.hasOn.bind(AKSHOOKS);
+    this.append = AKSHOOKS.append.bind(AKSHOOKS);
+    this.set = AKSHOOKS.set.bind(AKSHOOKS);
+    this.get = AKSHOOKS.get.bind(AKSHOOKS);
   }
 
   (0, _createClass3.default)(aotooServer, [{
     key: "public",
     value: function _public(opts) {
+      this._public = opts;
       Aotoo.inject.public = opts;
     }
 
@@ -314,9 +334,7 @@ var aotooServer = function () {
                   gzip: false
                 };
 
-                if (opts) {
-                  dft = _.merge(dft, opts);
-                }
+                dft = _.merge(dft, opts);
 
                 app.use((0, _koaStaticCache2.default)(dist, dft, files));
 
@@ -446,6 +464,7 @@ var aotooServer = function () {
                     distState = _fs2.default.statSync(dist);
 
                     if (distState.isDirectory()) {
+                      // glob.sync(dist + '/**/*.html').forEach(function (item) {
                       _glob2.default.sync(dist + '/**/*.html').forEach(function (item) {
                         _views.push(item);
                       });

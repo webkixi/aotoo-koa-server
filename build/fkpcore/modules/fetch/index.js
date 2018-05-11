@@ -17,6 +17,7 @@ var _querystring = require('querystring');
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var DEBUG = debug('fkp:modules:fetch');
+var AKSHOOKS = SAX('AOTOO-KOA-SERVER');
 
 function inherits(Super, protos, staticProtos) {
   var child;
@@ -69,7 +70,7 @@ function setOpts(api, options, method) {
     delete opts.fttype;
   }
   this.api = api;
-  this.requestOptions = opts;
+  this.requestOptions = AKSHOOKS.emit('apiFetchOptions', { api: api, options: opts }) || opts || {};
 }
 
 var __request = inherits(_request, {

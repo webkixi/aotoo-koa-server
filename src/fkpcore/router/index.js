@@ -9,7 +9,7 @@ const Path = require('path')
 const Url = require('url')
 const Router = require('koa-router')
 const md5 = require('blueimp-md5')
-const myStore = SAX('AOTOO-KOA-SERVER')
+const AKSHOOKS = SAX('AOTOO-KOA-SERVER')
 const control = require('./control').default
 fs = Promise.promisifyAll(fs)
 
@@ -34,6 +34,10 @@ function getObjType(object) {
  * return   {boleean}
 **/
 function filterRendeFile(pms, url) {
+  url=url.replace(/\?\S*$/,'') // 避免?key=value参数影响ext判断
+
+  url=decodeURIComponent(url)
+  
   let rjson = Path.parse(url)
   let rtn = false;
   let ext = rjson.ext;
@@ -317,7 +321,7 @@ async function dealwithRoute(ctx, _mapper, ctrlPages) {
     ctx.fkproute = route
     let routerPrefix = this.opts.prefix
     ctx.routerPrefix = routerPrefix
-    myStore.append({
+    AKSHOOKS.append({
       route: {
         runtime: {
           route: route,
@@ -334,14 +338,20 @@ async function dealwithRoute(ctx, _mapper, ctrlPages) {
   } catch (e) {
     DEBUG('dealwithRoute error = %O', e)
     // console.log(e);
-    // return ctx.redirect('404')
   }
 }
 
 // 分发路由
 async function distribute(route, pageData, ctrlPages, routerInstance) {
-  let [pdata, rt] = await controler(this, route, pageData, ctrlPages, routerInstance)
-  return await renderPage(this, rt, pdata)
+  try{
+    let [pdata, rt] = await controler(this, route, pageData, ctrlPages, routerInstance)
+    return await renderPage(this, rt, pdata)
+  }catch(e){
+    DEBUG('dealwithRoute error = %O', e)
+    return await renderPage(this, null, null)
+    // 渲染模板出错重定向至404页面
+    // return await this.render('404')
+  }
 }
 
 
@@ -411,7 +421,7 @@ var existsControlFun = {}
 
 // match的control文件，并返回数据
 async function getctrlData(_path, route, ctx, _pageData, routerInstance) {
-  try {
+  // try {
     let _names = []
     if (Array.isArray(_path)) {
       for (let _filename of _path) {
@@ -453,18 +463,18 @@ async function getctrlData(_path, route, ctx, _pageData, routerInstance) {
       _pageData = undefined
     }
     return _pageData
-  } catch (e) {
-    console.log(e);
-    DEBUG('getctrlData error = %O', e)
-    // return { nomatch: true }
-  } finally {
-    _pageData = undefined
-    return _pageData
-  }
+  // } catch (e) {
+  //   console.log(e);
+  //   DEBUG('getctrlData error = %O', e)
+  //   // return { nomatch: true }
+  // } finally {
+  //   _pageData = undefined
+  //   return _pageData
+  // }
 }
 
-function preRender(rt) {
-  const mydata = myStore.get()
+function preRender(rt, ctx) {
+  const mydata = AKSHOOKS.get()
   const myentry = mydata.entry
   const myroute = mydata.route.runtime.route
   const prefix = mydata.route.runtime.prefix
@@ -489,27 +499,41 @@ async function renderPage(ctx, route, data, isAjax) {
   try {
     DEBUG('renderPage pageData = %O', data)
     DEBUG('renderPage route = %s', route)
-    route = preRender(route)
-    switch (ctx.method) {
-      case 'GET':
-        let getStat = ctx.local.query._stat_
-        if ((getStat && getStat === 'DATA') || isAjax) return ctx.body = data
-        if (data && data.nomatch) throw new Error('你访问的页面/api不存在')
-        return await ctx.render(route, data)
-      case 'POST':
-        ctx.body = data
+    if (route) {
+      route = preRender(route, ctx)
+      data = AKSHOOKS.emit('pageWillRender', data) || data
+      switch (ctx.method) {
+        case 'GET':
+          let getStat = ctx.local.query._stat_
+          if ((getStat && getStat === 'DATA') || isAjax) return ctx.body = data
+          if (data && data.nomatch) {
+            console.log('你访问的页面/api不存在');
+          }
+          return await ctx.render(route, data)
+        case 'POST':
+          ctx.body = data
+      }
+    } else {
+      throw new Error('模板文件不存在')
     }
   } catch (e) {
-    console.log(e);
+    AKSHOOKS.emit('pageRenderError', { err: e, isAjax, ctx })
     if (isAjax) {
       ctx.body = {
         error: 'node - 找不到相关信息'
       }
     } else {
-      return await ctx.redirect('/404')
-      // ctx.body = "找不到页面，呃"
+      ctx.status = 404
+      if (route == '404') {
+        ctx.body = '您访问的页面不存在!'
+      } else {
+        if (AKSHOOKS.hasOn('404')) {
+          return await AKSHOOKS.emit('404', ctx)
+        }
+        return await ctx.redirect('/404')
+      }
+      // return await ctx.render('404')
     }
-    // return await ctx.render('404')
   }
 }
 

@@ -16,6 +16,7 @@ var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var DEBUG = debug('fkp:router:passaccesscontrol');
+var AKSHOOKS = SAX('AOTOO-KOA-SERVER');
 
 function passaccess(oridata) {
   return {
@@ -31,9 +32,11 @@ function passaccess(oridata) {
 
               case 2:
                 passdata = _context.sent;
+
+                passData = AKSHOOKS.emit('apiControl-get', { data: passdata, ctx: ctx }) || passdata;
                 return _context.abrupt('return', passdata);
 
-              case 4:
+              case 5:
               case 'end':
                 return _context.stop();
             }
@@ -61,8 +64,10 @@ function passaccess(oridata) {
               case 2:
                 passdata = _context2.sent;
 
+                passData = AKSHOOKS.emit('apiControl-post', { data: passdata, ctx: ctx }) || passdata;
+
                 if (!(passdata && passdata[1])) {
-                  _context2.next = 8;
+                  _context2.next = 9;
                   break;
                 }
 
@@ -71,19 +76,19 @@ function passaccess(oridata) {
                 }
                 return _context2.abrupt('return', passdata[1]);
 
-              case 8:
+              case 9:
                 if (!(passdata && passdata[1] === '')) {
-                  _context2.next = 10;
+                  _context2.next = 11;
                   break;
                 }
 
                 return _context2.abrupt('return', { success: '1010', message: "链接正确，但数据为空" });
 
-              case 10:
+              case 11:
                 DEBUG('%s', 'java/php后端返回数据出错');
                 return _context2.abrupt('return', { error: "60002", message: "java或者php返回数据错误" });
 
-              case 12:
+              case 13:
               case 'end':
                 return _context2.stop();
             }

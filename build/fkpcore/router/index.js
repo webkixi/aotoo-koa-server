@@ -122,7 +122,7 @@ var dealwithRoute = function () {
             routerPrefix = this.opts.prefix;
 
             ctx.routerPrefix = routerPrefix;
-            myStore.append({
+            AKSHOOKS.append({
               route: {
                 runtime: {
                   route: route,
@@ -151,7 +151,6 @@ var dealwithRoute = function () {
 
             DEBUG('dealwithRoute error = %O', _context4.t0);
             // console.log(e);
-            // return ctx.redirect('404')
 
           case 20:
           case 'end':
@@ -177,26 +176,38 @@ var distribute = function () {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            _context5.next = 2;
+            _context5.prev = 0;
+            _context5.next = 3;
             return controler(this, route, pageData, ctrlPages, routerInstance);
 
-          case 2:
+          case 3:
             _ref6 = _context5.sent;
             _ref7 = (0, _slicedToArray3.default)(_ref6, 2);
             pdata = _ref7[0];
             rt = _ref7[1];
-            _context5.next = 8;
+            _context5.next = 9;
             return renderPage(this, rt, pdata);
 
-          case 8:
+          case 9:
             return _context5.abrupt('return', _context5.sent);
 
-          case 9:
+          case 12:
+            _context5.prev = 12;
+            _context5.t0 = _context5['catch'](0);
+
+            DEBUG('dealwithRoute error = %O', _context5.t0);
+            _context5.next = 17;
+            return renderPage(this, null, null);
+
+          case 17:
+            return _context5.abrupt('return', _context5.sent);
+
+          case 18:
           case 'end':
             return _context5.stop();
         }
       }
-    }, _callee5, this);
+    }, _callee5, this, [[0, 12]]);
   }));
 
   return function distribute(_x10, _x11, _x12, _x13) {
@@ -344,18 +355,18 @@ var getctrlData = function () {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
-            _context7.prev = 0;
+            // try {
             _names = [];
 
             if (!Array.isArray(_path)) {
-              _context7.next = 22;
+              _context7.next = 21;
               break;
             }
 
             _iteratorNormalCompletion = true;
             _didIteratorError = false;
             _iteratorError = undefined;
-            _context7.prev = 6;
+            _context7.prev = 5;
 
             for (_iterator = (0, _getIterator3.default)(_path); !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
               _filename = _step.value;
@@ -363,42 +374,42 @@ var getctrlData = function () {
               _filename = Path.resolve(__dirname, _filename + '.js');
               _names.push(_filename);
             }
-            _context7.next = 14;
+            _context7.next = 13;
             break;
 
-          case 10:
-            _context7.prev = 10;
-            _context7.t0 = _context7['catch'](6);
+          case 9:
+            _context7.prev = 9;
+            _context7.t0 = _context7['catch'](5);
             _didIteratorError = true;
             _iteratorError = _context7.t0;
 
-          case 14:
+          case 13:
+            _context7.prev = 13;
             _context7.prev = 14;
-            _context7.prev = 15;
 
             if (!_iteratorNormalCompletion && _iterator.return) {
               _iterator.return();
             }
 
-          case 17:
-            _context7.prev = 17;
+          case 16:
+            _context7.prev = 16;
 
             if (!_didIteratorError) {
-              _context7.next = 20;
+              _context7.next = 19;
               break;
             }
 
             throw _iteratorError;
 
+          case 19:
+            return _context7.finish(16);
+
           case 20:
-            return _context7.finish(17);
+            return _context7.finish(13);
 
           case 21:
-            return _context7.finish(14);
-
-          case 22:
             if (!existsControlFun[_names[0]]) {
-              _context7.next = 32;
+              _context7.next = 31;
               break;
             }
 
@@ -406,29 +417,29 @@ var getctrlData = function () {
             controlConfig = controlFun ? controlFun.call(ctx, _pageData) : undefined;
 
             if (!controlConfig) {
-              _context7.next = 31;
+              _context7.next = 30;
               break;
             }
 
-            _context7.next = 28;
+            _context7.next = 27;
             return control(route, ctx, _pageData, routerInstance, controlConfig);
 
-          case 28:
+          case 27:
             return _context7.abrupt('return', _context7.sent);
 
-          case 31:
+          case 30:
             throw new Error('控制器文件不符合规范');
 
-          case 32:
+          case 31:
             if (!fs.existsSync(_names[0])) {
-              _context7.next = 50;
+              _context7.next = 49;
               break;
             }
 
             controlModule = require(_names[0]);
 
             if (!controlModule) {
-              _context7.next = 47;
+              _context7.next = 46;
               break;
             }
 
@@ -439,58 +450,44 @@ var getctrlData = function () {
             _controlConfig = _controlFun ? _controlFun.call(ctx, _pageData) : undefined;
 
             if (!_controlConfig) {
-              _context7.next = 44;
+              _context7.next = 43;
               break;
             }
 
-            _context7.next = 41;
+            _context7.next = 40;
             return control(route, ctx, _pageData, routerInstance, _controlConfig);
 
-          case 41:
+          case 40:
             _pageData = _context7.sent;
-            _context7.next = 45;
+            _context7.next = 44;
             break;
 
-          case 44:
+          case 43:
             throw new Error('控制器文件不符合规范');
 
-          case 45:
-            _context7.next = 48;
+          case 44:
+            _context7.next = 47;
             break;
+
+          case 46:
+            _pageData = undefined;
 
           case 47:
-            _pageData = undefined;
-
-          case 48:
-            _context7.next = 51;
+            _context7.next = 50;
             break;
 
-          case 50:
+          case 49:
             _pageData = undefined;
+
+          case 50:
+            return _context7.abrupt('return', _pageData);
 
           case 51:
-            return _context7.abrupt('return', _pageData);
-
-          case 54:
-            _context7.prev = 54;
-            _context7.t1 = _context7['catch'](0);
-
-            console.log(_context7.t1);
-            DEBUG('getctrlData error = %O', _context7.t1);
-            // return { nomatch: true }
-
-          case 58:
-            _context7.prev = 58;
-
-            _pageData = undefined;
-            return _context7.abrupt('return', _pageData);
-
-          case 62:
           case 'end':
             return _context7.stop();
         }
       }
-    }, _callee7, this, [[0, 54, 58, 62], [6, 10, 14, 22], [15,, 17, 21]]);
+    }, _callee7, this, [[5, 9, 13, 21], [14,, 16, 20]]);
   }));
 
   return function getctrlData(_x19, _x20, _x21, _x22, _x23) {
@@ -510,73 +507,106 @@ var renderPage = function () {
 
             DEBUG('renderPage pageData = %O', data);
             DEBUG('renderPage route = %s', route);
-            route = preRender(route);
+
+            if (!route) {
+              _context8.next = 19;
+              break;
+            }
+
+            route = preRender(route, ctx);
+            data = AKSHOOKS.emit('pageWillRender', data) || data;
             _context8.t0 = ctx.method;
-            _context8.next = _context8.t0 === 'GET' ? 7 : _context8.t0 === 'POST' ? 15 : 16;
+            _context8.next = _context8.t0 === 'GET' ? 9 : _context8.t0 === 'POST' ? 16 : 17;
             break;
 
-          case 7:
+          case 9:
             getStat = ctx.local.query._stat_;
 
             if (!(getStat && getStat === 'DATA' || isAjax)) {
-              _context8.next = 10;
+              _context8.next = 12;
               break;
             }
 
             return _context8.abrupt('return', ctx.body = data);
 
-          case 10:
-            if (!(data && data.nomatch)) {
-              _context8.next = 12;
-              break;
-            }
-
-            throw new Error('你访问的页面/api不存在');
-
           case 12:
-            _context8.next = 14;
+            if (data && data.nomatch) {
+              console.log('你访问的页面/api不存在');
+            }
+            _context8.next = 15;
             return ctx.render(route, data);
 
-          case 14:
+          case 15:
             return _context8.abrupt('return', _context8.sent);
 
-          case 15:
+          case 16:
             ctx.body = data;
 
-          case 16:
-            _context8.next = 28;
+          case 17:
+            _context8.next = 20;
             break;
 
-          case 18:
-            _context8.prev = 18;
+          case 19:
+            throw new Error('模板文件不存在');
+
+          case 20:
+            _context8.next = 41;
+            break;
+
+          case 22:
+            _context8.prev = 22;
             _context8.t1 = _context8['catch'](0);
 
-            console.log(_context8.t1);
+            AKSHOOKS.emit('pageRenderError', { err: _context8.t1, isAjax: isAjax, ctx: ctx });
 
             if (!isAjax) {
-              _context8.next = 25;
+              _context8.next = 29;
               break;
             }
 
             ctx.body = {
               error: 'node - 找不到相关信息'
             };
-            _context8.next = 28;
+            _context8.next = 41;
             break;
 
-          case 25:
-            _context8.next = 27;
-            return ctx.redirect('/404');
+          case 29:
+            ctx.status = 404;
 
-          case 27:
+            if (!(route == '404')) {
+              _context8.next = 34;
+              break;
+            }
+
+            ctx.body = '您访问的页面不存在!';
+            _context8.next = 41;
+            break;
+
+          case 34:
+            if (!AKSHOOKS.hasOn('404')) {
+              _context8.next = 38;
+              break;
+            }
+
+            _context8.next = 37;
+            return AKSHOOKS.emit('404', ctx);
+
+          case 37:
             return _context8.abrupt('return', _context8.sent);
 
-          case 28:
+          case 38:
+            _context8.next = 40;
+            return ctx.redirect('/404');
+
+          case 40:
+            return _context8.abrupt('return', _context8.sent);
+
+          case 41:
           case 'end':
             return _context8.stop();
         }
       }
-    }, _callee8, this, [[0, 18]]);
+    }, _callee8, this, [[0, 22]]);
   }));
 
   return function renderPage(_x24, _x25, _x26, _x27) {
@@ -597,7 +627,7 @@ var Path = require('path');
 var Url = require('url');
 var Router = require('koa-router');
 var md5 = require('blueimp-md5');
-var myStore = SAX('AOTOO-KOA-SERVER');
+var AKSHOOKS = SAX('AOTOO-KOA-SERVER');
 var control = require('./control').default;
 fs = Promise.promisifyAll(fs);
 
@@ -617,6 +647,10 @@ function getObjType(object) {
  * return   {boleean}
 **/
 function filterRendeFile(pms, url) {
+  url = url.replace(/\?\S*$/, ''); // 避免?key=value参数影响ext判断
+
+  url = decodeURIComponent(url);
+
   var rjson = Path.parse(url);
   var rtn = false;
   var ext = rjson.ext;
@@ -886,8 +920,8 @@ function forBetter(router, ctrlPages) {
 
 var existsControlFun = {};
 
-function preRender(rt) {
-  var mydata = myStore.get();
+function preRender(rt, ctx) {
+  var mydata = AKSHOOKS.get();
   var myentry = mydata.entry;
   var myroute = mydata.route.runtime.route;
   var prefix = mydata.route.runtime.prefix;

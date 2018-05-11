@@ -1,14 +1,17 @@
 const DEBUG = debug('fkp:router:passaccesscontrol')
+const AKSHOOKS = SAX('AOTOO-KOA-SERVER')
 
 function passaccess(oridata) {
   return {
     get: async function(ctx){
       let passdata = await Fetch.get(ctx.fkproute, ctx.query)
+      passData = AKSHOOKS.emit('apiControl-get', { data: passdata, ctx }) || passdata
       return passdata
     },
 
     post: async function(ctx){
       let passdata = await Fetch.post(ctx.fkproute, ctx.request.body)
+      passData = AKSHOOKS.emit('apiControl-post', { data: passdata, ctx }) || passdata
       if (passdata && passdata[1]) {
         if (passdata[0].headers.login){
           ctx.response.set('login', passdata[0].headers.login); //设置response的header

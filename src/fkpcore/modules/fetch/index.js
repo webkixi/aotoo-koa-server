@@ -2,6 +2,7 @@ import path from 'path'
 import request from 'request'
 import {stringify} from 'querystring'
 const DEBUG = debug('fkp:modules:fetch')
+const AKSHOOKS = SAX('AOTOO-KOA-SERVER')
 
 function inherits( Super, protos, staticProtos ) {
   var child;
@@ -55,7 +56,7 @@ function setOpts(api, options, method) {
     delete opts.fttype;
   }
   this.api = api
-  this.requestOptions = opts
+  this.requestOptions = AKSHOOKS.emit('apiFetchOptions', { api, options: opts }) || opts || {}
 }
 
 let __request = inherits(_request, {
