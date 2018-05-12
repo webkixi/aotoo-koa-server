@@ -261,7 +261,7 @@ async function init(app, prefix, options) {
   if (options && _.isPlainObject(options)) {
     let customControl
     if (options.customControl) {
-      customControl = options.customControl
+      customControl = myCustomControl(options.customControl)
     }
     _.map(options, (item, key) => {
       if (_.includes(['get', 'post', 'put', 'del'], key)) {
@@ -293,6 +293,17 @@ async function init(app, prefix, options) {
   }
   app.use(router.routes())
   app.use(router.allowedMethods())
+}
+
+function myCustomControl(myControl) {
+  return async function (ctx, next) {
+    let isRender = filterRendeFile(ctx.params, ctx.url)
+    let route = isRender ? makeRoute(ctx) : false
+    if (route) {
+      ctx.fkproute = route
+      myControl.call(this, ctx, next)
+    }
+  }
 }
 
 function forBetter(router, ctrlPages) {
