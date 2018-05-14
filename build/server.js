@@ -25,24 +25,25 @@ var _createClass2 = require("babel-runtime/helpers/createClass");
 var _createClass3 = _interopRequireDefault(_createClass2);
 
 var _init = function () {
-  var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9() {
-    var _this = this;
-
+  var _ref8 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8() {
     var _configs, keys, apis, mapper, server;
 
-    return _regenerator2.default.wrap(function _callee9$(_context9) {
+    return _regenerator2.default.wrap(function _callee8$(_context8) {
       while (1) {
-        switch (_context9.prev = _context9.next) {
+        switch (_context8.prev = _context8.next) {
           case 0:
-            _context9.prev = 0;
+            _context8.prev = 0;
 
-            AKSHOOKS.append({ entry: this });
+            AKSHOOKS.append({
+              entry: this,
+              context: this
+            });
             _configs = this.configs, keys = _configs.keys, apis = _configs.apis, mapper = _configs.mapper;
 
             app.keys = this.configs.keys;
 
             if (apis.list) {
-              _context9.next = 6;
+              _context8.next = 6;
               break;
             }
 
@@ -50,54 +51,32 @@ var _init = function () {
 
           case 6:
             if (!(!mapper.js || !mapper.css)) {
-              _context9.next = 8;
+              _context8.next = 8;
               break;
             }
 
             throw new Error('请将静态资源列表分别配置作为mapper.js和mapper.css的子元素');
 
           case 8:
-            _context9.next = 10;
+            _context8.next = 10;
             return _fkpcore2.default.call(this, app, this.configs);
 
           case 10:
-            server = _context9.sent;
+            server = _context8.sent;
+            return _context8.abrupt("return", server);
 
-            app.on('error', function () {
-              var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8(err, ctx) {
-                return _regenerator2.default.wrap(function _callee8$(_context8) {
-                  while (1) {
-                    switch (_context8.prev = _context8.next) {
-                      case 0:
-                        console.error('server error', err, ctx);
+          case 14:
+            _context8.prev = 14;
+            _context8.t0 = _context8["catch"](0);
 
-                      case 1:
-                      case "end":
-                        return _context8.stop();
-                    }
-                  }
-                }, _callee8, _this);
-              }));
+            console.log(_context8.t0.stack);
 
-              return function (_x13, _x14) {
-                return _ref9.apply(this, arguments);
-              };
-            }());
-
-            return _context9.abrupt("return", server);
-
-          case 15:
-            _context9.prev = 15;
-            _context9.t0 = _context9["catch"](0);
-
-            console.log(_context9.t0.stack);
-
-          case 18:
+          case 17:
           case "end":
-            return _context9.stop();
+            return _context8.stop();
         }
       }
-    }, _callee9, this, [[0, 15]]);
+    }, _callee8, this, [[0, 14]]);
   }));
 
   return function _init() {
@@ -156,11 +135,12 @@ var _cache2 = _interopRequireDefault(_cache);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 ReactDom = require('react-dom/server');
+var AKSHOOKS = SAX('AOTOO-KOA-SERVER');
 global.ReactDomServer = ReactDom;
+global.AotooServerHooks = AKSHOOKS;
 Aotoo.render = ReactDomServer.renderToString;
 Aotoo.html = ReactDomServer.renderToStaticMarkup;
 
-var AKSHOOKS = SAX('AOTOO-KOA-SERVER');
 var app = new _koa2.default();
 var DEFAULTCONFIGS = {
   mapper: {
@@ -252,7 +232,10 @@ var aotooServer = function () {
       Aotoo.inject.mapper = mapper;
     }
 
-    this.on = AKSHOOKS.on.bind(AKSHOOKS);
+    this.on = function (name, cb) {
+      if (name === 'error') app.on(name, cb);
+      AKSHOOKS.on(name, cb);
+    };
     this.one = AKSHOOKS.one.bind(AKSHOOKS);
     this.off = AKSHOOKS.off.bind(AKSHOOKS);
     this.emit = AKSHOOKS.emit.bind(AKSHOOKS);

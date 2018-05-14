@@ -13,11 +13,12 @@ import fetch from './fkpcore/modules/fetch'
 import cache from './fkpcore/modules/cache'
 
 ReactDom = require('react-dom/server')
+const AKSHOOKS = SAX('AOTOO-KOA-SERVER')
 global.ReactDomServer = ReactDom
+global.AotooServerHooks = AKSHOOKS
 Aotoo.render = ReactDomServer.renderToString
 Aotoo.html = ReactDomServer.renderToStaticMarkup
 
-const AKSHOOKS = SAX('AOTOO-KOA-SERVER')
 const app = new Koa()
 const DEFAULTCONFIGS = {
   mapper: {
@@ -105,7 +106,10 @@ class aotooServer {
       Aotoo.inject.mapper = mapper
     }
 
-    this.on = AKSHOOKS::AKSHOOKS.on
+    this.on = function(name, cb) {
+      if (name === 'error') app.on(name, cb)
+      AKSHOOKS.on(name, cb)
+    }
     this.one = AKSHOOKS::AKSHOOKS.one
     this.off = AKSHOOKS::AKSHOOKS.off
     this.emit = AKSHOOKS::AKSHOOKS.emit
@@ -253,7 +257,10 @@ class aotooServer {
 
 async function _init() {
   try {
-    AKSHOOKS.append({ entry: this })
+    AKSHOOKS.append({ 
+      entry: this ,
+      context: this
+    })
     const {keys, apis, mapper} = this.configs
     app.keys = this.configs.keys
 
@@ -266,9 +273,6 @@ async function _init() {
     }
 
     const server = await core.call(this, app, this.configs)
-    app.on('error', async (err, ctx) => {
-      console.error('server error', err, ctx)
-    })
   
     return server
   } catch (error) {

@@ -22,6 +22,10 @@ const routeParam = [
   '/:cat/:title',
   '/:cat/:title/:id'
 ]
+const defaultMethodParam = {
+  get: routeParam,
+  post: routeParam.slice(1)
+}
 
 function getObjType(object) {
   return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1].toLowerCase();
@@ -254,298 +258,295 @@ function staticMapper(ctx, mapper, route, routerPrefix) {
  * {param2} map of static file
  * return rende pages
 **/
+const allMethods = ['get', 'post', 'put', 'del']
 async function init(app, prefix, options) {
   let _controlPages = await controlPages()
-  DEBUG('control pages === %O', _controlPages)
-  const router = prefix ? new Router({ prefix: prefix }) : new Router()
-  if (options && _.isPlainObject(options)) {
-    let customControl
-    if (options.customControl) {
-      customControl = myCustomControl(options.customControl)
+  const router = (()=>{
+    if (prefix) {
+      return new Router({prefix})
+    } else {
+      return new Router()
     }
-    _.map(options, (item, key) => {
-      if (_.includes(['get', 'post', 'put', 'del'], key)) {
-        if (typeof item == 'string') item = [item]
-        if (!Array.isArray(item)) return
-        item.forEach(rt => {
-          if (key != 'get') {
-            if (rt != '/') {
-              router[key](rt, router:: (customControl || forBetter(router, _controlPages)))
-            }
-          } else {
-            router[key](rt, router:: (customControl || forBetter(router, _controlPages)))
-          }
+  })()
+  let customControl
+  if (options&&options.customControl) {
+    customControl = options.customControl
+    delete options.customControl
+  }
+  const myOptions = _.merge({}, defaultMethodParam, options)
+  // const betterControl = routerControl(router, _controlPages, customControl)
+  const betterControl = customControl ? control_custrom.call(router, router, customControl) : control_mirror.call(router, router, _controlPages)
+  if (_.isPlainObject(options)) {
+    _.map(myOptions, (rules, key)=>{
+      const methodKey = key.toLowerCase()
+      if (allMethods.indexOf(methodKey) > -1) {
+        rules = [].concat(rules)
+        rules.forEach( rule=>{
+          router[methodKey](rule, betterControl)
+          // if (rule!=='/') {
         })
       } else {
-        routeParam.forEach(_path => {
-          router.get(_path, router:: (customControl || forBetter(router, _controlPages)))
-          router.post(_path, router:: (customControl || forBetter(router, _controlPages)))
-        })
+        if (prefix) {
+          AKSHOOKS.append({ [prefix]: {
+            [key]: rules
+          }})
+        }
       }
     })
   } else {
     routeParam.forEach(item => {
-      router.get(item, forBetter(router, _controlPages))
-      if (item != '/') {
-        router.post(item, forBetter(router, _controlPages))
-      }
+      router.get(item, betterControl)
+      router.post(item, betterControl)
     })
   }
   app.use(router.routes())
   app.use(router.allowedMethods())
 }
 
-function myCustomControl(myControl) {
-  return async function (ctx, next) {
-    let isRender = filterRendeFile(ctx.params, ctx.url)
-    let route = isRender ? makeRoute(ctx) : false
-    if (route) {
-      ctx.fkproute = route
-      myControl.call(this, ctx, next)
-    }
-  }
+function control_ctx_variable(ctx, router) {
+  let isRender = filterRendeFile(ctx.params, ctx.url)
+  let route = isRender ? makeRoute(ctx) : false
+  let routerPrefix = router.opts.prefix
+  ctx.fkproute = ctx.aotooRoutePath = route
+  ctx.routerPrefix = ctx.aotooRoutePrefix = routerPrefix
+  const hooksKey = routerPrefix ? path_join(routerPrefix, route) : route
+  ctx.hooksKey = hooksKey
+  AKSHOOKS.append({
+    [hooksKey]: { "runtime": {
+      route: route,
+      prefix: routerPrefix,
+      path: hooksKey
+    }}
+  })
 }
 
-function forBetter(router, ctrlPages) {
-  return async function (ctx, next) {
+function control_error(err, ctx) {
+  const message = err.message
+  const route = ctx.routerPrefix || ctx.fkproute
+  const isAjax = ctx.fkp.isAjax()
+  if (route === '404') {
+    return ctx.body = '您访问的页面不存在'
+  }
+
+  const beforeError = AKSHOOKS.emit('beforeError', {err, ctx, isAjax})
+  if (beforeError) return beforeError
+
+  switch (message) {
+    case '404':
+      ctx.status = 404
+      console.log('========= 路由访问错误或模板文件不存在 ==========')
+      console.log(err)
+      break;
+    default:
+      console.log(err)
+      break;
+  }
+
+  const afterError = AKSHOOKS.emit('afterError', {err, ctx, isAjax})
+  if (afterError) return afterError
+}
+
+function control_custrom(router, myControl) {
+  return async (ctx, next) => {
     try {
-      if (ignoreStacic.indexOf(ctx.params.cat) == -1) {
-        return await dealwithRoute.call(this, ctx, ctx.fkp.staticMapper, ctrlPages)
-      }
-    } catch (e) {
-      console.log(e.stack)
+      control_ctx_variable(ctx, router)
+      return myControl.call(router, ctx, next)
+    } catch (err) {
+      return control_error(err, ctx)
     }
-  }.bind(router)
-}
-
-/**
- * 路由配置
- * {param1} koa implement
- * {param2} map of static file
- * return rende pages
-**/
-async function dealwithRoute(ctx, _mapper, ctrlPages) {
-  try {
-    let isRender = filterRendeFile(ctx.params, ctx.url)
-    let route = isRender ? makeRoute(ctx) : false
-    if (!route) throw 'route配置不正确'
-    ctx.fkproute = route
-    let routerPrefix = this.opts.prefix
-    ctx.routerPrefix = routerPrefix
-    AKSHOOKS.append({
-      route: {
-        runtime: {
-          route: route,
-          prefix: routerPrefix
-        }
-      }
-    })
-    DEBUG('dealwithRoute route = %s', route)
-    DEBUG('dealwithRoute routerPrefix = %s', routerPrefix)
-
-    let pageData = staticMapper(ctx, _mapper, route, routerPrefix)
-    if (!pageData) throw 'mapper数据不正确'
-    return ctx:: distribute(route, pageData, ctrlPages, this)
-  } catch (e) {
-    DEBUG('dealwithRoute error = %O', e)
-    // console.log(e);
   }
 }
 
-// 分发路由
-async function distribute(route, pageData, ctrlPages, routerInstance) {
-  try{
-    let [pdata, rt] = await controler(this, route, pageData, ctrlPages, routerInstance)
-    return await renderPage(this, rt, pdata)
-  }catch(e){
-    DEBUG('dealwithRoute error = %O', e)
-    return await renderPage(this, null, null)
-    // 渲染模板出错重定向至404页面
-    // return await this.render('404')
+function control_mirror(router, ctrlPages) {
+  return async (ctx, next) => {
+    const isAjax = ctx.fkp.isAjax()
+    try {
+      control_ctx_variable(ctx, router)
+      let pageData = staticMapper(ctx, ctx.fkp.staticMapper, ctx.fkproute, ctx.routerPrefix)
+      if (pageData) {
+        // return distribute.call(ctx, ctx.fkproute, pageData, ctrlPages, router)
+        let [pdata, rt] = await controler(ctx, ctx.fkproute, pageData, ctrlPages, router)
+        rt = preRender(rt, ctx)
+        return await renderPage(ctx, rt, pdata)
+      }
+    } catch (err) {
+      return control_error(err, ctx)
+    }
   }
 }
 
 
 async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
+  let xData = undefined
+  let passAccess = false
+  let isAjax = ctx.fkp.isAjax()
   let routerPrefix = routerInstance.opts.prefix
   if (_.isString(routerPrefix) && routerPrefix.indexOf('/') == 0) {
     routerPrefix = routerPrefix.replace('/', '')
   }
-
-  try {
-    let passAccess = false
-    let xData = undefined
-    // 根据route匹配到control文件+三层路由
-    const controlFile = Path.sep + route + '.js'
-    if (ctrlPages.indexOf(controlFile) > -1) {
-      xData = await getctrlData([businessPagesPath + '/' + route], route, ctx, pageData, routerInstance)
-    }
-    // 根据prefix匹配到control文件+三层路由
-    else if (routerPrefix) {
-      route = routerPrefix
-      // let prefixRootFile = Path.join(businessPagesPath, routerPrefix)
-      // let prefixIndexFile = Path.join(businessPagesPath, routerPrefix, '/index')
-      // let prefixCatFile = Path.join(businessPagesPath, routerPrefix, ctx.params.cat || '')
-      // xData = await getctrlData([prefixCatFile, prefixIndexFile, prefixRootFile], route, ctx, pageData, routerInstance)
-
-      const hitedControlFile = []
-      const controlFile = Path.join(Path.sep, routerPrefix)
-      const controlIndexFile = Path.join(Path.sep, routerPrefix, 'index')
-      const controlCatFile = Path.join(Path.sep, routerPrefix, (ctx.params.cat||''))
-      Array.forEach([controlFile, controlIndexFile, controlCatFile], item => {
-        const item_file = item + '.js'
-        if (ctrlPages.indexOf(item_file) > -1) {
-          hitedControlFile.push(Path.join(businessPagesPath, item))
-        }
-      })
-      
-      xData = await getctrlData(hitedControlFile, route, ctx, pageData, routerInstance)
-    }
-    // pages根目录+三层路由
-    else {
-      if (ctx.params.cat) {
-        let paramsCatFile = Path.join(businessPagesPath, ctx.params.cat)
-        const xRoute = ctx.params.cat
-        xData = await getctrlData([paramsCatFile], xRoute, ctx, pageData, routerInstance)
-      }
-    }
-    // 根据 Fetch.apilist 匹配到api接口，从远程借口拿去数据
-    if (!xData) {
-      let apilist = Fetch.apilist
-      if (apilist.list[route] || route === 'redirect') {
-        passAccess = true
-        xData = await getctrlData(['./passaccesscontrol'], route, ctx, pageData, routerInstance)
-      } else {
-        xData = { nomatch: true }
-      }
-    }
-    const isAjax = ctx.fkp.isAjax()
-    if (passAccess || isAjax) pageData = xData
-    return [pageData, route]
-  } catch (e) {
-    DEBUG('controler error = %O', e)
-    // console.log(e.stack);
+  // 根据route匹配到control文件+三层路由
+  const controlFile = Path.sep + route + '.js'
+  if (ctrlPages.indexOf(controlFile) > -1) {
+    xData = await getctrlData([businessPagesPath + '/' + route], route, ctx, pageData, routerInstance)
   }
+  // 根据prefix匹配到control文件+三层路由
+  else if (routerPrefix) {
+    route = routerPrefix
+    const hitedControlFile = []
+    const controlFile = Path.join(Path.sep, routerPrefix)
+    const controlIndexFile = Path.join(Path.sep, routerPrefix, 'index')
+    const controlCatFile = Path.join(Path.sep, routerPrefix, (ctx.params.cat||''))
+    Array.forEach([controlFile, controlIndexFile, controlCatFile], item => {
+      const item_file = item + '.js'
+      if (ctrlPages.indexOf(item_file) > -1) {
+        hitedControlFile.push(Path.join(businessPagesPath, item))
+      }
+    })
+    
+    xData = await getctrlData(hitedControlFile, route, ctx, pageData, routerInstance)
+  }
+  // pages根目录+三层路由
+  else {
+    if (ctx.params.cat) {
+      let paramsCatFile = Path.join(businessPagesPath, ctx.params.cat)
+      const xRoute = ctx.params.cat
+      xData = await getctrlData([paramsCatFile], xRoute, ctx, pageData, routerInstance)
+    }
+  }
+  // 根据 Fetch.apilist 匹配到api接口，从远程借口拿去数据
+  if (!xData) {
+    let apilist = Fetch.apilist
+    if (apilist.list[route] || route === 'redirect') {
+      passAccess = true
+      xData = await getctrlData(['./passaccesscontrol'], route, ctx, pageData, routerInstance)
+    } else {
+      xData = { nomatch: true }
+    }
+  }
+  if (passAccess || isAjax) pageData = xData
+  return [pageData, route]
 }
 
 var existsControlFun = {}
-
 // match的control文件，并返回数据
 async function getctrlData(_path, route, ctx, _pageData, routerInstance) {
-  // try {
-    let _names = []
-    if (Array.isArray(_path)) {
-      for (let _filename of _path) {
-        _filename = Path.resolve(__dirname, _filename + '.js')
-        _names.push(_filename)
-      }
+  let _names = []
+  if (Array.isArray(_path)) {
+    for (let _filename of _path) {
+      _filename = Path.resolve(__dirname, _filename + '.js')
+      _names.push(_filename)
     }
+  }
 
-    if (existsControlFun[_names[0]]) {
-      const controlFun = existsControlFun[_names[0]]
+  if (existsControlFun[_names[0]]) {
+    const controlFun = existsControlFun[_names[0]]
+    const controlConfig = controlFun ? controlFun.call(ctx, _pageData) : undefined
+    if (controlConfig) {
+      return await control(route, ctx, _pageData, routerInstance, controlConfig)
+    } else {
+      throw new Error('控制器文件不符合规范')
+    }
+  }
+
+  if (fs.existsSync(_names[0])) {
+    const controlModule = require(_names[0])
+    if (controlModule) {
+      const controlFun = typeof controlModule == 'function' 
+      ? controlModule 
+      : controlModule.getData && controlModule.getData && typeof controlModule.getData == 'function' 
+      ? controlModule.getData 
+      : undefined
+
+      existsControlFun[_names[0]] = controlFun
       const controlConfig = controlFun ? controlFun.call(ctx, _pageData) : undefined
       if (controlConfig) {
-        return await control(route, ctx, _pageData, routerInstance, controlConfig)
+        _pageData = await control(route, ctx, _pageData, routerInstance, controlConfig)
       } else {
         throw new Error('控制器文件不符合规范')
-      }
-    }
-
-    if (fs.existsSync(_names[0])) {
-      const controlModule = require(_names[0])
-      if (controlModule) {
-        const controlFun = typeof controlModule == 'function' 
-        ? controlModule 
-        : controlModule.getData && controlModule.getData && typeof controlModule.getData == 'function' 
-        ? controlModule.getData 
-        : undefined
-
-        existsControlFun[_names[0]] = controlFun
-        const controlConfig = controlFun ? controlFun.call(ctx, _pageData) : undefined
-        if (controlConfig) {
-          _pageData = await control(route, ctx, _pageData, routerInstance, controlConfig)
-        } else {
-          throw new Error('控制器文件不符合规范')
-        }
-      } else {
-        _pageData = undefined
       }
     } else {
       _pageData = undefined
     }
-    return _pageData
-  // } catch (e) {
-  //   console.log(e);
-  //   DEBUG('getctrlData error = %O', e)
-  //   // return { nomatch: true }
-  // } finally {
-  //   _pageData = undefined
-  //   return _pageData
-  // }
+  } else {
+    _pageData = undefined
+  }
+  return _pageData
 }
 
 function preRender(rt, ctx) {
-  const mydata = AKSHOOKS.get()
-  const myentry = mydata.entry
-  const myroute = mydata.route.runtime.route
-  const prefix = mydata.route.runtime.prefix
-  const viewsRoot = myentry.state.viewsRoot
-  const absOriRoute = Path.join(viewsRoot, myroute + '.html')
-
-  const viewsFiles = myentry.state.views
-  if (viewsFiles.indexOf(absOriRoute) > -1) {
-    if (rt != myroute) return myroute
-    return rt
-  } else {
+  if (rt) {
+    const mydata = AKSHOOKS.get()
+    const context = mydata.context   // aotoo-koa-server entry instance
+    const myroute = ctx.fkproute
+    const prefix = ctx.routerPrefix
+    const viewsRoot = context.state.viewsRoot
+    const absOriRoute = Path.join(viewsRoot, myroute + '.html')
+    const viewsFiles = context.state.views
+  
     if (prefix) {
       return rt
-    } else {
-      throw new Error(`模板文件不存在，${absOriRoute}`)
+    }
+  
+    if (viewsFiles.indexOf(absOriRoute)>-1) {
+      return rt === myroute ? rt : myroute
     }
   }
 }
 
 // dealwith the data from controlPage
-async function renderPage(ctx, route, data, isAjax) {
-  try {
-    DEBUG('renderPage pageData = %O', data)
-    DEBUG('renderPage route = %s', route)
-    if (route) {
-      route = preRender(route, ctx)
-      data = AKSHOOKS.emit('pageWillRender', data) || data
-      switch (ctx.method) {
-        case 'GET':
-          let getStat = ctx.local.query._stat_
-          if ((getStat && getStat === 'DATA') || isAjax) return ctx.body = data
-          if (data && data.nomatch) {
-            console.log('你访问的页面/api不存在');
-          }
-          return await ctx.render(route, data)
-        case 'POST':
-          ctx.body = data
-      }
-    } else {
-      throw new Error('模板文件不存在')
-    }
-  } catch (e) {
-    AKSHOOKS.emit('pageRenderError', { err: e, isAjax, ctx })
-    if (isAjax) {
-      ctx.body = {
-        error: 'node - 找不到相关信息'
-      }
-    } else {
-      ctx.status = 404
-      if (route == '404') {
-        ctx.body = '您访问的页面不存在!'
+async function renderPage(ctx, route, data) {
+  DEBUG('renderPage pageData = %O', data)
+  DEBUG('renderPage route = %s', route)
+  const isAjax = ctx.fkp.isAjax()
+  data = AKSHOOKS.emit('beforeRender', data) || data
+  switch (ctx.method) {
+    case 'GET':
+      if (isAjax) return ctx.body = data
+      if (route) {
+        return await ctx.render(route, data)
       } else {
-        if (AKSHOOKS.hasOn('404')) {
-          return await AKSHOOKS.emit('404', ctx)
-        }
-        return await ctx.redirect('/404')
+        throw new Error('404') // 路由访问错误或模板文件不存在
       }
-      // return await ctx.render('404')
-    }
+    case 'POST':
+      return ctx.body = data
   }
+
+  // try {
+  //   DEBUG('renderPage pageData = %O', data)
+  //   DEBUG('renderPage route = %s', route)
+  //   route = preRender(route, ctx)
+  //   if (route) {
+  //     data = AKSHOOKS.emit('pageWillRender', data) || data
+  //     switch (ctx.method) {
+  //       case 'GET':
+  //         if (isAjax) return ctx.body = data
+  //         return await ctx.render(route+'.html', data)
+  //       case 'POST':
+  //         return ctx.body = data
+  //     }
+  //   } else {
+  //     throw new Error('路由访问错误或模板文件不存在')
+  //   }
+  // } catch (e) {
+  //   console.log(e);
+  //   AKSHOOKS.emit('pageRenderError', { err: e, isAjax, ctx })
+  //   if (isAjax) {
+  //     ctx.body = {
+  //       error: 'node - 找不到相关信息'
+  //     }
+  //   } else {
+  //     ctx.status = 404
+  //     if (route == '404') {
+  //       ctx.body = '您访问的页面不存在!'
+  //     } else {
+  //       if (AKSHOOKS.hasOn('404')) {
+  //         return await AKSHOOKS.emit('404', ctx)
+  //       }
+  //       return await ctx.redirect('/404')
+  //     }
+  //     // return await ctx.render('404')
+  //   }
+  // }
 }
 
 init.makeRoute = makeRoute
