@@ -13,19 +13,8 @@ const AKSHOOKS = SAX('AOTOO-KOA-SERVER')
 const control = require('./control').default
 fs = Promise.promisifyAll(fs)
 
-// const businessPagesPath = '../../pages'
 let businessPagesPath = ''
 const ignoreStacic = ['css', 'js', 'images', 'img']
-const routeParam = [
-  '/',
-  '/:cat',
-  '/:cat/:title',
-  '/:cat/:title/:id'
-]
-const defaultMethodParam = {
-  get: routeParam,
-  post: routeParam.slice(1)
-}
 
 function getObjType(object) {
   return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1].toLowerCase();
@@ -252,15 +241,36 @@ function staticMapper(ctx, mapper, route, routerPrefix) {
   return pageData
 }
 
+function defineMyRouter(myOptions, router, prefix, customControl, controlPages) {
+  const allMethods = AKSHOOKS.get().context.configs.routerOptions.allMethods
+  const betterControl = customControl ? control_custrom.call(router, router, customControl) : control_mirror.call(router, router, controlPages)
+  _.map(myOptions, (rules, key)=>{
+    const methodKey = key.toLowerCase()
+    if (allMethods.indexOf(methodKey) > -1) {
+      rules = [].concat(rules)
+      rules.forEach( rule=>{
+        router[methodKey](rule, betterControl)
+      })
+    } else {
+      if (prefix) {
+        AKSHOOKS.append({ [prefix]: {
+          [key]: rules
+        }})
+      }
+    }
+  })
+}
+
 /**
  * 路由分配
  * {param1} koa implement
  * {param2} map of static file
  * return rende pages
 **/
-const allMethods = ['get', 'post', 'put', 'del']
 async function init(app, prefix, options) {
   let _controlPages = await controlPages()
+  const AotooConfigs = AKSHOOKS.get().context.configs
+  const allMethods = AotooConfigs.routerOptions.allMethods
   const router = (()=>{
     if (prefix) {
       return new Router({prefix})
@@ -273,34 +283,49 @@ async function init(app, prefix, options) {
     customControl = options.customControl
     delete options.customControl
   }
-  const myOptions = _.merge({}, defaultMethodParam, options)
-  // const betterControl = routerControl(router, _controlPages, customControl)
+  const myOptions = _.merge({}, AotooConfigs.routerOptions.parameters, options)
   const betterControl = customControl ? control_custrom.call(router, router, customControl) : control_mirror.call(router, router, _controlPages)
   if (_.isPlainObject(options)) {
-    _.map(myOptions, (rules, key)=>{
+    defineMyRouter(myOptions, router, prefix, customControl, _controlPages)
+  } else {
+    _.map(myOptions, (rules, key) => {
       const methodKey = key.toLowerCase()
       if (allMethods.indexOf(methodKey) > -1) {
         rules = [].concat(rules)
-        rules.forEach( rule=>{
-          router[methodKey](rule, betterControl)
-          // if (rule!=='/') {
-        })
-      } else {
-        if (prefix) {
-          AKSHOOKS.append({ [prefix]: {
-            [key]: rules
-          }})
-        }
+        rules.forEach( rule => router[methodKey](rule, betterControl) )
       }
-    })
-  } else {
-    routeParam.forEach(item => {
-      router.get(item, betterControl)
-      router.post(item, betterControl)
     })
   }
   app.use(router.routes())
   app.use(router.allowedMethods())
+}
+
+function control_custrom(router, myControl) {
+  return async function(ctx, next){
+    try {
+      control_ctx_variable(ctx, router)
+      return await myControl.call(router, ctx, next)
+    } catch (err) {
+      return control_error(err, ctx)
+    }
+  }.bind(this)
+}
+
+function control_mirror(router, ctrlPages) {
+  return async function(ctx, next){
+    const isAjax = ctx.fkp.isAjax()
+    try {
+      control_ctx_variable(ctx, router)
+      let pageData = staticMapper(ctx, ctx.fkp.staticMapper, ctx.fkproute, ctx.routerPrefix)
+      if (pageData) {
+        let [pdata, rt] = await controler(ctx, ctx.fkproute, pageData, ctrlPages, router)
+        rt = preRender(rt, ctx)
+        return await renderPage(ctx, rt, pdata)
+      }
+    } catch (err) {
+      return control_error(err, ctx)
+    }
+  }.bind(this)
 }
 
 function control_ctx_variable(ctx, router) {
@@ -344,35 +369,6 @@ function control_error(err, ctx) {
 
   const afterError = AKSHOOKS.emit('afterError', {err, ctx, isAjax})
   if (afterError) return afterError
-}
-
-function control_custrom(router, myControl) {
-  return async (ctx, next) => {
-    try {
-      control_ctx_variable(ctx, router)
-      return myControl.call(router, ctx, next)
-    } catch (err) {
-      return control_error(err, ctx)
-    }
-  }
-}
-
-function control_mirror(router, ctrlPages) {
-  return async (ctx, next) => {
-    const isAjax = ctx.fkp.isAjax()
-    try {
-      control_ctx_variable(ctx, router)
-      let pageData = staticMapper(ctx, ctx.fkp.staticMapper, ctx.fkproute, ctx.routerPrefix)
-      if (pageData) {
-        // return distribute.call(ctx, ctx.fkproute, pageData, ctrlPages, router)
-        let [pdata, rt] = await controler(ctx, ctx.fkproute, pageData, ctrlPages, router)
-        rt = preRender(rt, ctx)
-        return await renderPage(ctx, rt, pdata)
-      }
-    } catch (err) {
-      return control_error(err, ctx)
-    }
-  }
 }
 
 

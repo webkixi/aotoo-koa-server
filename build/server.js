@@ -158,7 +158,7 @@ var DEFAULTCONFIGS = {
 
   fetchOptions: {
     headers: {},
-    timeout: 10000
+    timeout: 100000
   },
 
   cacheOptions: {
@@ -170,7 +170,16 @@ var DEFAULTCONFIGS = {
     maxAge: 2 * 60 * 60 * 1000
   },
 
-  bodyOptions: {}
+  bodyOptions: {},
+
+  routerOptions: {
+    allMethods: ['get', 'post', 'put', 'del'],
+    parameters: {
+      get: ['/', '/:cat', '/:cat/:title', '/:cat/:title/:id'],
+      post: ['/', '/:cat', '/:cat/:title', '/:cat/:title/:id']
+    },
+    prefixes: {}
+  }
 };
 
 var aotooServer = function () {
@@ -184,20 +193,19 @@ var aotooServer = function () {
       css: '/css'
     };
 
-    var theApis = {
-      list: opts.apis || {}
-    };
+    opts = _.merge({}, DEFAULTCONFIGS, opts);
 
     this.configs = {
       keys: opts.keys || ['aotoo koa'], // cookie session关键字
       index: opts.index || 'index', // 默认首页
 
-      apis: theApis || DEFAULTCONFIGS.apis, // api接口集合
-      mapper: opts.mapper || DEFAULTCONFIGS.mapper, // 静态资源映射文件
+      apis: opts.apis, // api接口集合
+      mapper: opts.mapper, // 静态资源映射文件
 
-      fetchOptions: opts.fetchOptions || DEFAULTCONFIGS.fetchOptions,
-      cacheOptions: opts.cacheOptions || DEFAULTCONFIGS.cacheOptions,
-      bodyOptions: opts.bodyOptions || DEFAULTCONFIGS.bodyOptions,
+      fetchOptions: opts.fetchOptions,
+      cacheOptions: opts.cacheOptions,
+      bodyOptions: opts.bodyOptions,
+      routerOptions: opts.routerOptions,
 
       root: opts.root, // 渲染默认目录
       pages: opts.pages || opts.pagesFolder || opts.controls, // control层文件夹，必须
@@ -206,7 +214,8 @@ var aotooServer = function () {
 
     this.state = {
       views: false,
-      bodyparser: false
+      bodyparser: false,
+      status: false
     };
 
     if (this.configs.bodyOptions) {
@@ -216,7 +225,7 @@ var aotooServer = function () {
 
     // 传入apis
     global.Fetch = this.fetch = (0, _fetch2.default)((0, _extends3.default)({ apis: this.configs.apis }, this.fetchOptions));
-    global.Cache = this.cache = (0, _cache2.default)(this.cacheOptions);
+    global.Cache = this.cache = (0, _cache2.default)(this.configs.cacheOptions);
 
     if (this.configs.mapper) {
       var _public = void 0;
@@ -246,6 +255,38 @@ var aotooServer = function () {
   }
 
   (0, _createClass3.default)(aotooServer, [{
+    key: "setFetchOptions",
+    value: function setFetchOptions(opts) {
+      DEFAULTCONFIGS.fetchOptions.apis = this.fetch.apis;
+      var _opts = _.merge({}, DEFAULTCONFIGS.fetchOptions, opts);
+      this.configs.fetchOptions = _opts;
+      global.Fetch = this.fetch = (0, _fetch2.default)(_opts);
+    }
+  }, {
+    key: "setCacheOptions",
+    value: function setCacheOptions(opts) {
+      var _opts = _.merge({}, DEFAULTCONFIGS.cacheOptions, opts);
+      this.configs.cacheOptions = _opts;
+      global.Cache = this.cache = (0, _cache2.default)(_opts);
+    }
+  }, {
+    key: "setRouterOptions",
+    value: function setRouterOptions(opts) {
+      var _opts = _.merge({}, DEFAULTCONFIGS.routerOptions, opts);
+      this.configs.routerOptions = _opts;
+    }
+  }, {
+    key: "setRouterPrefixes",
+    value: function setRouterPrefixes(opts) {
+      if (!this.state.status) {
+        var _opts = _.merge({}, this.configs.routerOptions.prefixes, opts);
+        this.configs.routerOptions.prefixes = _opts;
+      } else {
+        console.log('===========');
+        console.log('初始化状态才能设置前缀路由');
+      }
+    }
+  }, {
     key: "public",
     value: function _public(opts) {
       this._public = opts;
@@ -556,9 +597,10 @@ var aotooServer = function () {
               case 2:
                 server = _context7.sent;
 
+                this.state.status = 'running';
                 server.listen(port, dom, cb);
 
-              case 4:
+              case 5:
               case "end":
                 return _context7.stop();
             }

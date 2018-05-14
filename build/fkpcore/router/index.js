@@ -24,9 +24,15 @@ var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
 
+/**
+ * 路由分配
+ * {param1} koa implement
+ * {param2} map of static file
+ * return rende pages
+**/
 var init = function () {
   var _ref2 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(app, prefix, options) {
-    var _controlPages, router, customControl, myOptions, betterControl;
+    var _controlPages, AotooConfigs, allMethods, router, customControl, myOptions, betterControl;
 
     return _regenerator2.default.wrap(function _callee2$(_context2) {
       while (1) {
@@ -37,6 +43,8 @@ var init = function () {
 
           case 2:
             _controlPages = _context2.sent;
+            AotooConfigs = AKSHOOKS.get().context.configs;
+            allMethods = AotooConfigs.routerOptions.allMethods;
 
             router = function () {
               if (prefix) {
@@ -52,36 +60,26 @@ var init = function () {
               customControl = options.customControl;
               delete options.customControl;
             }
-            myOptions = _.merge({}, defaultMethodParam, options);
-            // const betterControl = routerControl(router, _controlPages, customControl)
-
+            myOptions = _.merge({}, AotooConfigs.routerOptions.parameters, options);
             betterControl = customControl ? control_custrom.call(router, router, customControl) : control_mirror.call(router, router, _controlPages);
 
             if (_.isPlainObject(options)) {
+              defineMyRouter(myOptions, router, prefix, customControl, _controlPages);
+            } else {
               _.map(myOptions, function (rules, key) {
                 var methodKey = key.toLowerCase();
                 if (allMethods.indexOf(methodKey) > -1) {
                   rules = [].concat(rules);
                   rules.forEach(function (rule) {
-                    router[methodKey](rule, betterControl);
-                    // if (rule!=='/') {
+                    return router[methodKey](rule, betterControl);
                   });
-                } else {
-                  if (prefix) {
-                    AKSHOOKS.append((0, _defineProperty3.default)({}, prefix, (0, _defineProperty3.default)({}, key, rules)));
-                  }
                 }
-              });
-            } else {
-              routeParam.forEach(function (item) {
-                router.get(item, betterControl);
-                router.post(item, betterControl);
               });
             }
             app.use(router.routes());
             app.use(router.allowedMethods());
 
-          case 11:
+          case 13:
           case 'end':
             return _context2.stop();
         }
@@ -430,14 +428,8 @@ var AKSHOOKS = SAX('AOTOO-KOA-SERVER');
 var control = require('./control').default;
 fs = Promise.promisifyAll(fs);
 
-// const businessPagesPath = '../../pages'
 var businessPagesPath = '';
 var ignoreStacic = ['css', 'js', 'images', 'img'];
-var routeParam = ['/', '/:cat', '/:cat/:title', '/:cat/:title/:id'];
-var defaultMethodParam = {
-  get: routeParam,
-  post: routeParam.slice(1)
-};
 
 function getObjType(object) {
   return Object.prototype.toString.call(object).match(/^\[object\s(.*)\]$/)[1].toLowerCase();
@@ -677,59 +669,25 @@ function staticMapper(ctx, mapper, route, routerPrefix) {
   return pageData;
 }
 
-/**
- * 路由分配
- * {param1} koa implement
- * {param2} map of static file
- * return rende pages
-**/
-var allMethods = ['get', 'post', 'put', 'del'];
-
-
-function control_ctx_variable(ctx, router) {
-  var isRender = filterRendeFile(ctx.params, ctx.url);
-  var route = isRender ? makeRoute(ctx) : false;
-  var routerPrefix = router.opts.prefix;
-  ctx.fkproute = ctx.aotooRoutePath = route;
-  ctx.routerPrefix = ctx.aotooRoutePrefix = routerPrefix;
-  var hooksKey = routerPrefix ? path_join(routerPrefix, route) : route;
-  ctx.hooksKey = hooksKey;
-  AKSHOOKS.append((0, _defineProperty3.default)({}, hooksKey, { "runtime": {
-      route: route,
-      prefix: routerPrefix,
-      path: hooksKey
-    } }));
-}
-
-function control_error(err, ctx) {
-  var message = err.message;
-  var route = ctx.routerPrefix || ctx.fkproute;
-  var isAjax = ctx.fkp.isAjax();
-  if (route === '404') {
-    return ctx.body = '您访问的页面不存在';
-  }
-
-  var beforeError = AKSHOOKS.emit('beforeError', { err: err, ctx: ctx, isAjax: isAjax });
-  if (beforeError) return beforeError;
-
-  switch (message) {
-    case '404':
-      ctx.status = 404;
-      console.log('========= 路由访问错误或模板文件不存在 ==========');
-      console.log(err);
-      break;
-    default:
-      console.log(err);
-      break;
-  }
-
-  var afterError = AKSHOOKS.emit('afterError', { err: err, ctx: ctx, isAjax: isAjax });
-  if (afterError) return afterError;
+function defineMyRouter(myOptions, router, prefix, customControl, controlPages) {
+  var allMethods = AKSHOOKS.get().context.configs.routerOptions.allMethods;
+  var betterControl = customControl ? control_custrom.call(router, router, customControl) : control_mirror.call(router, router, controlPages);
+  _.map(myOptions, function (rules, key) {
+    var methodKey = key.toLowerCase();
+    if (allMethods.indexOf(methodKey) > -1) {
+      rules = [].concat(rules);
+      rules.forEach(function (rule) {
+        router[methodKey](rule, betterControl);
+      });
+    } else {
+      if (prefix) {
+        AKSHOOKS.append((0, _defineProperty3.default)({}, prefix, (0, _defineProperty3.default)({}, key, rules)));
+      }
+    }
+  });
 }
 
 function control_custrom(router, myControl) {
-  var _this2 = this;
-
   return function () {
     var _ref3 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee3(ctx, next) {
       return _regenerator2.default.wrap(function _callee3$(_context3) {
@@ -739,30 +697,32 @@ function control_custrom(router, myControl) {
               _context3.prev = 0;
 
               control_ctx_variable(ctx, router);
-              return _context3.abrupt('return', myControl.call(router, ctx, next));
+              _context3.next = 4;
+              return myControl.call(router, ctx, next);
 
-            case 5:
-              _context3.prev = 5;
+            case 4:
+              return _context3.abrupt('return', _context3.sent);
+
+            case 7:
+              _context3.prev = 7;
               _context3.t0 = _context3['catch'](0);
               return _context3.abrupt('return', control_error(_context3.t0, ctx));
 
-            case 8:
+            case 10:
             case 'end':
               return _context3.stop();
           }
         }
-      }, _callee3, _this2, [[0, 5]]);
+      }, _callee3, this, [[0, 7]]);
     }));
 
     return function (_x5, _x6) {
       return _ref3.apply(this, arguments);
     };
-  }();
+  }().bind(this);
 }
 
 function control_mirror(router, ctrlPages) {
-  var _this3 = this;
-
   return function () {
     var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(ctx, next) {
       var isAjax, pageData, _ref5, _ref6, pdata, rt;
@@ -812,13 +772,54 @@ function control_mirror(router, ctrlPages) {
               return _context4.stop();
           }
         }
-      }, _callee4, _this3, [[1, 17]]);
+      }, _callee4, this, [[1, 17]]);
     }));
 
     return function (_x7, _x8) {
       return _ref4.apply(this, arguments);
     };
-  }();
+  }().bind(this);
+}
+
+function control_ctx_variable(ctx, router) {
+  var isRender = filterRendeFile(ctx.params, ctx.url);
+  var route = isRender ? makeRoute(ctx) : false;
+  var routerPrefix = router.opts.prefix;
+  ctx.fkproute = ctx.aotooRoutePath = route;
+  ctx.routerPrefix = ctx.aotooRoutePrefix = routerPrefix;
+  var hooksKey = routerPrefix ? path_join(routerPrefix, route) : route;
+  ctx.hooksKey = hooksKey;
+  AKSHOOKS.append((0, _defineProperty3.default)({}, hooksKey, { "runtime": {
+      route: route,
+      prefix: routerPrefix,
+      path: hooksKey
+    } }));
+}
+
+function control_error(err, ctx) {
+  var message = err.message;
+  var route = ctx.routerPrefix || ctx.fkproute;
+  var isAjax = ctx.fkp.isAjax();
+  if (route === '404') {
+    return ctx.body = '您访问的页面不存在';
+  }
+
+  var beforeError = AKSHOOKS.emit('beforeError', { err: err, ctx: ctx, isAjax: isAjax });
+  if (beforeError) return beforeError;
+
+  switch (message) {
+    case '404':
+      ctx.status = 404;
+      console.log('========= 路由访问错误或模板文件不存在 ==========');
+      console.log(err);
+      break;
+    default:
+      console.log(err);
+      break;
+  }
+
+  var afterError = AKSHOOKS.emit('afterError', { err: err, ctx: ctx, isAjax: isAjax });
+  if (afterError) return afterError;
 }
 
 var existsControlFun = {};

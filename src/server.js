@@ -36,7 +36,7 @@ const DEFAULTCONFIGS = {
 
   fetchOptions: {
     headers: { }
-    , timeout: 10000
+    , timeout: 100000
   },
 
   cacheOptions: {
@@ -46,7 +46,26 @@ const DEFAULTCONFIGS = {
     , maxAge: 2 * 60 * 60 * 1000
   },
 
-  bodyOptions: {}
+  bodyOptions: {},
+
+  routerOptions: {
+    allMethods: ['get', 'post', 'put', 'del'],
+    parameters: {
+      get: [
+        '/',
+        '/:cat',
+        '/:cat/:title',
+        '/:cat/:title/:id'
+      ],
+      post: [
+        '/',
+        '/:cat',
+        '/:cat/:title',
+        '/:cat/:title/:id'
+      ]
+    },
+    prefixes: { }
+  }
 }
 
 
@@ -58,20 +77,19 @@ class aotooServer {
       css: '/css'
     }
 
-    let theApis = {
-      list: opts.apis || {}
-    }
+    opts = _.merge({}, DEFAULTCONFIGS, opts)
 
     this.configs = {
       keys: opts.keys || ['aotoo koa'],    // cookie session关键字
       index: opts.index || 'index',        // 默认首页
 
-      apis: theApis || DEFAULTCONFIGS.apis,                      // api接口集合
-      mapper: opts.mapper || DEFAULTCONFIGS.mapper,  // 静态资源映射文件
+      apis: opts.apis,                      // api接口集合
+      mapper: opts.mapper,  // 静态资源映射文件
 
-      fetchOptions: opts.fetchOptions || DEFAULTCONFIGS.fetchOptions,
-      cacheOptions: opts.cacheOptions || DEFAULTCONFIGS.cacheOptions,
-      bodyOptions: opts.bodyOptions || DEFAULTCONFIGS.bodyOptions,
+      fetchOptions: opts.fetchOptions,
+      cacheOptions: opts.cacheOptions,
+      bodyOptions: opts.bodyOptions,
+      routerOptions: opts.routerOptions,
 
       root: opts.root,              // 渲染默认目录
       pages: opts.pages||opts.pagesFolder||opts.controls,        // control层文件夹，必须
@@ -80,7 +98,8 @@ class aotooServer {
 
     this.state = {
       views: false,
-      bodyparser: false
+      bodyparser: false,
+      status: false
     }
 
     if (this.configs.bodyOptions) {
@@ -90,7 +109,7 @@ class aotooServer {
 
     // 传入apis
     global.Fetch = this.fetch = fetch({ apis: this.configs.apis, ...this.fetchOptions});
-    global.Cache = this.cache = cache(this.cacheOptions)
+    global.Cache = this.cache = cache(this.configs.cacheOptions)
 
     if (this.configs.mapper) {
       let _public
@@ -117,6 +136,34 @@ class aotooServer {
     this.append = AKSHOOKS::AKSHOOKS.append
     this.set = AKSHOOKS::AKSHOOKS.set
     this.get = AKSHOOKS::AKSHOOKS.get
+  }
+  
+  setFetchOptions(opts){
+    DEFAULTCONFIGS.fetchOptions.apis = this.fetch.apis
+    const _opts = _.merge({}, DEFAULTCONFIGS.fetchOptions, opts)
+    this.configs.fetchOptions = _opts
+    global.Fetch = this.fetch = fetch(_opts)
+  }
+
+  setCacheOptions(opts){
+    const _opts = _.merge({}, DEFAULTCONFIGS.cacheOptions, opts)
+    this.configs.cacheOptions = _opts
+    global.Cache = this.cache = cache(_opts)
+  }
+
+  setRouterOptions(opts){
+    const _opts = _.merge({}, DEFAULTCONFIGS.routerOptions, opts)
+    this.configs.routerOptions = _opts
+  }
+
+  setRouterPrefixes(opts){
+    if (!this.state.status) {
+      const _opts = _.merge({}, this.configs.routerOptions.prefixes, opts)
+      this.configs.routerOptions.prefixes = _opts
+    } else {
+      console.log('===========');
+      console.log('初始化状态才能设置前缀路由');
+    }
   }
 
   public(opts) {
@@ -250,6 +297,7 @@ class aotooServer {
 
   async listen(port, dom, cb) {
     const server = await this.init()
+    this.state.status = 'running'
     server.listen(port, dom, cb)
   }
 }

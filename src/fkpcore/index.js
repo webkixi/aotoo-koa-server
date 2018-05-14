@@ -39,7 +39,18 @@ function header(ctx, name, value) {
   }
 }
 
+async function registerRouterPrefixes(app) {
+  const AotooConfigs = AotooServerHooks.get().context.configs
+  if (Object.keys(AotooConfigs.routerOptions.prefixes).length) {
+    _.map(AotooConfigs.routerOptions.prefixes, async (params, prefix) => {
+      const myOptions = _.merge({}, AotooConfigs.routerOptions.parameters, params)
+      await router(app, prefix, myOptions)
+    })
+  }
+}
+
 async function _routepreset(app) {
+  await registerRouterPrefixes(app)
   const presets = innerData.route.presets
   const preset_keys = Object.keys(presets)
   const short_prefix = []
@@ -49,26 +60,8 @@ async function _routepreset(app) {
   const sort_prefixs = [...multi_part_prefix, ...single_part_prefix]
 
   sort_prefixs.forEach(async (prefix) => {
-    // console.log(prefix);
     await router(app, prefix, presets[prefix])
-  });
-
-  // const presets = innerData.route.presets
-  // const preset_keys = Object.keys(presets)
-  // const short_prefix = []
-
-  // preset_keys.forEach(async (_prefix) => {
-  //   const len = _prefix.split('/').length
-  //   if (len > 2) {
-  //     await router(app, _prefix, presets[_prefix])
-  //   } else {
-  //     short_prefix.push(_prefix)
-  //   }
-  // })
-
-  // short_prefix.forEach(async (_prefix) => {
-  //   await router(app, _prefix, presets[_prefix])
-  // })
+  })
 }
 
 // 静态, fkp()返回实例
