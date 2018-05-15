@@ -697,23 +697,33 @@ function control_custrom(router, myControl) {
               _context3.prev = 0;
 
               control_ctx_variable(ctx, router);
-              _context3.next = 4;
+
+              if (!ctx.fkproute) {
+                _context3.next = 6;
+                break;
+              }
+
+              _context3.next = 5;
               return myControl.call(router, ctx, next);
 
-            case 4:
+            case 5:
               return _context3.abrupt('return', _context3.sent);
 
-            case 7:
-              _context3.prev = 7;
+            case 6:
+              _context3.next = 11;
+              break;
+
+            case 8:
+              _context3.prev = 8;
               _context3.t0 = _context3['catch'](0);
               return _context3.abrupt('return', control_error(_context3.t0, ctx));
 
-            case 10:
+            case 11:
             case 'end':
               return _context3.stop();
           }
         }
-      }, _callee3, this, [[0, 7]]);
+      }, _callee3, this, [[0, 8]]);
     }));
 
     return function (_x5, _x6) {
@@ -735,44 +745,50 @@ function control_mirror(router, ctrlPages) {
               _context4.prev = 1;
 
               control_ctx_variable(ctx, router);
-              pageData = staticMapper(ctx, ctx.fkp.staticMapper, ctx.fkproute, ctx.routerPrefix);
 
-              if (!pageData) {
-                _context4.next = 15;
+              if (!ctx.fkproute) {
+                _context4.next = 16;
                 break;
               }
 
-              _context4.next = 7;
+              pageData = staticMapper(ctx, ctx.fkp.staticMapper, ctx.fkproute, ctx.routerPrefix);
+
+              if (!pageData) {
+                _context4.next = 16;
+                break;
+              }
+
+              _context4.next = 8;
               return controler(ctx, ctx.fkproute, pageData, ctrlPages, router);
 
-            case 7:
+            case 8:
               _ref5 = _context4.sent;
               _ref6 = (0, _slicedToArray3.default)(_ref5, 2);
               pdata = _ref6[0];
               rt = _ref6[1];
 
               rt = preRender(rt, ctx);
-              _context4.next = 14;
+              _context4.next = 15;
               return renderPage(ctx, rt, pdata);
 
-            case 14:
+            case 15:
               return _context4.abrupt('return', _context4.sent);
 
-            case 15:
-              _context4.next = 20;
+            case 16:
+              _context4.next = 21;
               break;
 
-            case 17:
-              _context4.prev = 17;
+            case 18:
+              _context4.prev = 18;
               _context4.t0 = _context4['catch'](1);
               return _context4.abrupt('return', control_error(_context4.t0, ctx));
 
-            case 20:
+            case 21:
             case 'end':
               return _context4.stop();
           }
         }
-      }, _callee4, this, [[1, 17]]);
+      }, _callee4, this, [[1, 18]]);
     }));
 
     return function (_x7, _x8) {
@@ -784,16 +800,18 @@ function control_mirror(router, ctrlPages) {
 function control_ctx_variable(ctx, router) {
   var isRender = filterRendeFile(ctx.params, ctx.url);
   var route = isRender ? makeRoute(ctx) : false;
-  var routerPrefix = router.opts.prefix;
-  ctx.fkproute = ctx.aotooRoutePath = route;
-  ctx.routerPrefix = ctx.aotooRoutePrefix = routerPrefix;
-  var hooksKey = routerPrefix ? path_join(routerPrefix, route) : route;
-  ctx.hooksKey = hooksKey;
-  AKSHOOKS.append((0, _defineProperty3.default)({}, hooksKey, { "runtime": {
-      route: route,
-      prefix: routerPrefix,
-      path: hooksKey
-    } }));
+  if (route) {
+    var routerPrefix = router.opts.prefix;
+    ctx.fkproute = ctx.aotooRoutePath = route;
+    ctx.routerPrefix = ctx.aotooRoutePrefix = routerPrefix;
+    var hooksKey = routerPrefix ? Path.join(routerPrefix, route || '') : route;
+    ctx.hooksKey = hooksKey;
+    AKSHOOKS.append((0, _defineProperty3.default)({}, hooksKey, { "runtime": {
+        route: route,
+        prefix: routerPrefix,
+        path: hooksKey
+      } }));
+  }
 }
 
 function control_error(err, ctx) {

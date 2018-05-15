@@ -304,7 +304,9 @@ function control_custrom(router, myControl) {
   return async function(ctx, next){
     try {
       control_ctx_variable(ctx, router)
-      return await myControl.call(router, ctx, next)
+      if (ctx.fkproute) {
+        return await myControl.call(router, ctx, next)
+      }
     } catch (err) {
       return control_error(err, ctx)
     }
@@ -316,11 +318,13 @@ function control_mirror(router, ctrlPages) {
     const isAjax = ctx.fkp.isAjax()
     try {
       control_ctx_variable(ctx, router)
-      let pageData = staticMapper(ctx, ctx.fkp.staticMapper, ctx.fkproute, ctx.routerPrefix)
-      if (pageData) {
-        let [pdata, rt] = await controler(ctx, ctx.fkproute, pageData, ctrlPages, router)
-        rt = preRender(rt, ctx)
-        return await renderPage(ctx, rt, pdata)
+      if (ctx.fkproute) {
+        let pageData = staticMapper(ctx, ctx.fkp.staticMapper, ctx.fkproute, ctx.routerPrefix)
+        if (pageData) {
+          let [pdata, rt] = await controler(ctx, ctx.fkproute, pageData, ctrlPages, router)
+          rt = preRender(rt, ctx)
+          return await renderPage(ctx, rt, pdata)
+        }
       }
     } catch (err) {
       return control_error(err, ctx)
@@ -331,18 +335,20 @@ function control_mirror(router, ctrlPages) {
 function control_ctx_variable(ctx, router) {
   let isRender = filterRendeFile(ctx.params, ctx.url)
   let route = isRender ? makeRoute(ctx) : false
-  let routerPrefix = router.opts.prefix
-  ctx.fkproute = ctx.aotooRoutePath = route
-  ctx.routerPrefix = ctx.aotooRoutePrefix = routerPrefix
-  const hooksKey = routerPrefix ? path_join(routerPrefix, route) : route
-  ctx.hooksKey = hooksKey
-  AKSHOOKS.append({
-    [hooksKey]: { "runtime": {
-      route: route,
-      prefix: routerPrefix,
-      path: hooksKey
-    }}
-  })
+  if (route) {
+    let routerPrefix = router.opts.prefix
+    ctx.fkproute = ctx.aotooRoutePath = route
+    ctx.routerPrefix = ctx.aotooRoutePrefix = routerPrefix
+    const hooksKey = routerPrefix ? Path.join(routerPrefix, route||'') : route
+    ctx.hooksKey = hooksKey
+    AKSHOOKS.append({
+      [hooksKey]: { "runtime": {
+        route: route,
+        prefix: routerPrefix,
+        path: hooksKey
+      }}
+    })
+  }
 }
 
 function control_error(err, ctx) {
