@@ -16,7 +16,7 @@ var _querystring = require('querystring');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var DEBUG = debug('fkp:modules:fetch');
+var DEBUG = debug('AKS:FETCH');
 var AKSHOOKS = SAX('AOTOO-KOA-SERVER');
 
 function inherits(Super, protos, staticProtos) {
@@ -86,8 +86,8 @@ var __request = inherits(_request, {
     setOpts.call(this, api, options, 'get');
     var _opts = this.requestOptions;
     var _api = this.api;
-    DEBUG('_get api %s', api);
-    DEBUG('_get options: %O', _opts);
+    DEBUG('GET:API %s', api);
+    DEBUG('GET:PARAM %O', _opts);
     if (_opts && _opts.json) {
       var _q = (0, _querystring.stringify)(_opts.json);
       api = api + '?' + _q;
@@ -99,7 +99,7 @@ var __request = inherits(_request, {
           return rej("async search: no respons data");
         }
         if (rep.statusCode == 200) {
-          DEBUG('_get response body %O', body);
+          DEBUG('GET:RESULT %O', body);
           return res(body);
         }
       });
@@ -111,15 +111,15 @@ var __request = inherits(_request, {
     var _opts = this.requestOptions;
     var _api = this.api;
     _opts.headers['Content-type'] = 'application/json; charset=utf-8';
-    DEBUG('_post api %s', api);
-    DEBUG('_post options: %O', _opts);
+    DEBUG('POST:API %s', api);
+    DEBUG('POST:PARAM %O', _opts);
     return new _promise2.default(function (res, rej) {
       _request3.default.post(_api, _opts, function (err, rep, body) {
         if (err) {
           return rej("async search: no respons data");
         }
         if (rep.statusCode == 200) {
-          DEBUG('_get response body %O', body);
+          DEBUG('POST:RESULT %O', body);
           return res(body);
         }
       });

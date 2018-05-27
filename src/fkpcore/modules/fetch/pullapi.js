@@ -1,6 +1,6 @@
 import path from 'path'
 import {stringify} from 'querystring'
-const DEBUG = debug('fkp:modules:pullapi')
+const DEBUG = debug('AKS:FETCH:PULLAPI')
 
 function getMyApi(api, apilist){
   const apiAry = api.split(':')
@@ -78,24 +78,70 @@ module.exports = function(){
     },
 
     get: async function(api, param){
-      DEBUG('get api %s', api)
-      let [_api, _param] = this._parseClientForm(api, param, 'get')
-      if (!_api) return {error: "60001", message: "指定api不存在"}
-      if (_param && _param.json && _param.json.test && _param.json.test == '123') delete _param.json.test
-      if (_param && _param.json && _param.json._stat_ ) delete _param.json._stat_
-      DEBUG('get param %O', _param)
-      let _data = await this._get(_api, _param)
-      return {data: _data}
+      // let [_api, _param] = this._parseClientForm(api, param, 'get')
+      // if (!_api) return {error: "60001", message: "指定api不存在"}
+      // if (_param && _param.json && _param.json.test && _param.json.test == '123') delete _param.json.test
+      // if (_param && _param.json && _param.json._stat_ ) delete _param.json._stat_
+      // DEBUG('get param %O', _param)
+      // let _data = await this._get(_api, _param)
+      // return {data: _data}
+      
+      try {
+        let [_api, _param] = this._parseClientForm(api, param, 'get')
+        if (_api) {
+          if (_param && _param.json && _param.json.test && _param.json.test == '123') delete _param.json.test
+          if (_param && _param.json && _param.json._stat_ ) delete _param.json._stat_
+          let _data = await this._get(_api, _param)
+          return {data: _data}
+        } else {
+          throw new Error(JSON.stringify({
+            error: "60001", 
+            message: "指定api不存在",
+            api: '/api/'+api,
+            param: param
+          }))
+        }
+      } catch (error) {
+        throw new Error(JSON.stringify({
+          error: "60002",
+          message: "后端返回数据错误",
+          info: error.message,
+          api: '/api/' + api,
+          param: param
+        }))
+      }
     },
 
     post: async function(api, param){
-      DEBUG('post api %s', api)
-      let [_api, _param] = this._parseClientForm(api, param, 'post')
-      if (!_api) return {error: "60001", message: "指定api不存在"}
-      if (_param && _param.form && _param.form.test && _param.form.test == '123') delete _param.form.test
-      DEBUG('post param %O', _param)
-      let _data = await this._post(_api, _param)
-      return {data: _data}
+      // let [_api, _param] = this._parseClientForm(api, param, 'post')
+      // if (!_api) return {error: "60001", message: "指定api不存在"}
+      // if (_param && _param.form && _param.form.test && _param.form.test == '123') delete _param.form.test
+      // DEBUG('post param %O', _param)
+      // let _data = await this._post(_api, _param)
+      // return {data: _data}
+      try {
+        let [_api, _param] = this._parseClientForm(api, param, 'get')
+        if (_api) {
+          if (_param && _param.form && _param.form.test && _param.form.test == '123') delete _param.form.test
+          let _data = await this._post(_api, _param)
+          return {data: _data}
+        } else {
+          throw new Error(JSON.stringify({
+            error: "60001", 
+            message: "指定api不存在",
+            api: '/api/'+api,
+            param: param
+          }))
+        }
+      } catch (error) {
+        throw new Error(JSON.stringify({
+          error: "60002",
+          message: "后端返回数据错误",
+          info: error.message,
+          api: '/api/' + api,
+          param: param
+        }))
+      }
     }
   }
 }

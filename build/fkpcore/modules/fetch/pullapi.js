@@ -4,6 +4,10 @@ var _regenerator = require('babel-runtime/regenerator');
 
 var _regenerator2 = _interopRequireDefault(_regenerator);
 
+var _stringify = require('babel-runtime/core-js/json/stringify');
+
+var _stringify2 = _interopRequireDefault(_stringify);
+
 var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
 
 var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
@@ -28,7 +32,7 @@ var _querystring = require('querystring');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var DEBUG = debug('fkp:modules:pullapi');
+var DEBUG = debug('AKS:FETCH:PULLAPI');
 
 function getMyApi(api, apilist) {
   var apiAry = api.split(':');
@@ -112,33 +116,52 @@ module.exports = function () {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                DEBUG('get api %s', api);
+                _context.prev = 0;
                 _parseClientForm2 = this._parseClientForm(api, param, 'get'), _parseClientForm3 = (0, _slicedToArray3.default)(_parseClientForm2, 2), _api = _parseClientForm3[0], _param = _parseClientForm3[1];
 
-                if (_api) {
-                  _context.next = 4;
+                if (!_api) {
+                  _context.next = 11;
                   break;
                 }
 
-                return _context.abrupt('return', { error: "60001", message: "指定api不存在" });
-
-              case 4:
                 if (_param && _param.json && _param.json.test && _param.json.test == '123') delete _param.json.test;
                 if (_param && _param.json && _param.json._stat_) delete _param.json._stat_;
-                DEBUG('get param %O', _param);
-                _context.next = 9;
+                _context.next = 7;
                 return this._get(_api, _param);
 
-              case 9:
+              case 7:
                 _data = _context.sent;
                 return _context.abrupt('return', { data: _data });
 
               case 11:
+                throw new Error((0, _stringify2.default)({
+                  error: "60001",
+                  message: "指定api不存在",
+                  api: '/api/' + api,
+                  param: param
+                }));
+
+              case 12:
+                _context.next = 17;
+                break;
+
+              case 14:
+                _context.prev = 14;
+                _context.t0 = _context['catch'](0);
+                throw new Error((0, _stringify2.default)({
+                  error: "60002",
+                  message: "后端返回数据错误",
+                  info: _context.t0.message,
+                  api: '/api/' + api,
+                  param: param
+                }));
+
+              case 17:
               case 'end':
                 return _context.stop();
             }
           }
-        }, _callee, this);
+        }, _callee, this, [[0, 14]]);
       }));
 
       function get(_x3, _x4) {
@@ -156,32 +179,51 @@ module.exports = function () {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
-                DEBUG('post api %s', api);
-                _parseClientForm4 = this._parseClientForm(api, param, 'post'), _parseClientForm5 = (0, _slicedToArray3.default)(_parseClientForm4, 2), _api = _parseClientForm5[0], _param = _parseClientForm5[1];
+                _context2.prev = 0;
+                _parseClientForm4 = this._parseClientForm(api, param, 'get'), _parseClientForm5 = (0, _slicedToArray3.default)(_parseClientForm4, 2), _api = _parseClientForm5[0], _param = _parseClientForm5[1];
 
-                if (_api) {
-                  _context2.next = 4;
+                if (!_api) {
+                  _context2.next = 10;
                   break;
                 }
 
-                return _context2.abrupt('return', { error: "60001", message: "指定api不存在" });
-
-              case 4:
                 if (_param && _param.form && _param.form.test && _param.form.test == '123') delete _param.form.test;
-                DEBUG('post param %O', _param);
-                _context2.next = 8;
+                _context2.next = 6;
                 return this._post(_api, _param);
 
-              case 8:
+              case 6:
                 _data = _context2.sent;
                 return _context2.abrupt('return', { data: _data });
 
               case 10:
+                throw new Error((0, _stringify2.default)({
+                  error: "60001",
+                  message: "指定api不存在",
+                  api: '/api/' + api,
+                  param: param
+                }));
+
+              case 11:
+                _context2.next = 16;
+                break;
+
+              case 13:
+                _context2.prev = 13;
+                _context2.t0 = _context2['catch'](0);
+                throw new Error((0, _stringify2.default)({
+                  error: "60002",
+                  message: "后端返回数据错误",
+                  info: _context2.t0.message,
+                  api: '/api/' + api,
+                  param: param
+                }));
+
+              case 16:
               case 'end':
                 return _context2.stop();
             }
           }
-        }, _callee2, this);
+        }, _callee2, this, [[0, 13]]);
       }));
 
       function post(_x5, _x6) {
