@@ -340,9 +340,10 @@ var getctrlData = function () {
             _pageData = undefined;
 
           case 50:
+            DEBUG('getctrlData return = %O', _pageData);
             return _context6.abrupt('return', _pageData);
 
-          case 51:
+          case 52:
           case 'end':
             return _context6.stop();
         }
@@ -363,42 +364,40 @@ var renderPage = function () {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
-            DEBUG('renderPage pageData = %O', data);
-            DEBUG('renderPage route = %s', route);
             isAjax = ctx.fkp.isAjax();
 
             data = AKSHOOKS.emit('beforeRender', data) || data;
             _context7.t0 = ctx.method;
-            _context7.next = _context7.t0 === 'GET' ? 7 : _context7.t0 === 'POST' ? 16 : 17;
+            _context7.next = _context7.t0 === 'GET' ? 5 : _context7.t0 === 'POST' ? 14 : 15;
             break;
 
-          case 7:
+          case 5:
             if (!isAjax) {
-              _context7.next = 9;
+              _context7.next = 7;
               break;
             }
 
             return _context7.abrupt('return', ctx.body = data);
 
-          case 9:
+          case 7:
             if (!route) {
-              _context7.next = 15;
+              _context7.next = 13;
               break;
             }
 
-            _context7.next = 12;
+            _context7.next = 10;
             return ctx.render(route, data);
 
-          case 12:
+          case 10:
             return _context7.abrupt('return', _context7.sent);
 
-          case 15:
+          case 13:
             throw new Error('404');
 
-          case 16:
+          case 14:
             return _context7.abrupt('return', ctx.body = data);
 
-          case 17:
+          case 15:
           case 'end':
             return _context7.stop();
         }
@@ -416,7 +415,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 /**
  * Module dependencies.
  */
-var DEBUG = debug('fkp:router');
+var DEBUG = debug('AKS:ROUTER');
 var fs = require('fs');
 var Promise = require('bluebird');
 var glob = require('glob');
@@ -457,7 +456,7 @@ function filterRendeFile(pms, url) {
 
   if (!ext) rtn = true;
 
-  return !ext || tempExts.includes(ext) || noPassCat.includes(cat);
+  return !ext || tempExts.includes(ext) > -1 || noPassCat.includes(cat) == -1;
 
   // if (_.indexOf(tempExts, ext) > -1) rtn = true;
   // if (_.indexOf(noPassCat, cat) > -1) rtn = false;
@@ -519,7 +518,6 @@ function controlPages() {
     fs.mkdirSync(businessPages, '0777');
   }
 
-  DEBUG('businessPages %s', businessPages);
   var controlPagePath = businessPages;
   var _id = controlPagePath;
 
@@ -798,10 +796,12 @@ function control_mirror(router, ctrlPages) {
 }
 
 function control_ctx_variable(ctx, router) {
+  var routerPrefix = router.opts.prefix;
   var isRender = filterRendeFile(ctx.params, ctx.url);
   var route = isRender ? makeRoute(ctx) : false;
+  DEBUG('router path = %s', route);
+  DEBUG('router prefix = %s', routerPrefix);
   if (route) {
-    var routerPrefix = router.opts.prefix;
     ctx.fkproute = ctx.aotooRoutePath = route;
     ctx.routerPrefix = ctx.aotooRoutePrefix = routerPrefix;
     var hooksKey = routerPrefix ? Path.join(routerPrefix, route || '') : route;

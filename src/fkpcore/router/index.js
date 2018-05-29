@@ -1,7 +1,7 @@
 /**
  * Module dependencies.
  */
-const DEBUG = debug('fkp:router')
+const DEBUG = debug('AKS:ROUTER')
 let fs = require('fs');
 const Promise = require('bluebird')
 const glob = require('glob')
@@ -42,7 +42,7 @@ function filterRendeFile(pms, url) {
 
   if (!ext) rtn = true;
 
-  return !ext || tempExts.includes(ext) || noPassCat.includes(cat)
+  return !ext || tempExts.includes(ext)>-1 || noPassCat.includes(cat)==-1
 
   // if (_.indexOf(tempExts, ext) > -1) rtn = true;
   // if (_.indexOf(noPassCat, cat) > -1) rtn = false;
@@ -100,7 +100,6 @@ function controlPages() {
     fs.mkdirSync(businessPages, '0777')
   }
 
-  DEBUG('businessPages %s', businessPages)
   const controlPagePath = businessPages
   const _id = controlPagePath
 
@@ -333,10 +332,12 @@ function control_mirror(router, ctrlPages) {
 }
 
 function control_ctx_variable(ctx, router) {
+  let routerPrefix = router.opts.prefix
   let isRender = filterRendeFile(ctx.params, ctx.url)
   let route = isRender ? makeRoute(ctx) : false
+  DEBUG('router path = %s', route)
+  DEBUG('router prefix = %s', routerPrefix)
   if (route) {
-    let routerPrefix = router.opts.prefix
     ctx.fkproute = ctx.aotooRoutePath = route
     ctx.routerPrefix = ctx.aotooRoutePrefix = routerPrefix
     const hooksKey = routerPrefix ? Path.join(routerPrefix, route||'') : route
@@ -472,6 +473,7 @@ async function getctrlData(_path, route, ctx, _pageData, routerInstance) {
   } else {
     _pageData = undefined
   }
+  DEBUG('getctrlData return = %O', _pageData)
   return _pageData
 }
 
@@ -497,8 +499,6 @@ function preRender(rt, ctx) {
 
 // dealwith the data from controlPage
 async function renderPage(ctx, route, data) {
-  DEBUG('renderPage pageData = %O', data)
-  DEBUG('renderPage route = %s', route)
   const isAjax = ctx.fkp.isAjax()
   data = AKSHOOKS.emit('beforeRender', data) || data
   switch (ctx.method) {
