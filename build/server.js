@@ -170,7 +170,7 @@ var DEFAULTCONFIGS = {
     maxAge: 2 * 60 * 60 * 1000
   },
 
-  bodyOptions: {},
+  bodyOptions: null,
 
   routerOptions: {
     allMethods: ['get', 'post', 'put', 'del'],
@@ -418,7 +418,7 @@ var aotooServer = function () {
           while (1) {
             switch (_context4.prev = _context4.next) {
               case 0:
-                if ((typeof obj === "undefined" ? "undefined" : (0, _typeof3.default)(obj)) == 'object') {
+                if (!this.state.bodyparser && (typeof obj === "undefined" ? "undefined" : (0, _typeof3.default)(obj)) == 'object') {
                   this.state.bodyparser = true;
                   app.use((0, _koaBodyparser2.default)(obj));
                 }

@@ -46,7 +46,7 @@ const DEFAULTCONFIGS = {
     , maxAge: 2 * 60 * 60 * 1000
   },
 
-  bodyOptions: {},
+  bodyOptions: null,
 
   routerOptions: {
     allMethods: ['get', 'post', 'put', 'del'],
@@ -212,7 +212,7 @@ class aotooServer {
 
   // 注册POST中间件，可以通过 ctx.bodys来访问post数据
   async bodyparser(obj = {}) {
-    if (typeof obj == 'object') {
+    if (!this.state.bodyparser && typeof obj == 'object') {
       this.state.bodyparser = true
       app.use(bodyparser(obj))
     }
