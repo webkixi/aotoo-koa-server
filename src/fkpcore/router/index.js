@@ -320,9 +320,18 @@ function control_mirror(router, ctrlPages) {
       if (ctx.fkproute) {
         let pageData = staticMapper(ctx, ctx.fkp.staticMapper, ctx.fkproute, ctx.routerPrefix)
         if (pageData) {
-          let [pdata, rt] = await controler(ctx, ctx.fkproute, pageData, ctrlPages, router)
+          let [pdata, rt, xdata, hitControlFile] = await controler(ctx, ctx.fkproute, pageData, ctrlPages, router)
           rt = preRender(rt, ctx)
-          return await renderPage(ctx, rt, pdata)
+          // return await renderPage(ctx, rt, pdata)
+          if (xdata) {
+            if (hitControlFile) {
+              return await renderPage(ctx, rt, pdata)
+            }
+          } else {
+            if (!hitControlFile) {
+              return await renderPage(ctx, rt, pdata)
+            }
+          }
         }
       }
     } catch (err) {
@@ -381,6 +390,7 @@ function control_error(err, ctx) {
 
 async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
   let xData = undefined
+  let hitControlFile = false
   let passAccess = false
   let isAjax = ctx.fkp.isAjax()
   let routerPrefix = routerInstance.opts.prefix
@@ -390,6 +400,7 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
   // 根据route匹配到control文件+三层路由
   const controlFile = Path.sep + route + '.js'
   if (ctrlPages.indexOf(controlFile) > -1) {
+    hitControlFile = true
     xData = await getctrlData([businessPagesPath + '/' + route], route, ctx, pageData, routerInstance)
   }
   // 根据prefix匹配到control文件+三层路由
@@ -402,6 +413,7 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
     Array.forEach([controlFile, controlIndexFile, controlCatFile], item => {
       const item_file = item + '.js'
       if (ctrlPages.indexOf(item_file) > -1) {
+        hitControlFile = true
         hitedControlFile.push(Path.join(businessPagesPath, item))
       }
     })
@@ -412,7 +424,11 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
   else {
     if (ctx.params.cat) {
       let paramsCatFile = Path.join(businessPagesPath, ctx.params.cat)
+      let controlFile = paramsCatFile+'.js'
       const xRoute = ctx.params.cat
+      if (existsControlFun[controlFile] || fs.existsSync(controlFile)) {
+        hitControlFile = true
+      }
       xData = await getctrlData([paramsCatFile], xRoute, ctx, pageData, routerInstance)
     }
   }
@@ -421,13 +437,17 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
     let apilist = Fetch.apilist
     if (apilist.list[route] || route === 'redirect') {
       passAccess = true
+      hitControlFile = true
       xData = await getctrlData(['./passaccesscontrol'], route, ctx, pageData, routerInstance)
-    } else {
-      xData = { nomatch: true }
     }
   }
-  if (passAccess || isAjax) pageData = xData
-  return [pageData, route]
+  
+  // xData = { nomatch: true }
+  // if (passAccess || isAjax) pageData = xData
+  // return [pageData, route]
+  
+  pageData = xData || pageData
+  return [pageData, route, xData, hitControlFile]
 }
 
 var existsControlFun = {}
@@ -460,12 +480,14 @@ async function getctrlData(_path, route, ctx, _pageData, routerInstance) {
       ? controlModule.getData 
       : undefined
 
-      existsControlFun[_names[0]] = controlFun
-      const controlConfig = controlFun ? controlFun.call(ctx, _pageData) : undefined
-      if (controlConfig) {
-        _pageData = await control(route, ctx, _pageData, routerInstance, controlConfig)
-      } else {
-        throw new Error('控制器文件不符合规范')
+      if (controlFun) {
+        existsControlFun[_names[0]] = controlFun
+        const controlConfig = controlFun ? controlFun.call(ctx, _pageData) : undefined
+        if (controlConfig) {
+          _pageData = await control(route, ctx, _pageData, routerInstance, controlConfig)
+        } else {
+          throw new Error('控制器文件不符合规范')
+        }
       }
     } else {
       _pageData = undefined

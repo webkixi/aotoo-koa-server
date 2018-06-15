@@ -439,7 +439,7 @@ exports.default = function () {
   var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9(app, options) {
     var _this3 = this;
 
-    var instance, dfts, server, pluginRoot, myfkp;
+    var instance, dfts, server, pluginRoot;
     return _regenerator2.default.wrap(function _callee9$(_context9) {
       while (1) {
         switch (_context9.prev = _context9.next) {
@@ -556,10 +556,9 @@ exports.default = function () {
               return router.getRoute(ctx);
             };
 
-            myfkp = fkp(null);
+            // const myfkp = fkp(null)
 
             // 封装koa中间件
-
             app.use(function () {
               var _ref9 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee8(ctx, next) {
                 return _regenerator2.default.wrap(function _callee8$(_context8) {
@@ -567,16 +566,17 @@ exports.default = function () {
                     switch (_context8.prev = _context8.next) {
                       case 0:
                         // controle层使用的fkp都是实例化的fkp
-                        myfkp.ctx = ctx;
-                        ctx.fkp = myfkp;
-                        ctx.aks = myfkp;
+
+                        // myfkp.ctx = ctx
+                        ctx.fkp = ctx.aks = fkp(ctx);
+                        // ctx.aks = myfkp
 
                         // 定义Fetch的上下文环境
                         Fetch.init(ctx);
-                        _context8.next = 6;
+                        _context8.next = 4;
                         return next();
 
-                      case 6:
+                      case 4:
                       case 'end':
                         return _context8.stop();
                     }
@@ -589,20 +589,20 @@ exports.default = function () {
               };
             }());
 
-            _context9.next = 29;
+            _context9.next = 28;
             return _routepreset(app);
 
-          case 29:
-            _context9.next = 31;
+          case 28:
+            _context9.next = 30;
             return router(app);
 
-          case 31:
+          case 30:
 
             // socketio运行时
             socketio.run();
             return _context9.abrupt('return', server);
 
-          case 33:
+          case 32:
           case 'end':
             return _context9.stop();
         }

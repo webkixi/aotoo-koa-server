@@ -229,14 +229,15 @@ export default async function(app, options) {
     return router.getRoute(ctx)
   }
 
-  const myfkp = fkp(null)
+  // const myfkp = fkp(null)
   
   // 封装koa中间件
   app.use(async (ctx, next) => {
     // controle层使用的fkp都是实例化的fkp
-    myfkp.ctx = ctx
-    ctx.fkp = myfkp
-    ctx.aks = myfkp
+    
+    // myfkp.ctx = ctx
+    ctx.fkp = ctx.aks = fkp(ctx)
+    // ctx.aks = myfkp
 
     // 定义Fetch的上下文环境
     Fetch.init(ctx)

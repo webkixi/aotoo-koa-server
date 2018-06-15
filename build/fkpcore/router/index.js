@@ -94,13 +94,14 @@ var init = function () {
 
 var controler = function () {
   var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee5(ctx, route, pageData, ctrlPages, routerInstance) {
-    var xData, passAccess, isAjax, routerPrefix, controlFile, hitedControlFile, _controlFile, controlIndexFile, controlCatFile, paramsCatFile, xRoute, apilist;
+    var xData, hitControlFile, passAccess, isAjax, routerPrefix, controlFile, hitedControlFile, _controlFile, controlIndexFile, controlCatFile, paramsCatFile, _controlFile2, xRoute, apilist;
 
     return _regenerator2.default.wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
             xData = undefined;
+            hitControlFile = false;
             passAccess = false;
             isAjax = ctx.fkp.isAjax();
             routerPrefix = routerInstance.opts.prefix;
@@ -112,21 +113,22 @@ var controler = function () {
             controlFile = Path.sep + route + '.js';
 
             if (!(ctrlPages.indexOf(controlFile) > -1)) {
-              _context5.next = 12;
+              _context5.next = 14;
               break;
             }
 
-            _context5.next = 9;
+            hitControlFile = true;
+            _context5.next = 11;
             return getctrlData([businessPagesPath + '/' + route], route, ctx, pageData, routerInstance);
 
-          case 9:
+          case 11:
             xData = _context5.sent;
-            _context5.next = 30;
+            _context5.next = 34;
             break;
 
-          case 12:
+          case 14:
             if (!routerPrefix) {
-              _context5.next = 24;
+              _context5.next = 26;
               break;
             }
 
@@ -139,62 +141,69 @@ var controler = function () {
             (0, _forEach2.default)([_controlFile, controlIndexFile, controlCatFile], function (item) {
               var item_file = item + '.js';
               if (ctrlPages.indexOf(item_file) > -1) {
+                hitControlFile = true;
                 hitedControlFile.push(Path.join(businessPagesPath, item));
               }
             });
 
-            _context5.next = 21;
+            _context5.next = 23;
             return getctrlData(hitedControlFile, route, ctx, pageData, routerInstance);
 
-          case 21:
+          case 23:
             xData = _context5.sent;
-            _context5.next = 30;
+            _context5.next = 34;
             break;
 
-          case 24:
+          case 26:
             if (!ctx.params.cat) {
-              _context5.next = 30;
+              _context5.next = 34;
               break;
             }
 
             paramsCatFile = Path.join(businessPagesPath, ctx.params.cat);
+            _controlFile2 = paramsCatFile + '.js';
             xRoute = ctx.params.cat;
-            _context5.next = 29;
+
+            if (existsControlFun[_controlFile2] || fs.existsSync(_controlFile2)) {
+              hitControlFile = true;
+            }
+            _context5.next = 33;
             return getctrlData([paramsCatFile], xRoute, ctx, pageData, routerInstance);
 
-          case 29:
+          case 33:
             xData = _context5.sent;
 
-          case 30:
+          case 34:
             if (xData) {
-              _context5.next = 40;
+              _context5.next = 42;
               break;
             }
 
             apilist = Fetch.apilist;
 
             if (!(apilist.list[route] || route === 'redirect')) {
-              _context5.next = 39;
+              _context5.next = 42;
               break;
             }
 
             passAccess = true;
-            _context5.next = 36;
+            hitControlFile = true;
+            _context5.next = 41;
             return getctrlData(['./passaccesscontrol'], route, ctx, pageData, routerInstance);
 
-          case 36:
+          case 41:
             xData = _context5.sent;
-            _context5.next = 40;
-            break;
-
-          case 39:
-            xData = { nomatch: true };
-
-          case 40:
-            if (passAccess || isAjax) pageData = xData;
-            return _context5.abrupt('return', [pageData, route]);
 
           case 42:
+
+            // xData = { nomatch: true }
+            // if (passAccess || isAjax) pageData = xData
+            // return [pageData, route]
+
+            pageData = xData || pageData;
+            return _context5.abrupt('return', [pageData, route, xData, hitControlFile]);
+
+          case 44:
           case 'end':
             return _context5.stop();
         }
@@ -292,58 +301,62 @@ var getctrlData = function () {
 
           case 31:
             if (!fs.existsSync(_names[0])) {
-              _context6.next = 49;
+              _context6.next = 50;
               break;
             }
 
             controlModule = require(_names[0]);
 
             if (!controlModule) {
-              _context6.next = 46;
+              _context6.next = 47;
               break;
             }
 
             _controlFun = typeof controlModule == 'function' ? controlModule : controlModule.getData && controlModule.getData && typeof controlModule.getData == 'function' ? controlModule.getData : undefined;
 
+            if (!_controlFun) {
+              _context6.next = 45;
+              break;
+            }
 
             existsControlFun[_names[0]] = _controlFun;
             _controlConfig = _controlFun ? _controlFun.call(ctx, _pageData) : undefined;
 
             if (!_controlConfig) {
-              _context6.next = 43;
+              _context6.next = 44;
               break;
             }
 
-            _context6.next = 40;
+            _context6.next = 41;
             return control(route, ctx, _pageData, routerInstance, _controlConfig);
 
-          case 40:
+          case 41:
             _pageData = _context6.sent;
-            _context6.next = 44;
+            _context6.next = 45;
             break;
-
-          case 43:
-            throw new Error('控制器文件不符合规范');
 
           case 44:
-            _context6.next = 47;
-            break;
+            throw new Error('控制器文件不符合规范');
 
-          case 46:
-            _pageData = undefined;
+          case 45:
+            _context6.next = 48;
+            break;
 
           case 47:
-            _context6.next = 50;
-            break;
-
-          case 49:
             _pageData = undefined;
 
+          case 48:
+            _context6.next = 51;
+            break;
+
           case 50:
+            _pageData = undefined;
+
+          case 51:
             DEBUG('getctrlData return = %O', _pageData);
             return _context6.abrupt('return', _pageData);
 
-          case 52:
+          case 53:
           case 'end':
             return _context6.stop();
         }
@@ -733,7 +746,7 @@ function control_custrom(router, myControl) {
 function control_mirror(router, ctrlPages) {
   return function () {
     var _ref4 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee4(ctx, next) {
-      var isAjax, pageData, _ref5, _ref6, pdata, rt;
+      var isAjax, pageData, _ref5, _ref6, pdata, rt, xdata, hitControlFile;
 
       return _regenerator2.default.wrap(function _callee4$(_context4) {
         while (1) {
@@ -745,14 +758,14 @@ function control_mirror(router, ctrlPages) {
               control_ctx_variable(ctx, router);
 
               if (!ctx.fkproute) {
-                _context4.next = 16;
+                _context4.next = 26;
                 break;
               }
 
               pageData = staticMapper(ctx, ctx.fkp.staticMapper, ctx.fkproute, ctx.routerPrefix);
 
               if (!pageData) {
-                _context4.next = 16;
+                _context4.next = 26;
                 break;
               }
 
@@ -761,32 +774,62 @@ function control_mirror(router, ctrlPages) {
 
             case 8:
               _ref5 = _context4.sent;
-              _ref6 = (0, _slicedToArray3.default)(_ref5, 2);
+              _ref6 = (0, _slicedToArray3.default)(_ref5, 4);
               pdata = _ref6[0];
               rt = _ref6[1];
+              xdata = _ref6[2];
+              hitControlFile = _ref6[3];
 
               rt = preRender(rt, ctx);
-              _context4.next = 15;
+              // return await renderPage(ctx, rt, pdata)
+
+              if (!xdata) {
+                _context4.next = 22;
+                break;
+              }
+
+              if (!hitControlFile) {
+                _context4.next = 20;
+                break;
+              }
+
+              _context4.next = 19;
               return renderPage(ctx, rt, pdata);
 
-            case 15:
+            case 19:
               return _context4.abrupt('return', _context4.sent);
 
-            case 16:
-              _context4.next = 21;
+            case 20:
+              _context4.next = 26;
               break;
 
-            case 18:
-              _context4.prev = 18;
+            case 22:
+              if (hitControlFile) {
+                _context4.next = 26;
+                break;
+              }
+
+              _context4.next = 25;
+              return renderPage(ctx, rt, pdata);
+
+            case 25:
+              return _context4.abrupt('return', _context4.sent);
+
+            case 26:
+              _context4.next = 31;
+              break;
+
+            case 28:
+              _context4.prev = 28;
               _context4.t0 = _context4['catch'](1);
               return _context4.abrupt('return', control_error(_context4.t0, ctx));
 
-            case 21:
+            case 31:
             case 'end':
               return _context4.stop();
           }
         }
-      }, _callee4, this, [[1, 18]]);
+      }, _callee4, this, [[1, 28]]);
     }));
 
     return function (_x7, _x8) {
