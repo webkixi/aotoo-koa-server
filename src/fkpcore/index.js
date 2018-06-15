@@ -152,6 +152,7 @@ export default async function(app, options) {
   const instance = this
   // =========== 注册fkp中间件 =============
   app.fkp = fkp
+  app.aks = fkp
 
   let dfts = {
     apis: options.apis,
@@ -235,6 +236,7 @@ export default async function(app, options) {
     // controle层使用的fkp都是实例化的fkp
     myfkp.ctx = ctx
     ctx.fkp = myfkp
+    ctx.aks = myfkp
 
     // 定义Fetch的上下文环境
     Fetch.init(ctx)

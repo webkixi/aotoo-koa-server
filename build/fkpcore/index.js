@@ -448,6 +448,7 @@ exports.default = function () {
             // =========== 注册fkp中间件 =============
 
             app.fkp = fkp;
+            app.aks = fkp;
 
             dfts = {
               apis: options.apis,
@@ -521,34 +522,34 @@ exports.default = function () {
             2、插件方法为new fkp后的对象方法，带有this的上下文，第一个参数ctx，为koa环境对象，插件方法挂载在fkp上，调用方法同样为fkp.xxx
             =================================================*/
 
-            _context9.prev = 11;
-            _context9.next = 14;
+            _context9.prev = 12;
+            _context9.next = 15;
             return registerUtile(app);
 
-          case 14:
+          case 15:
 
             // register plugins
             pluginRoot = dfts.pluginsFolder;
 
             if (!(pluginRoot && fs.existsSync(pluginRoot))) {
-              _context9.next = 18;
+              _context9.next = 19;
               break;
             }
 
-            _context9.next = 18;
+            _context9.next = 19;
             return registerPlugins(pluginRoot, app);
 
-          case 18:
-            _context9.next = 23;
+          case 19:
+            _context9.next = 24;
             break;
 
-          case 20:
-            _context9.prev = 20;
-            _context9.t0 = _context9['catch'](11);
+          case 21:
+            _context9.prev = 21;
+            _context9.t0 = _context9['catch'](12);
 
             console.log(_context9.t0);
 
-          case 23:
+          case 24:
 
             // 获取当前的路由信息
             fkp.getRouter = function () {
@@ -568,13 +569,14 @@ exports.default = function () {
                         // controle层使用的fkp都是实例化的fkp
                         myfkp.ctx = ctx;
                         ctx.fkp = myfkp;
+                        ctx.aks = myfkp;
 
                         // 定义Fetch的上下文环境
                         Fetch.init(ctx);
-                        _context8.next = 5;
+                        _context8.next = 6;
                         return next();
 
-                      case 5:
+                      case 6:
                       case 'end':
                         return _context8.stop();
                     }
@@ -587,25 +589,25 @@ exports.default = function () {
               };
             }());
 
-            _context9.next = 28;
+            _context9.next = 29;
             return _routepreset(app);
 
-          case 28:
-            _context9.next = 30;
+          case 29:
+            _context9.next = 31;
             return router(app);
 
-          case 30:
+          case 31:
 
             // socketio运行时
             socketio.run();
             return _context9.abrupt('return', server);
 
-          case 32:
+          case 33:
           case 'end':
             return _context9.stop();
         }
       }
-    }, _callee9, this, [[11, 20]]);
+    }, _callee9, this, [[12, 21]]);
   }));
 
   return function (_x9, _x10) {

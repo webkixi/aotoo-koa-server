@@ -8,7 +8,7 @@ import md5 from "blueimp-md5";
 import render from 'koa-art-template'
 import statics from 'koa-static-cache'
 import bodyparser from 'koa-bodyparser'
-import core, { fkp } from './fkpcore'
+import core, { fkp as aks } from './fkpcore'
 import fetch from './fkpcore/modules/fetch'
 import cache from './fkpcore/modules/cache'
 
@@ -16,8 +16,14 @@ ReactDom = require('react-dom/server')
 const AKSHOOKS = SAX('AOTOO-KOA-SERVER')
 global.ReactDomServer = ReactDom
 global.AotooServerHooks = AKSHOOKS
-Aotoo.render = ReactDomServer.renderToString
-Aotoo.html = ReactDomServer.renderToStaticMarkup
+Aotoo.render = function() {
+  AKSHOOKS.emit('AotooClassDestory')  // 演示2.5秒
+  return ReactDomServer.renderToString.apply(null, arguments)
+}
+Aotoo.html = function() {
+  AKSHOOKS.emit('AotooClassDestory')
+  return ReactDomServer.renderToStaticMarkup.apply(null, arguments)
+}
 
 const app = new Koa()
 const DEFAULTCONFIGS = {
@@ -110,6 +116,7 @@ class aotooServer {
     // 传入apis
     global.Fetch = this.fetch = fetch({ apis: this.configs.apis, ...this.fetchOptions});
     global.Cache = this.cache = cache(this.configs.cacheOptions)
+    global.Md5 = md5
 
     if (this.configs.mapper) {
       let _public
@@ -178,12 +185,12 @@ class aotooServer {
 
   // 注册一个Aotoo插件方法
   plugins(name, fn) {
-    fkp.plugins(name, fn)
+    aks.plugins(name, fn)
   }
 
   // 注册一个Aotoo助手方法
   utile(name, fn) {
-    fkp.utileHand(name, fn)
+    aks.utileHand(name, fn)
   }
 
   callback() {

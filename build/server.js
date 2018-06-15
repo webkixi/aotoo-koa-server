@@ -138,8 +138,14 @@ ReactDom = require('react-dom/server');
 var AKSHOOKS = SAX('AOTOO-KOA-SERVER');
 global.ReactDomServer = ReactDom;
 global.AotooServerHooks = AKSHOOKS;
-Aotoo.render = ReactDomServer.renderToString;
-Aotoo.html = ReactDomServer.renderToStaticMarkup;
+Aotoo.render = function () {
+  AKSHOOKS.emit('AotooClassDestory'); // 演示2.5秒
+  return ReactDomServer.renderToString.apply(null, arguments);
+};
+Aotoo.html = function () {
+  AKSHOOKS.emit('AotooClassDestory');
+  return ReactDomServer.renderToStaticMarkup.apply(null, arguments);
+};
 
 var app = new _koa2.default();
 var DEFAULTCONFIGS = {
@@ -226,6 +232,7 @@ var aotooServer = function () {
     // 传入apis
     global.Fetch = this.fetch = (0, _fetch2.default)((0, _extends3.default)({ apis: this.configs.apis }, this.fetchOptions));
     global.Cache = this.cache = (0, _cache2.default)(this.configs.cacheOptions);
+    global.Md5 = _blueimpMd2.default;
 
     if (this.configs.mapper) {
       var _public = void 0;
