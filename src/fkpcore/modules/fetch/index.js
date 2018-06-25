@@ -1,6 +1,7 @@
-import path from 'path'
-import request from 'request'
-import {stringify} from 'querystring'
+const path = require('path')
+const request = require(request)
+const querystring = require('querystring')
+const stringify = querystring.stringify
 const DEBUG = debug('AKS:FETCH')
 const AKSHOOKS = SAX('AOTOO-KOA-SERVER')
 

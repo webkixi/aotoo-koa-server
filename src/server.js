@@ -1,7 +1,6 @@
 import fs from "fs";
 import Koa from 'koa'
 import glob from "glob";
-import path from 'path'
 import 'aotoo'
 import 'aotoo-web-widgets'
 import md5 from "blueimp-md5";

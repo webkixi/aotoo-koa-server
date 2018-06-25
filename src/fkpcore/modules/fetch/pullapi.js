@@ -1,5 +1,3 @@
-import path from 'path'
-import {stringify} from 'querystring'
 const DEBUG = debug('AKS:FETCH:PULLAPI')
 
 function getMyApi(api, apilist){
