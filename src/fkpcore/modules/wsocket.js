@@ -54,7 +54,7 @@ function websocket(app){
 
 function mkon(socket) {
   // const client = socket.handshake
-  Object.keys(socket_config).forEach( item => {
+  Object.keys(socket_config).forEach( function(item) {
     var cb = socket_config[item]
     if (typeof cb == 'function') {
       socket.on(item, function(data) {

@@ -50,7 +50,7 @@ module.exports = function(params) {
 			}
 			return cache.del(key)
 		},
-		ifid: (key, callback) => {
+		ifid: function(key, callback) {
 			if (typeof key == 'string') {
 				var tmp = cache.has(md5(key))
 				return tmp ? cache.get(md5(key)) : (function () {

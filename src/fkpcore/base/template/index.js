@@ -40,6 +40,6 @@ function index(fkp, raw, data={}, options) {
   }
 }
 
-export default function(fkp){
+module.exports = function(fkp){
   return index
 }

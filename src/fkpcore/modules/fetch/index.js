@@ -80,8 +80,8 @@ let __request = inherits(_request, {
       api = api + '?' + _q;
       delete _opts.json
     }
-    return new Promise( (res, rej) => {
-      request.get(api, _opts, (err, rep, body)=>{
+    return new Promise( function(res, rej) {
+      request.get(api, _opts, function(err, rep, body) {
         if(err) { return rej("async search: no respons data")}
         if (rep.statusCode == 200){
           DEBUG('GET:RESULT %O', body)
@@ -98,8 +98,8 @@ let __request = inherits(_request, {
     _opts.headers['Content-type'] = 'application/json; charset=utf-8'
     DEBUG('POST:API %s', api)
     DEBUG('POST:PARAM %O', _opts)
-    return new Promise( (res, rej) => {
-      request.post(_api, _opts, (err, rep, body)=>{
+    return new Promise( function(res, rej) {
+      request.post(_api, _opts, function(err, rep, body) {
         if(err) {return rej("async search: no respons data")}
         if (rep.statusCode == 200){
           DEBUG('POST:RESULT %O', body)

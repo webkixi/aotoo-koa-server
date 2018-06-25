@@ -43,7 +43,7 @@ function folderInfo(_dir){
   return { tree }
 }
 
-async function index(fkp, dir){
+function index(fkp, dir){
   try {
     if (fs.existSync(dir)) {
       return folderInfo(dir)
@@ -53,6 +53,6 @@ async function index(fkp, dir){
   }
 }
 
-export default function(fkp){
+module.exports = function(fkp){
   return index
 }
