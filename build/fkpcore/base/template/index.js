@@ -1,13 +1,5 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-exports.default = function (fkp) {
-  return index;
-};
-
 var template = require('art-template');
 
 // 压缩页面的css/js
@@ -51,4 +43,8 @@ function index(fkp, raw) {
     return template.render(raw, data, options);
   }
 }
+
+module.exports = function (fkp) {
+  return index;
+};
 //# sourceMappingURL=../../../maps/fkpcore/base/template/index.js.map

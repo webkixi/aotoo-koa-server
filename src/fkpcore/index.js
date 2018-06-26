@@ -1,5 +1,5 @@
-import Path from 'path'
-import request from 'request'
+const Path = require('path')
+const request = require('request')
 
 let fs = require('fs')
 let socketio = require('./modules/wsocket'); global.Sio = socketio.sio
@@ -24,8 +24,8 @@ function _fkp(ctx, opts){
   this.ctx = ctx
   this.opts = opts
   const that = this
-  this.isAjax = function() {
-    return header(that.ctx, 'X-Requested-With') === 'XMLHttpRequest';
+  this.isAjax = function(ctxx) {
+    return header(ctxx||that.ctx, 'X-Requested-With') === 'XMLHttpRequest';
   }
 }
 
@@ -37,6 +37,16 @@ function header(ctx, name, value) {
       return ctx.request.get(name);
     }
   }
+}
+
+// 静态, fkp()返回实例
+function fkp(ctx, opts) {
+  let fkpInstanc = new _fkp(ctx, opts)
+  for (const property of Object.entries(fkp)) {
+    const [_name, _value] = property
+    fkpInstanc[_name] = _value
+  }
+  return fkpInstanc
 }
 
 async function registerRouterPrefixes(app) {
@@ -64,15 +74,6 @@ async function _routepreset(app) {
   })
 }
 
-// 静态, fkp()返回实例
-export function fkp(ctx, opts){
-  let fkpInstanc = new _fkp(ctx, opts)
-  for (const property of Object.entries(fkp)) {
-    const [_name, _value] = property
-    fkpInstanc[_name] = _value
-  }
-  return fkpInstanc
-}
 
 // manual set static property or fun or some resource
 fkp.env = process.env.NODE_ENV == 'development' ? 'dev' : 'pro'
@@ -115,7 +116,12 @@ async function registerUtile(app) {
   if (_utilesFiles && _utilesFiles.length) {
     for (let utileFile of _utilesFiles) {
       if (valideFile(utileFile)) {
-        let utileFun = require('./base/' + utileFile).default()
+        // let utileFun = require('./base/' + utileFile).default()
+        let utileFun = require('./base/' + utileFile)
+        if (utileFun.default) utileFun = utileFun.default()
+        else {
+          utileFun = utileFun()
+        }
         fkp.utileHand(Path.parse(utileFile).name, utileFun)
       }
     }
@@ -130,7 +136,12 @@ async function registerPlugins(pluginRoot, app) {
     if (_pluginFiles && _pluginFiles.length) {
       for (let pluginFile of _pluginFiles) {
         if (valideFile(pluginFile)) {
-          let plugin = require(Path.join(pluginRoot, pluginFile)).default(fkp)
+          // let plugin = require(Path.join(pluginRoot, pluginFile)).default(fkp)
+          let plugin = require(Path.join(pluginRoot, pluginFile))
+          if (plugin.default) plugin = plugin.default(fkp)
+          else {
+            plugin = plugin(fkp)
+          }
           fkp.plugins(Path.parse(pluginFile).name, plugin)
         }
       }
@@ -148,7 +159,8 @@ async function registerPlugins(pluginRoot, app) {
   }
 }
 
-export default async function(app, options) {
+// export default async function(app, options) {
+async function core(app, options) {
   const instance = this
   // =========== 注册fkp中间件 =============
   app.fkp = fkp
@@ -252,4 +264,9 @@ export default async function(app, options) {
   // socketio运行时
   socketio.run()
   return server
+}
+
+module.exports = {
+  core: core,
+  fkp: fkp
 }

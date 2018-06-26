@@ -1,8 +1,5 @@
 "use strict";
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
 function Control(ctx, oridata, routerIns) {
   this.ctx = ctx || null;
   this.get = undefined;
@@ -118,5 +115,6 @@ function control(route, ctx, odata, routerIns) {
   });
 }
 
-exports.default = myControl;
+module.exports = myControl;
+// export default myControl
 //# sourceMappingURL=../../maps/fkpcore/router/control.js.map

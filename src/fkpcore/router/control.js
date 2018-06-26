@@ -116,4 +116,5 @@ function control(route, ctx, odata, routerIns){
   })
 }
 
-export default myControl
+module.exports = myControl
+// export default myControl

@@ -1,7 +1,7 @@
 'use strict';
 
-require('babel-core/register');
-require("babel-polyfill");
+// require('babel-core/register')
+// require("babel-polyfill")
 global.debug = require('debug');
 
 var atServer = require('./server');

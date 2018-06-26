@@ -1,21 +1,5 @@
 'use strict';
 
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
-
-var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
-
-var _entries = require('babel-runtime/core-js/object/entries');
-
-var _entries2 = _interopRequireDefault(_entries);
-
-var _getIterator2 = require('babel-runtime/core-js/get-iterator');
-
-var _getIterator3 = _interopRequireDefault(_getIterator2);
-
 var _toConsumableArray2 = require('babel-runtime/helpers/toConsumableArray');
 
 var _toConsumableArray3 = _interopRequireDefault(_toConsumableArray2);
@@ -31,6 +15,18 @@ var _keys2 = _interopRequireDefault(_keys);
 var _asyncToGenerator2 = require('babel-runtime/helpers/asyncToGenerator');
 
 var _asyncToGenerator3 = _interopRequireDefault(_asyncToGenerator2);
+
+var _slicedToArray2 = require('babel-runtime/helpers/slicedToArray');
+
+var _slicedToArray3 = _interopRequireDefault(_slicedToArray2);
+
+var _entries = require('babel-runtime/core-js/object/entries');
+
+var _entries2 = _interopRequireDefault(_entries);
+
+var _getIterator2 = require('babel-runtime/core-js/get-iterator');
+
+var _getIterator3 = _interopRequireDefault(_getIterator2);
 
 var registerRouterPrefixes = function () {
   var _ref = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee2(app) {
@@ -142,7 +138,7 @@ var _routepreset = function () {
   };
 }();
 
-// 静态, fkp()返回实例
+// manual set static property or fun or some resource
 
 
 var registerUtile = function () {
@@ -157,7 +153,7 @@ var registerUtile = function () {
             fkp = app.fkp;
             baseRoot = './base';
             _context5.next = 4;
-            return fs.readdirAsync(_path2.default.resolve(__dirname, baseRoot));
+            return fs.readdirAsync(Path.resolve(__dirname, baseRoot));
 
           case 4:
             _utilesFiles = _context5.sent;
@@ -176,9 +172,13 @@ var registerUtile = function () {
               utileFile = _step2.value;
 
               if (valideFile(utileFile)) {
-                utileFun = require('./base/' + utileFile).default();
+                // let utileFun = require('./base/' + utileFile).default()
+                utileFun = require('./base/' + utileFile);
 
-                fkp.utileHand(_path2.default.parse(utileFile).name, utileFun);
+                if (utileFun.default) utileFun = utileFun.default();else {
+                  utileFun = utileFun();
+                }
+                fkp.utileHand(Path.parse(utileFile).name, utileFun);
               }
             }
             _context5.next = 17;
@@ -263,9 +263,13 @@ var registerPlugins = function () {
               pluginFile = _step3.value;
 
               if (valideFile(pluginFile)) {
-                plugin = require(_path2.default.join(pluginRoot, pluginFile)).default(fkp);
+                // let plugin = require(Path.join(pluginRoot, pluginFile)).default(fkp)
+                plugin = require(Path.join(pluginRoot, pluginFile));
 
-                fkp.plugins(_path2.default.parse(pluginFile).name, plugin);
+                if (plugin.default) plugin = plugin.default(fkp);else {
+                  plugin = plugin(fkp);
+                }
+                fkp.plugins(Path.parse(pluginFile).name, plugin);
               }
             }
             _context6.next = 18;
@@ -314,128 +318,10 @@ var registerPlugins = function () {
   };
 }();
 
-exports.fkp = fkp;
+// export default async function(app, options) {
 
-var _path = require('path');
 
-var _path2 = _interopRequireDefault(_path);
-
-var _request = require('request');
-
-var _request2 = _interopRequireDefault(_request);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var fs = require('fs');
-var socketio = require('./modules/wsocket');global.Sio = socketio.sio;
-// let cache = require('./modules/cache');      global.Cache = cache
-// let _fetch = require('./modules/fetch');
-var router = require('./router');
-var Promise = require('bluebird');
-fs = Promise.promisifyAll(fs);
-
-// 内部变量
-var innerData = {
-  route: {
-    prefix: [],
-    presets: {}
-  }
-};
-
-var IGNORE_CHARS = ['_', '.'];
-
-// 实例, fkp中间件
-function _fkp(ctx, opts) {
-  this.ctx = ctx;
-  this.opts = opts;
-  var that = this;
-  this.isAjax = function () {
-    return header(that.ctx, 'X-Requested-With') === 'XMLHttpRequest';
-  };
-}
-
-function header(ctx, name, value) {
-  if (ctx) {
-    if (value != undefined) {
-      ctx.request.set(name, value);
-    } else {
-      return ctx.request.get(name);
-    }
-  }
-}
-
-function fkp(ctx, opts) {
-  var fkpInstanc = new _fkp(ctx, opts);
-  var _iteratorNormalCompletion = true;
-  var _didIteratorError = false;
-  var _iteratorError = undefined;
-
-  try {
-    for (var _iterator = (0, _getIterator3.default)((0, _entries2.default)(fkp)), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      var property = _step.value;
-
-      var _property = (0, _slicedToArray3.default)(property, 2),
-          _name = _property[0],
-          _value = _property[1];
-
-      fkpInstanc[_name] = _value;
-    }
-  } catch (err) {
-    _didIteratorError = true;
-    _iteratorError = err;
-  } finally {
-    try {
-      if (!_iteratorNormalCompletion && _iterator.return) {
-        _iterator.return();
-      }
-    } finally {
-      if (_didIteratorError) {
-        throw _iteratorError;
-      }
-    }
-  }
-
-  return fkpInstanc;
-}
-
-// manual set static property or fun or some resource
-fkp.env = process.env.NODE_ENV == 'development' ? 'dev' : 'pro';
-
-// Register utile function
-fkp.utileHand = function (name, fn) {
-  if (typeof fn == 'function') {
-    fkp[name] = function () {
-      if (fn && typeof fn == 'function') {
-        return fn.apply(null, [fkp].concat(Array.prototype.slice.call(arguments)));
-      }
-    };
-  }
-};
-
-// Register plugins function
-fkp.plugins = function (name, fn) {
-  if (typeof fn == 'function') {
-    _fkp.prototype[name] = function () {
-      if (fn && typeof fn == 'function') {
-        return fn.apply(this, [this.ctx].concat(Array.prototype.slice.call(arguments)));
-      }
-    };
-  }
-};
-
-// as plugins, it look nice
-fkp.use = function (name, fn) {
-  _fkp.prototype[name] = function () {
-    if (fn && typeof fn == 'function') return fn.apply(this, [this.ctx].concat(Array.prototype.slice.call(arguments)));
-  };
-};
-
-function valideFile(_file) {
-  var firstChar = _file && _file.charAt(0);
-  return IGNORE_CHARS.indexOf(firstChar) > -1 ? false : true;
-}
-
-exports.default = function () {
+var core = function () {
   var _ref7 = (0, _asyncToGenerator3.default)( /*#__PURE__*/_regenerator2.default.mark(function _callee9(app, options) {
     var _this3 = this;
 
@@ -486,7 +372,7 @@ exports.default = function () {
                     switch (_context7.prev = _context7.next) {
                       case 0:
                         if (prefix) {
-                          prefix = _path2.default.join('/', prefix);
+                          prefix = Path.join('/', prefix);
                           innerData.route.presets[prefix] = routerOptions;
                           // prefix = Path.join('/', prefix)
                           // let presets = innerData.route.presets
@@ -610,8 +496,127 @@ exports.default = function () {
     }, _callee9, this, [[12, 21]]);
   }));
 
-  return function (_x9, _x10) {
+  return function core(_x9, _x10) {
     return _ref7.apply(this, arguments);
   };
 }();
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Path = require('path');
+var request = require('request');
+
+var fs = require('fs');
+var socketio = require('./modules/wsocket');global.Sio = socketio.sio;
+// let cache = require('./modules/cache');      global.Cache = cache
+// let _fetch = require('./modules/fetch');
+var router = require('./router');
+var Promise = require('bluebird');
+fs = Promise.promisifyAll(fs);
+
+// 内部变量
+var innerData = {
+  route: {
+    prefix: [],
+    presets: {}
+  }
+};
+
+var IGNORE_CHARS = ['_', '.'];
+
+// 实例, fkp中间件
+function _fkp(ctx, opts) {
+  this.ctx = ctx;
+  this.opts = opts;
+  var that = this;
+  this.isAjax = function (ctxx) {
+    return header(ctxx || that.ctx, 'X-Requested-With') === 'XMLHttpRequest';
+  };
+}
+
+function header(ctx, name, value) {
+  if (ctx) {
+    if (value != undefined) {
+      ctx.request.set(name, value);
+    } else {
+      return ctx.request.get(name);
+    }
+  }
+}
+
+// 静态, fkp()返回实例
+function fkp(ctx, opts) {
+  var fkpInstanc = new _fkp(ctx, opts);
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = (0, _getIterator3.default)((0, _entries2.default)(fkp)), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var property = _step.value;
+
+      var _property = (0, _slicedToArray3.default)(property, 2),
+          _name = _property[0],
+          _value = _property[1];
+
+      fkpInstanc[_name] = _value;
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
+
+  return fkpInstanc;
+}
+
+fkp.env = process.env.NODE_ENV == 'development' ? 'dev' : 'pro';
+
+// Register utile function
+fkp.utileHand = function (name, fn) {
+  if (typeof fn == 'function') {
+    fkp[name] = function () {
+      if (fn && typeof fn == 'function') {
+        return fn.apply(null, [fkp].concat(Array.prototype.slice.call(arguments)));
+      }
+    };
+  }
+};
+
+// Register plugins function
+fkp.plugins = function (name, fn) {
+  if (typeof fn == 'function') {
+    _fkp.prototype[name] = function () {
+      if (fn && typeof fn == 'function') {
+        return fn.apply(this, [this.ctx].concat(Array.prototype.slice.call(arguments)));
+      }
+    };
+  }
+};
+
+// as plugins, it look nice
+fkp.use = function (name, fn) {
+  _fkp.prototype[name] = function () {
+    if (fn && typeof fn == 'function') return fn.apply(this, [this.ctx].concat(Array.prototype.slice.call(arguments)));
+  };
+};
+
+function valideFile(_file) {
+  var firstChar = _file && _file.charAt(0);
+  return IGNORE_CHARS.indexOf(firstChar) > -1 ? false : true;
+}
+
+module.exports = {
+  core: core,
+  fkp: fkp
+};
 //# sourceMappingURL=../maps/fkpcore/index.js.map

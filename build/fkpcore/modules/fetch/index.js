@@ -4,18 +4,12 @@ var _promise = require('babel-runtime/core-js/promise');
 
 var _promise2 = _interopRequireDefault(_promise);
 
-var _path = require('path');
-
-var _path2 = _interopRequireDefault(_path);
-
-var _request2 = require('request');
-
-var _request3 = _interopRequireDefault(_request2);
-
-var _querystring = require('querystring');
-
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+var path = require('path');
+var request = require('request');
+var querystring = require('querystring');
+var stringify = querystring.stringify;
 var DEBUG = debug('AKS:FETCH');
 var AKSHOOKS = SAX('AOTOO-KOA-SERVER');
 
@@ -89,12 +83,12 @@ var __request = inherits(_request, {
     DEBUG('GET:API %s', api);
     DEBUG('GET:PARAM %O', _opts);
     if (_opts && _opts.json) {
-      var _q = (0, _querystring.stringify)(_opts.json);
+      var _q = stringify(_opts.json);
       api = api + '?' + _q;
       delete _opts.json;
     }
     return new _promise2.default(function (res, rej) {
-      _request3.default.get(api, _opts, function (err, rep, body) {
+      request.get(api, _opts, function (err, rep, body) {
         if (err) {
           return rej("async search: no respons data");
         }
@@ -114,7 +108,7 @@ var __request = inherits(_request, {
     DEBUG('POST:API %s', api);
     DEBUG('POST:PARAM %O', _opts);
     return new _promise2.default(function (res, rej) {
-      _request3.default.post(_api, _opts, function (err, rep, body) {
+      request.post(_api, _opts, function (err, rep, body) {
         if (err) {
           return rej("async search: no respons data");
         }

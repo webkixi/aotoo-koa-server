@@ -10,7 +10,8 @@ const Url = require('url')
 const Router = require('koa-router')
 const md5 = require('blueimp-md5')
 const AKSHOOKS = SAX('AOTOO-KOA-SERVER')
-const control = require('./control').default
+// const control = require('./control').default
+const control = require('./control')
 fs = Promise.promisifyAll(fs)
 
 let businessPagesPath = ''
@@ -200,44 +201,50 @@ function path_join(jspath, src) {
   }
 }
 
-function staticMapper(ctx, mapper, route, routerPrefix) {
+const tmpletStatic = (src, type) => {
   const jspath = Aotoo.inject.public.js
   const csspath = Aotoo.inject.public.css
-  let tmpletStatic = (src, type) => {
-    if (type == 'js') {
-      const jspagesrc = path_join(jspath, src)
-      return '<script type="text/javascript" src="' + jspagesrc + '" ></script>'
+  if (type == 'js') {
+    const jspagesrc = path_join(jspath, src)
+    return '<script type="text/javascript" src="' + jspagesrc + '" ></script>'
+  }
+  if (type == 'css') {
+    const csspagesrc = path_join(csspath, src)
+    return '<link rel="stylesheet" href="' + csspagesrc + '" />'
+  }
+}
+
+function staticMapper(ctx, mapper, route, routerPrefix) {
+  const urlObj = Url.parse(ctx.url)
+  const _id = md5(urlObj.pathname)
+  
+  return Cache.ifid(_id, () => {
+    if (_.isString(routerPrefix) && routerPrefix.indexOf('/') == 0) routerPrefix = routerPrefix.replace('/', '')
+    if (!mapper) return false
+    let pageData = {
+      //静态资源
+      commonjs: tmpletStatic((mapper.js.common || 'common.js'), 'js'),   //公共css
+      commoncss: tmpletStatic((mapper.css.common || 'common.css'), 'css'), //公共js
+      pagejs: '',
+      pagecss: '',
+      pagedata: {}
     }
-    if (type == 'css') {
-      const csspagesrc = path_join(csspath, src)
-      return '<link rel="stylesheet" href="' + csspagesrc + '" />'
+    //静态资源初始化
+    if (route.indexOf('/') == 0) route = route.substring(1)
+    if (route.lastIndexOf('/') == (route.length - 1)) route = route.substring(0, route.length - 1)
+    if (mapper.css[route]) pageData.pagecss = tmpletStatic(mapper.css[route], 'css')
+    if (mapper.js[route]) pageData.pagejs = tmpletStatic(mapper.js[route], 'js')
+  
+    let _route = route
+    if (routerPrefix) {
+      _route = routerPrefix
+      if (mapper.css[_route]) pageData.pagecss = tmpletStatic(mapper.css[_route], 'css')
+      if (mapper.js[_route]) pageData.pagejs = tmpletStatic(mapper.js[_route], 'js')
     }
-  }
-
-  if (_.isString(routerPrefix) && routerPrefix.indexOf('/') == 0) routerPrefix = routerPrefix.replace('/', '')
-  if (!mapper) return false
-  let pageData = {
-    //静态资源
-    commonjs: tmpletStatic((mapper.js.common || 'common.js'), 'js'),   //公共css
-    commoncss: tmpletStatic((mapper.css.common || 'common.css'), 'css'), //公共js
-    pagejs: '',
-    pagecss: '',
-    pagedata: {}
-  }
-  //静态资源初始化
-  if (route.indexOf('/') == 0) route = route.substring(1)
-  if (route.lastIndexOf('/') == (route.length - 1)) route = route.substring(0, route.length - 1)
-  if (mapper.css[route]) pageData.pagecss = tmpletStatic(mapper.css[route], 'css')
-  if (mapper.js[route]) pageData.pagejs = tmpletStatic(mapper.js[route], 'js')
-
-  let _route = route
-  if (routerPrefix) {
-    _route = routerPrefix
-    if (mapper.css[_route]) pageData.pagecss = tmpletStatic(mapper.css[_route], 'css')
-    if (mapper.js[_route]) pageData.pagejs = tmpletStatic(mapper.js[_route], 'js')
-  }
-
-  return pageData
+    
+    Cache.set(_id, pageData)
+    return pageData
+  })
 }
 
 function defineMyRouter(myOptions, router, prefix, customControl, controlPages) {
@@ -314,7 +321,7 @@ function control_custrom(router, myControl) {
 
 function control_mirror(router, ctrlPages) {
   return async function(ctx, next){
-    const isAjax = ctx.fkp.isAjax()
+    const isAjax = ctx.fkp.isAjax(ctx)
     try {
       control_ctx_variable(ctx, router)
       if (ctx.fkproute) {
@@ -364,7 +371,7 @@ function control_ctx_variable(ctx, router) {
 function control_error(err, ctx) {
   const message = err.message
   const route = ctx.routerPrefix || ctx.fkproute
-  const isAjax = ctx.fkp.isAjax()
+  const isAjax = ctx.fkp.isAjax(ctx)
   if (route === '404') {
     return ctx.body = '您访问的页面不存在'
   }
@@ -392,7 +399,7 @@ async function controler(ctx, route, pageData, ctrlPages, routerInstance) {
   let xData = undefined
   let hitControlFile = false
   let passAccess = false
-  let isAjax = ctx.fkp.isAjax()
+  let isAjax = ctx.fkp.isAjax(ctx)
   let routerPrefix = routerInstance.opts.prefix
   if (_.isString(routerPrefix) && routerPrefix.indexOf('/') == 0) {
     routerPrefix = routerPrefix.replace('/', '')
@@ -521,7 +528,7 @@ function preRender(rt, ctx) {
 
 // dealwith the data from controlPage
 async function renderPage(ctx, route, data) {
-  const isAjax = ctx.fkp.isAjax()
+  const isAjax = ctx.fkp.isAjax(ctx)
   data = AKSHOOKS.emit('beforeRender', data) || data
   switch (ctx.method) {
     case 'GET':

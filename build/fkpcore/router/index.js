@@ -103,7 +103,7 @@ var controler = function () {
             xData = undefined;
             hitControlFile = false;
             passAccess = false;
-            isAjax = ctx.fkp.isAjax();
+            isAjax = ctx.fkp.isAjax(ctx);
             routerPrefix = routerInstance.opts.prefix;
 
             if (_.isString(routerPrefix) && routerPrefix.indexOf('/') == 0) {
@@ -377,7 +377,7 @@ var renderPage = function () {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
-            isAjax = ctx.fkp.isAjax();
+            isAjax = ctx.fkp.isAjax(ctx);
 
             data = AKSHOOKS.emit('beforeRender', data) || data;
             _context7.t0 = ctx.method;
@@ -437,7 +437,8 @@ var Url = require('url');
 var Router = require('koa-router');
 var md5 = require('blueimp-md5');
 var AKSHOOKS = SAX('AOTOO-KOA-SERVER');
-var control = require('./control').default;
+// const control = require('./control').default
+var control = require('./control');
 fs = Promise.promisifyAll(fs);
 
 var businessPagesPath = '';
@@ -641,43 +642,49 @@ function path_join(jspath, src) {
   }
 }
 
-function staticMapper(ctx, mapper, route, routerPrefix) {
+var tmpletStatic = function tmpletStatic(src, type) {
   var jspath = Aotoo.inject.public.js;
   var csspath = Aotoo.inject.public.css;
-  var tmpletStatic = function tmpletStatic(src, type) {
-    if (type == 'js') {
-      var jspagesrc = path_join(jspath, src);
-      return '<script type="text/javascript" src="' + jspagesrc + '" ></script>';
-    }
-    if (type == 'css') {
-      var csspagesrc = path_join(csspath, src);
-      return '<link rel="stylesheet" href="' + csspagesrc + '" />';
-    }
-  };
-
-  if (_.isString(routerPrefix) && routerPrefix.indexOf('/') == 0) routerPrefix = routerPrefix.replace('/', '');
-  if (!mapper) return false;
-  var pageData = {
-    //静态资源
-    commonjs: tmpletStatic(mapper.js.common || 'common.js', 'js'), //公共css
-    commoncss: tmpletStatic(mapper.css.common || 'common.css', 'css'), //公共js
-    pagejs: '',
-    pagecss: '',
-    pagedata: {}
-    //静态资源初始化
-  };if (route.indexOf('/') == 0) route = route.substring(1);
-  if (route.lastIndexOf('/') == route.length - 1) route = route.substring(0, route.length - 1);
-  if (mapper.css[route]) pageData.pagecss = tmpletStatic(mapper.css[route], 'css');
-  if (mapper.js[route]) pageData.pagejs = tmpletStatic(mapper.js[route], 'js');
-
-  var _route = route;
-  if (routerPrefix) {
-    _route = routerPrefix;
-    if (mapper.css[_route]) pageData.pagecss = tmpletStatic(mapper.css[_route], 'css');
-    if (mapper.js[_route]) pageData.pagejs = tmpletStatic(mapper.js[_route], 'js');
+  if (type == 'js') {
+    var jspagesrc = path_join(jspath, src);
+    return '<script type="text/javascript" src="' + jspagesrc + '" ></script>';
   }
+  if (type == 'css') {
+    var csspagesrc = path_join(csspath, src);
+    return '<link rel="stylesheet" href="' + csspagesrc + '" />';
+  }
+};
 
-  return pageData;
+function staticMapper(ctx, mapper, route, routerPrefix) {
+  var urlObj = Url.parse(ctx.url);
+  var _id = md5(urlObj.pathname);
+
+  return Cache.ifid(_id, function () {
+    if (_.isString(routerPrefix) && routerPrefix.indexOf('/') == 0) routerPrefix = routerPrefix.replace('/', '');
+    if (!mapper) return false;
+    var pageData = {
+      //静态资源
+      commonjs: tmpletStatic(mapper.js.common || 'common.js', 'js'), //公共css
+      commoncss: tmpletStatic(mapper.css.common || 'common.css', 'css'), //公共js
+      pagejs: '',
+      pagecss: '',
+      pagedata: {}
+      //静态资源初始化
+    };if (route.indexOf('/') == 0) route = route.substring(1);
+    if (route.lastIndexOf('/') == route.length - 1) route = route.substring(0, route.length - 1);
+    if (mapper.css[route]) pageData.pagecss = tmpletStatic(mapper.css[route], 'css');
+    if (mapper.js[route]) pageData.pagejs = tmpletStatic(mapper.js[route], 'js');
+
+    var _route = route;
+    if (routerPrefix) {
+      _route = routerPrefix;
+      if (mapper.css[_route]) pageData.pagecss = tmpletStatic(mapper.css[_route], 'css');
+      if (mapper.js[_route]) pageData.pagejs = tmpletStatic(mapper.js[_route], 'js');
+    }
+
+    Cache.set(_id, pageData);
+    return pageData;
+  });
 }
 
 function defineMyRouter(myOptions, router, prefix, customControl, controlPages) {
@@ -752,7 +759,7 @@ function control_mirror(router, ctrlPages) {
         while (1) {
           switch (_context4.prev = _context4.next) {
             case 0:
-              isAjax = ctx.fkp.isAjax();
+              isAjax = ctx.fkp.isAjax(ctx);
               _context4.prev = 1;
 
               control_ctx_variable(ctx, router);
@@ -860,7 +867,7 @@ function control_ctx_variable(ctx, router) {
 function control_error(err, ctx) {
   var message = err.message;
   var route = ctx.routerPrefix || ctx.fkproute;
-  var isAjax = ctx.fkp.isAjax();
+  var isAjax = ctx.fkp.isAjax(ctx);
   if (route === '404') {
     return ctx.body = '您访问的页面不存在';
   }

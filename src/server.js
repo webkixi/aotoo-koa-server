@@ -1,15 +1,18 @@
-import fs from "fs";
-import Koa from 'koa'
-import glob from "glob";
-import 'aotoo'
-import 'aotoo-web-widgets'
-import md5 from "blueimp-md5";
-import render from 'koa-art-template'
-import statics from 'koa-static-cache'
-import bodyparser from 'koa-bodyparser'
-import core, { fkp as aks } from './fkpcore'
-import fetch from './fkpcore/modules/fetch'
-import cache from './fkpcore/modules/cache'
+const fs = require('fs')
+const Koa = require('koa')
+const glob = require('glob')
+const md5 = require('blueimp-md5')
+const render = require('koa-art-template')
+const statics = require('koa-static-cache')
+const bodyparser = require('koa-bodyparser')
+require('aotoo')
+require('aotoo-web-widgets')
+const fkpcore = require('./fkpcore')
+const fetch = require('./fkpcore/modules/fetch')
+const cache = require('./fkpcore/modules/cache')
+const core = fkpcore.core
+const fkp = fkpcore.fkp
+const aks = fkp
 
 ReactDom = require('react-dom/server')
 const AKSHOOKS = SAX('AOTOO-KOA-SERVER')
