@@ -536,7 +536,7 @@ async function renderPage(ctx, route, data) {
       if (route) {
         return await ctx.render(route, data)
       } else {
-        throw new Error('404') // 路由访问错误或模板文件不存在
+        throw new Error(`${ctx.url} not found`) // 路由访问错误或模板文件不存在
       }
     case 'POST':
       return ctx.body = data

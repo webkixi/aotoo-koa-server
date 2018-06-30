@@ -1,6 +1,8 @@
 const fs = require('fs')
+const log = console.log
 const Koa = require('koa')
 const glob = require('glob')
+const chalk = require('chalk')
 const md5 = require('blueimp-md5')
 const render = require('koa-art-template')
 const statics = require('koa-static-cache')
@@ -91,17 +93,24 @@ class aotooServer {
       keys: opts.keys || ['aotoo koa'],    // cookie session关键字
       index: opts.index || 'index',        // 默认首页
 
-      apis: opts.apis,                      // api接口集合
       mapper: opts.mapper,  // 静态资源映射文件
-
+      
       fetchOptions: opts.fetchOptions,
       cacheOptions: opts.cacheOptions,
       bodyOptions: opts.bodyOptions,
       routerOptions: opts.routerOptions,
+      
+      // M
+      apis: opts.apis,                      // api接口集合
 
-      root: opts.root,              // 渲染默认目录
-      pages: opts.pages||opts.pagesFolder||opts.controls,        // control层文件夹，必须
-      pluginsFolder: opts.pluginsFolder   // 插件文件夹
+      // V
+      root: opts.views || opts.root, // 渲染默认目录
+
+      // C
+      pages: opts.controls || opts.pages || opts.pagesFolder, // control层文件夹，必须
+      // controls: opts.controls || opts.pagesFolder || opts.pages,
+
+      pluginsFolder: opts.pluginsFolder,   // 插件文件夹
     }
 
     this.state = {
@@ -138,13 +147,50 @@ class aotooServer {
       if (name === 'error') app.on(name, cb)
       AKSHOOKS.on(name, cb)
     }
-    this.one = AKSHOOKS::AKSHOOKS.one
-    this.off = AKSHOOKS::AKSHOOKS.off
-    this.emit = AKSHOOKS::AKSHOOKS.emit
-    this.hasOn = AKSHOOKS::AKSHOOKS.hasOn
-    this.append = AKSHOOKS::AKSHOOKS.append
-    this.set = AKSHOOKS::AKSHOOKS.set
-    this.get = AKSHOOKS::AKSHOOKS.get
+    this.one = AKSHOOKS.one.bind(AKSHOOKS)
+    this.off = AKSHOOKS.off.bind(AKSHOOKS)
+    this.emit = AKSHOOKS.emit.bind(AKSHOOKS)
+    this.hasOn = AKSHOOKS.hasOn.bind(AKSHOOKS)
+    this.append = AKSHOOKS.append.bind(AKSHOOKS)
+    this.set = AKSHOOKS.set.bind(AKSHOOKS)
+    this.get = AKSHOOKS.get.bind(AKSHOOKS)
+  }
+
+  setApis(opts={}){
+    if (!opts.list) {
+      this.fetch.apilist = {list: opts}
+    } else {
+      this.fetch.apilist = opts
+    }
+    this.configs.apis = this.fetch.apilist
+  }
+
+    // 注册api接口集，用于做接口层的数据访问
+  async apis(obj = {}) {
+    // if (typeof obj == 'object') {
+    //   this.configs.apis = obj
+    // }
+
+    if (!obj.list) {
+      this.fetch.apilist = {list: obj}
+    } else {
+      this.fetch.apilist = obj
+    }
+    this.configs.apis = this.fetch.apilist
+  }
+
+  setMapper(opts={}){
+    let _public
+    let mapper = opts
+    if (mapper.public) {
+      _public = mapper.public
+      // delete mapper.public
+    }
+    if (_public) {
+      this._public = _public
+      Aotoo.inject.public = _public
+    }
+    Aotoo.inject.mapper = mapper
   }
   
   setFetchOptions(opts){
@@ -166,6 +212,9 @@ class aotooServer {
   }
 
   setRouterPrefixes(opts){
+    // this.state.status == 'running'
+    // 表示aotoo-koa-server服务正在运行
+    // 服务运行时不能设置 前缀路由
     if (!this.state.status) {
       const _opts = _.merge({}, this.configs.routerOptions.prefixes, opts)
       this.configs.routerOptions.prefixes = _opts
@@ -173,6 +222,11 @@ class aotooServer {
       console.log('===========');
       console.log('初始化状态才能设置前缀路由');
     }
+  }
+
+  setPublic(opts){
+    this._public = opts
+    Aotoo.inject.public = opts
   }
 
   public(opts) {
@@ -211,19 +265,19 @@ class aotooServer {
     app.use(statics(dist, dft, files))
   }
 
-  // 注册api接口集，用于做接口层的数据访问
-  async apis(obj = {}) {
-    if (typeof obj == 'object') {
-      this.configs.apis = obj
+  // 注册POST中间件，可以通过 ctx.bodys来访问post数据
+  async bodyparser(obj = {}) {
+    if (!this.state.status) {
+      if (!this.state.bodyparser && typeof obj == 'object') {
+        this.state.bodyparser = true
+        app.use(bodyparser(obj))
+      }
     }
   }
 
-
-  // 注册POST中间件，可以通过 ctx.bodys来访问post数据
-  async bodyparser(obj = {}) {
-    if (!this.state.bodyparser && typeof obj == 'object') {
-      this.state.bodyparser = true
-      app.use(bodyparser(obj))
+  async controls(dist){
+    if (!this.state.status) {
+      this.configs.pages = dist
     }
   }
 
@@ -285,10 +339,14 @@ class aotooServer {
   async init() {
     try {
       if (!this.configs.pages) {
-        throw new Error('控制器目录没有指定')
+        // throw new Error('控制器目录没有指定')
+log(chalk.green.bold(`
+控制器目录没有指定
+请指定this.configs.controls = 'path/to/controlDirectory'
+`))
       }
       if (!this.state.views) {
-        if (!this.configs.root) {
+        if (!this.configs.root) { //指定VIEW目录
           throw new Error('koa的模板解析引擎没有配置且需设置app.state.views=true; app.state.viewsRoot=HTMLDIST')
         } else {
           this.views(this.configs.root)
