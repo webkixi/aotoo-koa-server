@@ -95,47 +95,31 @@ function getCtrlFiles(dir, opts = {}) {
 // 预读取pages目录下的所有文件路径，并保存
 function controlPages() {
   // const businessPages = Path.join(__dirname, businessPagesPath)
-  const businessPages = businessPagesPath
-
-  if (!fs.existsSync(businessPages)) {
-    fs.mkdirSync(businessPages, '0777')
-  }
-
-  const controlPagePath = businessPages
-  const _id = controlPagePath
-
-  try {
-    if (fs.existsSync(controlPagePath)) {
-      return Cache.ifid(_id, async () => {
-        const __cfile = await getCtrlFiles(controlPagePath, controlPagePath); Cache.set(_id, __cfile)
-        return __cfile
-      })
-    } else {
-      throw new Error('控制层目录不存在')
+  if (businessPagesPath) {
+    const businessPages = businessPagesPath
+  
+    if (!fs.existsSync(businessPages)) {
+      fs.mkdirSync(businessPages, '0777')
     }
-  } catch (err) {
-    console.error(err.stack);
+  
+    const controlPagePath = businessPages
+    const _id = controlPagePath
+  
+    try {
+      if (fs.existsSync(controlPagePath)) {
+        return Cache.ifid(_id, async () => {
+          const __cfile = await getCtrlFiles(controlPagePath, controlPagePath); Cache.set(_id, __cfile)
+          return __cfile
+        })
+      } else {
+        throw new Error('控制层目录不存在')
+      }
+    } catch (err) {
+      console.error(err.stack);
+    }
+  } else {
+    return []
   }
-
-  // let ctrlFiles = []
-  // return Cache.ifid(_id, () => new Promise((res, rej) => {
-  //   return function getCtrlFiles(dir) {
-  //     fs.readdir(dir, (err, data) => {
-  //       if (err) throw err
-  //       data.map(file => {
-  //         const _path = Path.join(dir, file)
-  //         const stat = fs.statSync(_path)
-  //         if (stat && stat.isDirectory()) return getCtrlFiles(_path)
-  //         const okPath = _path.replace(controlPagePath, '')
-  //         ctrlFiles.push(okPath)
-  //         // ctrlFiles.push(Path.join(okPath))
-  //       }) // end map
-  //       Cache.set(_id, ctrlFiles)
-  //       res(ctrlFiles)
-  //     })
-  //   }(controlPagePath)
-  // })
-  // )
 }
 
 function makeRoute(ctx, prefix) {
@@ -218,7 +202,7 @@ function staticMapper(ctx, mapper, route, routerPrefix) {
   const urlObj = Url.parse(ctx.url)
   const _id = md5(urlObj.pathname)
   
-  return Cache.ifid(_id, () => {
+  const mapperJson = Cache.ifid(_id, () => {
     if (_.isString(routerPrefix) && routerPrefix.indexOf('/') == 0) routerPrefix = routerPrefix.replace('/', '')
     if (!mapper) return false
     let pageData = {
@@ -242,9 +226,15 @@ function staticMapper(ctx, mapper, route, routerPrefix) {
       if (mapper.js[_route]) pageData.pagejs = tmpletStatic(mapper.js[_route], 'js')
     }
     
-    Cache.set(_id, pageData)
-    return pageData
+    const staticPageData = JSON.stringify(pageData)
+    Cache.set(_id, staticPageData)
+    return staticPageData
+
+    // Cache.set(_id, pageData)
+    // return pageData
   })
+
+  return JSON.parse(mapperJson)
 }
 
 function defineMyRouter(myOptions, router, prefix, customControl, controlPages) {
@@ -585,7 +575,7 @@ init.getRoute = makeRoute
 init.staticMapper = staticMapper
 init.renderPage = renderPage
 init.pages = function (_path) {
-  businessPagesPath = _path
+  businessPagesPath = _path || ''
 }
 
 module.exports = init

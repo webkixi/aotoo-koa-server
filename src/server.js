@@ -281,6 +281,12 @@ class aotooServer {
     }
   }
 
+  async pluginsFolder(dist) {
+    if (!this.state.status) {
+      this.configs.pluginsFolder = dist
+    }
+  }
+
 
   // 注册渲染方法
   async views(dist, opts) {
@@ -341,7 +347,8 @@ class aotooServer {
       if (!this.configs.pages) {
         // throw new Error('控制器目录没有指定')
 log(chalk.green.bold(`
-控制器目录没有指定
+没有指定控制器目录
+不能解析ejs模板文件
 请指定this.configs.controls = 'path/to/controlDirectory'
 `))
       }
